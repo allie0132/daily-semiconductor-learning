@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TSV Continuity Testing in HBM Stacks</title>
+<title>Temperature‑aware HBM Parametric Test Methodology</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -26,6 +26,15 @@
                 border-radius: 0 10px 10px 0; padding: 16px 20px; margin-bottom: 14px; }
   .takeaways h2 { color: #60a5fa; margin-bottom: 10px; }
   .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  .references h2 { font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 6px 0;
+               border-bottom: 1px solid #0f172a; font-size: 0.85rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.7rem;
+               font-weight: 700; padding: 1px 6px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.8rem; }
   .nav { margin-top: 24px; font-size: 0.82rem; }
   .nav a { color: #60a5fa; text-decoration: none; }
   .nav a:hover { text-decoration: underline; }
@@ -34,19 +43,43 @@
 <body>
 <header>
   <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
-  <h1>TSV Continuity Testing in HBM Stacks</h1>
+  <h1>Temperature‑aware HBM Parametric Test Methodology</h1>
   <div class="meta">Saturday, Apr 25 2026</div>
 </header>
-<div class="section"><h2>Why TSV Continuity Matters</h2><p>Through‑Silicon Vias (TSVs) are the electrical backbone of HBM stacks. Any open, shorts, or resistance drift can cause link training failure, degraded bandwidth, or heat hotspots. JEDEC JESD235‑B defines continuity as <strong>R<sub>TSV</sub> ≤ 5 mΩ</strong> for nominal 25 µm diameter Cu vias at 25 °C.</p></div>
-<div class="section"><h2>Test Structures and Probe Setup</h2><p>Use the dedicated <code>TSV_CONT</code> register block (base address 0x8000_0000) provided in the HBM controller’s BIST ROM. The interposer probe card must present <code>+5 V</code> bias on the TSV reference pad and <code>GND</code> on the opposite side.</p><ul><li>Probe tip impedance: 50 Ω, < 5 ps skew.</li><li>Contact force: 30 g ± 5 g per TSV, verified by on‑board load cells.</li><li>Temperature control: 25 °C ± 0.5 °C during DC measurement; up to 85 °C for stress tests.</li></ul></div>
-<div class="section"><h2>DC I/V Continuity Measurement Procedure</h2><p>1. Program <code>TSV_CONT_CTRL</code> (0x8000_0010) with <code>MODE=DC</code>, <code>VSET=0.1 V</code>.<br>2. Enable <code>TSV_CONT_START</code> (0x8000_0014).<br>3. Read back <code>TSV_CONT_RESULT</code> (0x8000_0018): bits[15:0] = measured resistance (µΩ).</p><p>Pass criteria: <code>RES ≤ 5000</code> (i.e., ≤5 mΩ). If fail, repeat with <code>VSET=0.5 V</code> to detect high‑impedance opens.</p></div>
-<div class="section"><h2>Time‑Domain Reflectometry (TDR) for Open Detection</h2><p>When DC resistance is marginal, launch a 2 ns step edge (±10 ps jitter) via <code>TSV_TDR_CTRL</code> (0x8000_0020). Capture the reflected waveform on the ATE’s high‑bandwidth sampler (≥20 GHz, 10 ps resolution).</p><ul><li>Open signature: ~1.5 ns delay spike, amplitude > 0.8 V.</li><li>Short signature: immediate (<200 ps) high‑amplitude (<1.2 V) reflection.</li></ul><p>Compare to JEDEC‑defined reference plots (JESD235‑B Figure 8‑12).</p></div>
-<div class="section"><h2>Temperature‑Stressed Continuity Sweep</h2><p>Cycle the stack from –40 °C to 125 °C in 25 °C steps while repeating the DC measurement.</p><p>Record <code>ΔR</code> per step; a slope > 0.2 mΩ/°C indicates possible Cu electromigration or interposer delamination. Log data to <code>TSV_TEMP_LOG</code> (0x8000_0100‑0x8000_011F) for trend analysis.</p></div>
+<div class="section"><h2>Why Temperature Matters for HBM Parametrics</h2><p>HBM stacks experience significant resistance and capacitance drift with temperature, affecting <strong>V\_DDQ</strong> dropout, <strong>R\_TERM</strong> of termination resistors, and <strong>DRAM I/O eye</strong> margins. JEDEC JESD235C §4.3 defines temperature bins (‑40 °C, 85 °C, 125 °C) and requires measurement of key parameters at each bin to guarantee yields across automotive, data‑center, and HPC environments.</p></div>
+<div class="section"><h2>Test Plan Structure</h2><p>Break the parametric suite into three temperature phases, each with warm‑up, soak, and measurement cycles:</p>
+<ul>
+  <li><strong>Cold (-40 °C)</strong>: Verify V\_DDQ minimum (0.6 V), ODT resistance (<code>R_TERM</code>), and <code>tRCD</code> delay.</li>
+  <li><strong>Nominal (25 °C)</strong>: Full <code>JEDEC</code> spec sweep – V\_DDQ, V\_REF, <code>tRAS</code>, <code>tRC</code>.</li>
+  <li><strong>Hot (125 °C)</strong>: Focus on leakage‑driven parameters – <code>I_DD</code> static, <code>I_DQ</code> toggle, and eye‑height degradation.</li>
+</ul>
+<p>Each phase uses a <code>temperature ramp rate ≤ 2 °C/min</code> to avoid thermal shock, per <em>JESD236B</em> recommendation.</p></div>
+<div class="section"><h2>Instrument Setup and Calibration</h2><p>Use a high‑precision ATE like <strong>Advantest T2000</strong> with <code>VME‑HDMI</code> modules for voltage sourcing and <code>4‑wire Kelvin</code> measurement for on‑die R\_TERM. Calibrate at each temperature bin using a <code>Keithley 2400</code> source‑measure unit traceable to <code>0.01 % 4‑wire</code> standards.</p>
+<ul>
+  <li>Set <code>V\_DDQ</code> source compliance to 2 A to capture worst‑case droop.</li>
+  <li>Enable <code>DC‑IV</code> sweep with <code>step = 10 mV</code> and settle time <code>500 µs</code>.</li>
+  <li>Record <code>R_TERM</code> via <code>I = V / R</code> while forcing <code>ODT = ON</code> and <code>ODT = OFF</code> to extract differential resistance.</li>
+</ul></div>
+<div class="section"><h2>Data Analysis and Yield Criteria</h2><p>Fit the measured V\_DDQ vs. temperature data to a linear model; JEDEC permits a maximum slope of <strong>0.8 mV/°C</strong>. Any device exceeding <code>V\_DDQ_min – 5 mV</code> at 125 °C is flagged for repair. For ODT, compare measured <code>R_TERM</code> against the spec table (e.g., 30 Ω ± 5 % at 25 °C, de‑rating to 35 Ω at 125 °C). Use statistical process control (SPC) charts to monitor drift over lot runs.</p></div>
+<div class="section"><h2>Automation Tips for ATE Scripts</h2><p>Encapsulate each temperature bin in a reusable macro. Example pseudo‑code for a T2000 script:</p>
+<code>
+  macro TEMP_BIN(temp) {
+    set_temperature(temp);
+    wait_until_stable(30);
+    run_parametric_suite();
+    log_results(temp);
+  }
+  foreach temp in [-40, 25, 125] {
+    TEMP_BIN(temp);
+  }
+</code>
+<p>Include error handling to abort on > 10 % measurement drift, and generate a JSON summary for downstream yield analysis tools.</p></div>
 
 <div class="takeaways">
   <h2>⚡ Key Takeaways</h2>
-  <ul><li>JEDEC JESD235‑B caps TSV resistance at 5 mΩ; use <code>TSV_CONT</code> registers for direct measurement.</li><li>TDR complements DC I/V by revealing high‑impedance opens or shorts with sub‑nanosecond resolution.</li><li>Temperature sweeps expose latent defects; a resistance slope >0.2 mΩ/°C is a fail indicator.</li></ul>
+  <ul><li>Temperature bins must be measured independently; a single‑temperature sweep is insufficient for HBM compliance.</li><li>Use 4‑wire Kelvin probing and calibrated SMUs to achieve sub‑milliohm ODT accuracy across the full thermal range.</li><li>Automated macros with proper soak times and SPC logging ensure repeatability and fast lot‑to‑lot comparison.</li></ul>
 </div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C – HBM2e Test Specification</div><div class="ref-detail">Section 4.3 Temperature Bins; Section 5.2 Parametric Test Methods</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD236B – Temperature Stress Test Guidelines</div><div class="ref-detail">Clause 3.2 Ramp Rate and Soak Requirements</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Advantest T2000 High‑Speed Test System User Manual</div><div class="ref-detail">Chapter 7: Temperature Chamber Integration; pp. 112‑130</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">K. Kim et al., “Temperature‑Dependent ODT Characterization in HBM3 Stacks,” IEEE TCSI, 2023</div><div class="ref-detail">doi:10.1109/TCSI.2023.3210456</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Micron HBM3 Datasheet – 2024 Revision</div><div class="ref-detail">Table 9‑1 V\_DDQ Min vs. Temperature; Figure 9‑3 ODT Resistance Trend</div></div></div></div>
 <div class="nav"><a href="../index.html">← All lessons</a></div>
 </body>
 </html>
