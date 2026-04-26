@@ -54,12 +54,29 @@ Respond ONLY with a JSON object — no markdown fences, no extra text:
 
 Write 4-5 sections. Be technically precise — register names, timing specs, JEDEC references, real equipment behaviour. No fluff."""
 
-response = client.chat.completions.create(
-    model="meta-llama/llama-3.3-70b-instruct:free",
-    messages=[{"role": "user", "content": prompt}],
-    max_tokens=4096,
-)
-raw = response.choices[0].message.content.strip()
+import time
+models = [
+    "deepseek/deepseek-r1:free",
+    "google/gemini-2.0-flash-exp:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+]
+raw = None
+for model_id in models:
+    try:
+        response = client.chat.completions.create(
+            model=model_id,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=4096,
+        )
+        raw = response.choices[0].message.content.strip()
+        print(f"Used model: {model_id}")
+        break
+    except Exception as e:
+        print(f"Model {model_id} failed: {e}, trying next...")
+        time.sleep(5)
+
+if raw is None:
+    raise RuntimeError("All models failed")
 if raw.startswith("```"):
     raw = raw.split("```")[1]
     if raw.startswith("json"):
