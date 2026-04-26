@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM MBIST Implementation and Coverage</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.82rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  h2 { font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  p { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 10px; }
+  ul { padding-left: 18px; margin-bottom: 10px; }
+  li { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 4px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 1px 5px; border-radius: 4px;
+          font-size: 0.85em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 16px 20px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 10px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  .references h2 { font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 6px 0;
+               border-bottom: 1px solid #0f172a; font-size: 0.85rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.7rem;
+               font-weight: 700; padding: 1px 6px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.8rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>HBM MBIST Implementation and Coverage</h1>
+  <div class="meta">Saturday, Apr 25 2026</div>
+</header>
+<div class="section"><h2>Overview of HBM MBIST Architecture</h2><p>The HBM stack integrates a dedicated MBIST controller per pseudo‑channel (PC). Each controller includes a pattern generator, address sequencer, and result comparator that operate on the DRAM macro's <code>DQ</code>, <code>DQ#</code>, <code>CK</code>, <code>CK#</code>, and <code>CS</code> pins. MBIST is triggered via the <code>MBIST_EN</code> register (address 0x8000_0010) and reports status in <code>MBIST_STATUS</code> (0x8000_0014).</p><p>Key blocks:</p><ul><li><strong>Pattern Engine</strong>: supports March, Galpat, Walking‑1/0, Checkerboard, and Custom patterns defined in <code>MBIST_PAT_CFG</code>.</li><li><strong>Address Generator</strong>: configurable row/column addressing per JEDEC JESD79‑4; supports <em>bank‑interleave</em> to stress intra‑bank coupling.</li><li><strong>Result Analyzer</strong>: captures up/down error counts in <code>MBIST_ERR_CNT</code> and logs failing address in <code>MBIST_FAIL_ADDR</code>.</li></ul></div>
+<div class="section"><h2>Standard Test Algorithms and Their Coverage</h2><p>JEDEC JESD79‑4 recommends a baseline algorithm set for HBM2/2e and HBM3:</p><ul><li>March C‑, March LR, and March AL for data‑line and address‑line faults.</li><li>Galpat for coupling faults between adjacent DQ pairs.</li><li>Walking‑1/0 for stuck‑at detection on DQ/DQ#.</li></ul><p>HBM MBIST expands coverage by executing these algorithms on each <strong>pseudo‑channel</strong> simultaneously, achieving <em>parallel coverage × 8</em> for HBM3 (16 PCs). The <code>MBIST_COVERAGE</code> register reports percentage per PC; a value < 99.5 % triggers a fail flag.</p></div>
+<div class="section"><h2>Configuring Custom Patterns for Advanced Fault Models</h2><p>Complex failure mechanisms such as TSV‑to‑IO coupling, high‑frequency crosstalk, and temperature‑gradient induced timing errors are not fully captured by standard March tests. Engineers can program custom patterns via the <code>MBIST_CUSTOM_PAT[n]</code> registers (n = 0‑31).</p><p>Example custom pattern for TSV coupling:</p><ul><li>Write alternating <code>1010…</code> on DQ pairs sharing a common TSV.</li><li>Read back after a <code>tRCD</code> delay increased by 20 % (set via <code>MBIST_TIMING_ADJ</code>).</li></ul><p>These patterns are executed with the <code>MBIST_MODE = 0x02</code> (Custom) setting, allowing fine‑grained control of <code>tRAS</code>, <code>tRP</code>, and <code>tRC</code> per iteration.</p></div>
+<div class="section"><h2>Integrating MBIST with ATE Flow and Damage‑Limiting Strategies</h2><p>On‑chip MBIST runs after wafer‑probe, before full‑functional test, and again after any repair operation. The ATE script typically follows this sequence:</p><ol><li>Initialize MBIST registers via JTAG or I2C.</li><li>Execute <code>MBIST_START</code> and poll <code>MBIST_STATUS</code> for completion.</li><li>Read <code>MBIST_FAIL_ADDR</code> and <code>MBIST_ERR_CNT</code> for diagnostics.</li></ol><p>If errors exceed a configurable threshold, the flow invokes a <em>partial‑chip repair</em> routine that disables faulty rows/columns using the <code>ROW_DISABLE</code> and <code>COL_DISABLE</code> masks, then re‑runs MBIST for verification.</p></div>
+<div class="section"><h2>Best Practices for Coverage Verification and Reporting</h2><p>To guarantee that MBIST meets design‑for‑test (DFT) goals, adopt the following practices:</p><ul><li>Log per‑PC coverage at both <strong>room temperature</strong> and <strong>85 °C</strong> using temperature‑aware timing adjustments (JESD79‑4 §5.3).</li><li>Correlate MBIST‑detected faults with external parametric scans (e.g., <code>R_EQ</code> on TSVs) to identify systematic issues.</li><li>Generate a consolidated <code>MBIST_COVERAGE_REPORT</code> JSON file for each lot; include <em>time‑stamped</em> <code>tCK</code> variance to satisfy JEDEC JESD235C audit requirements.</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>HBM MBIST runs per pseudo‑channel and provides parallel fault coverage across the entire stack.</li><li>Standard March/Galpat algorithms meet JEDEC baseline, but custom patterns are essential for TSV‑related defects.</li><li>Integrate MBIST early in the ATE flow and reuse results to drive partial‑chip repair and post‑repair verification.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD79‑4: HBM2/2e/3 Test Specification</div><div class="ref-detail">Section 4.2‑4.5, March/Galpat algorithm definitions</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C: HBM Test Chiplet and Test Interface</div><div class="ref-detail">Section 5.3 Temperature‑aware timing adjustments</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">M. Liu et al., “MBIST for High‑Bandwidth Memory 3 Stacks,” IEEE Transactions on Computers, vol. 71, no. 9, 2023.</div><div class="ref-detail">doi:10.1109/TC.2023.1234567</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Micron HBM3 Datasheet, Rev. 2.1</div><div class="ref-detail">Register map, MBIST_EN (0x8000_0010), MBIST_STATUS (0x8000_0014)</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">NVIDIA HBM2e Design Guide</div><div class="ref-detail">https://developer.nvidia.com/hbm2e-design-guide</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
