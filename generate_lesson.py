@@ -94,6 +94,10 @@ sections = lesson["sections"]
 takeaways = lesson["key_takeaways"]
 references = lesson.get("references", [])
 
+import re
+slug = re.sub(r'[^a-z0-9]+', '-', topic.lower()).strip('-')[:60]
+base_name = f"{today}-{slug}"
+
 # Markdown
 md_lines = [f"# {topic}\n", f"*{date_str}*\n"]
 for s in sections:
@@ -113,7 +117,7 @@ if references:
     for i, r in enumerate(references, 1):
         md_lines.append(f"{i}. **[{r['type']}]** {r['title']} — {r['detail']}")
 
-md_path = os.path.join(lesson_dir, f"{today}.md")
+md_path = os.path.join(lesson_dir, f"{base_name}.md")
 with open(md_path, "w", encoding="utf-8") as f:
     f.write("\n".join(md_lines) + "\n")
 
@@ -193,7 +197,7 @@ html = f"""<!DOCTYPE html>
 </body>
 </html>"""
 
-html_path = os.path.join(lesson_dir, f"{today}.html")
+html_path = os.path.join(lesson_dir, f"{base_name}.html")
 with open(html_path, "w", encoding="utf-8") as f:
     f.write(html)
 
@@ -243,7 +247,7 @@ tg_token = os.environ.get("TELEGRAM_TOKEN")
 tg_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 if tg_token and tg_chat_id:
     msg = (f"📚 *Daily Lesson — {today}*\n\n*{topic}*\n\n{summary}\n\n"
-           f"[Read full lesson](https://allie0132.github.io/daily-semiconductor-learning/daily-lessons/{today}.html)")
+           f"[Read full lesson](https://allie0132.github.io/daily-semiconductor-learning/daily-lessons/{base_name}.html)")
     payload = json.dumps({"chat_id": tg_chat_id, "text": msg, "parse_mode": "Markdown"}).encode()
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{tg_token}/sendMessage",
