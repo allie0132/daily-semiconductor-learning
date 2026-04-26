@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSV Continuity Testing in HBM Stacks</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.82rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  h2 { font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  p { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 10px; }
+  ul { padding-left: 18px; margin-bottom: 10px; }
+  li { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 4px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 1px 5px; border-radius: 4px;
+          font-size: 0.85em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 16px 20px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 10px; }
+  .takeaways li { color: #94a3b8; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>TSV Continuity Testing in HBM Stacks</h1>
+  <div class="meta">Saturday, Apr 25 2026</div>
+</header>
+<div class="section"><h2>Why TSV Continuity Matters</h2><p>Through‑Silicon Vias (TSVs) are the electrical backbone of HBM stacks. Any open, shorts, or resistance drift can cause link training failure, degraded bandwidth, or heat hotspots. JEDEC JESD235‑B defines continuity as <strong>R<sub>TSV</sub> ≤ 5 mΩ</strong> for nominal 25 µm diameter Cu vias at 25 °C.</p></div>
+<div class="section"><h2>Test Structures and Probe Setup</h2><p>Use the dedicated <code>TSV_CONT</code> register block (base address 0x8000_0000) provided in the HBM controller’s BIST ROM. The interposer probe card must present <code>+5 V</code> bias on the TSV reference pad and <code>GND</code> on the opposite side.</p><ul><li>Probe tip impedance: 50 Ω, < 5 ps skew.</li><li>Contact force: 30 g ± 5 g per TSV, verified by on‑board load cells.</li><li>Temperature control: 25 °C ± 0.5 °C during DC measurement; up to 85 °C for stress tests.</li></ul></div>
+<div class="section"><h2>DC I/V Continuity Measurement Procedure</h2><p>1. Program <code>TSV_CONT_CTRL</code> (0x8000_0010) with <code>MODE=DC</code>, <code>VSET=0.1 V</code>.<br>2. Enable <code>TSV_CONT_START</code> (0x8000_0014).<br>3. Read back <code>TSV_CONT_RESULT</code> (0x8000_0018): bits[15:0] = measured resistance (µΩ).</p><p>Pass criteria: <code>RES ≤ 5000</code> (i.e., ≤5 mΩ). If fail, repeat with <code>VSET=0.5 V</code> to detect high‑impedance opens.</p></div>
+<div class="section"><h2>Time‑Domain Reflectometry (TDR) for Open Detection</h2><p>When DC resistance is marginal, launch a 2 ns step edge (±10 ps jitter) via <code>TSV_TDR_CTRL</code> (0x8000_0020). Capture the reflected waveform on the ATE’s high‑bandwidth sampler (≥20 GHz, 10 ps resolution).</p><ul><li>Open signature: ~1.5 ns delay spike, amplitude > 0.8 V.</li><li>Short signature: immediate (<200 ps) high‑amplitude (<1.2 V) reflection.</li></ul><p>Compare to JEDEC‑defined reference plots (JESD235‑B Figure 8‑12).</p></div>
+<div class="section"><h2>Temperature‑Stressed Continuity Sweep</h2><p>Cycle the stack from –40 °C to 125 °C in 25 °C steps while repeating the DC measurement.</p><p>Record <code>ΔR</code> per step; a slope > 0.2 mΩ/°C indicates possible Cu electromigration or interposer delamination. Log data to <code>TSV_TEMP_LOG</code> (0x8000_0100‑0x8000_011F) for trend analysis.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>JEDEC JESD235‑B caps TSV resistance at 5 mΩ; use <code>TSV_CONT</code> registers for direct measurement.</li><li>TDR complements DC I/V by revealing high‑impedance opens or shorts with sub‑nanosecond resolution.</li><li>Temperature sweeps expose latent defects; a resistance slope >0.2 mΩ/°C is a fail indicator.</li></ul>
+</div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
