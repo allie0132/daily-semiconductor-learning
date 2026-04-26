@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temperature‑Aware Parametric Testing for HBM</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.82rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  h2 { font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  p { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 10px; }
+  ul { padding-left: 18px; margin-bottom: 10px; }
+  li { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 4px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 1px 5px; border-radius: 4px;
+          font-size: 0.85em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 16px 20px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 10px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  .references h2 { font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 6px 0;
+               border-bottom: 1px solid #0f172a; font-size: 0.85rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.7rem;
+               font-weight: 700; padding: 1px 6px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.8rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>Temperature‑Aware Parametric Testing for HBM</h1>
+  <div class="meta">Sunday, Apr 26 2026</div>
+</header>
+<div class="section"><h2>Why Temperature Matters in HBM Parametrics</h2><p>HBM operates from -40 °C to 125 °C, and its key analog parameters (V\_DDQ, V\_DD, V\_REF, pull‑up/down resistances, and on‑die termination) drift with temperature. JEDEC JESD235C defines temperature corners for DC and AC tests because small changes in <strong>R\_PU</strong> or <strong>C\_term</strong> can cause eye‑closure at high data rates.</p><p>Temperature‑induced variations affect:</p><ul><li>IO voltage window (V\_DDQ ± 10 % typical)</li><li>Impedance of the PHY (Z\_0 30 Ω ± 10 % at 500 °C) </li><li>Leakage currents (I\_leak up to 2 µA per pin at 125 °C)</li></ul></div>
+<div class="section"><h2>Test Flow Overview</h2><p>The flow consists of three loops:</p><ol><li><strong>Cold‑Start Sweep</strong>: -40 °C → 0 °C, step 10 °C. Measure V\_DD, V\_DDQ, and on‑die termination (ODT) resistance.</li><li><strong>Hot‑Ramp Sweep</strong>: 25 °C → 125 °C, step 15 °C while exercising MBIST to capture dynamic power.</li><li><strong>Thermal‑Stability Hold</strong>: Hold at each corner for 30 s to let thermal gradients settle before sampling.</li></ol><p>At each corner record:</p><ul><li>Static I‑V curves for V\_REF pins (JEDEC JESD235 4.5)</li><li>AC S‑parameter of the PHY (S11, S21) up to 8 GHz</li><li>Eye diagram at 3 Gb/s and 6 Gb/s per pseudo‑channel</li></ul></div>
+<div class="section"><h2>Key Measurement Techniques</h2><p><strong>On‑Die Termination (ODT) Extraction</strong>: Use a vector network analyzer (VNA) with a <code>TRM‑2000</code> probe‑card; calibrate to the probe tip (TRL). Measure S11 at 0 dBm, convert to resistance via <code>R = Z0 * (1‑|S11|)/(1+|S11|)</code>. Repeat at each temperature corner.</p><p><strong>Leakage Current Mapping</strong>: Employ a low‑noise pico‑ammeter (<code>Keysight B2985A</code>) on each V\_DDQ pin while biasing at nominal voltage. Capture trend vs. °C, compare to the JEDEC limit of 2 µA/°C per pin.</p><p><strong>Eye‑Diagram Stress</strong>: Generate PRBS‑31 traffic on all pseudo‑channels simultaneously. Use a high‑bandwidth oscilloscope (<code>Tektronix DPO72004</code>, 20 GHz) with a differential probe (<code>PDH‑250</code>) positioned on the interposer V\_DDQ lines. Record eye‑height and eye‑width at each temperature.</p></div>
+<div class="section"><h2>Data Analysis and Pass/Fail Criteria</h2><p>Plot each parameter versus temperature and apply linear regression to extract slope (Δparameter/°C). Compare to JEDEC‑defined limits:</p><ul><li>V\_DDQ window drift ≤ ± 8 % over –40 °C to 125 °C (JESD235 5.2.1)</li><li>ODT resistance variation ≤ 15 % (JESD235 5.3.4)</li><li>Leakage increase ≤ 1 µA/°C per pin (JESD235 5.4.2)</li></ul><p>If any slope exceeds the spec, flag the device for re‑binning or schedule a repair flow (e.g., via spare TSV redundancy).</p></div>
+<div class="section"><h2>Practical Tips for ATE Implementation</h2><p>When programming the ATE (e.g., <code>Advantest T2000</code>), use <code>SMU</code> blocks with temperature‑compensated calibration tables. Insert a <code>WAIT(30s)</code> after each temperature transition to avoid thermal lag. Leverage parallel channel groups to run MBIST while the parametric sweep is idle, maximizing throughput.</p><p>For interposer probing, ensure probe‑card thermal expansion matches the silicon‑on‑glass coefficient (<0.5 ppm/°C) to prevent mechanical drift that would corrupt high‑frequency S‑parameter measurements.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Temperature corners dramatically affect HBM voltage windows, ODT resistance, and leakage currents.</li><li>Use calibrated VNA S‑parameter measurements and pico‑ammeter leakage scans at each corner to meet JESD235 limits.</li><li>Integrate thermal holds and MBIST activity into the ATE flow to capture both static and dynamic temperature effects.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC Standard JESD235C: High Bandwidth Memory (HBM) Test Specification</div><div class="ref-detail">Sections 4.5, 5.2‑5.4, 7.1</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">Temperature‑Dependent Electrical Characterization of 3D‑Stacked DRAM</div><div class="ref-detail">IEEE Trans. Device Mol. Syst., vol. 14, no. 3, 2022, pp. 456‑466</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">HBM2E and HBM3 Signal Integrity Guidelines</div><div class="ref-detail">M. Kim, "3D IC and Advanced Packaging", Springer, 2023, Chap. 6</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Advantest T2000 ATE User Manual – Temperature Sweep Functions</div><div class="ref-detail">https://www.advantest.com/manuals/t2000</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Keysight B2985A Low‑Noise Picoammeter Datasheet</div><div class="ref-detail">Keysight Technologies, Rev B, 2021</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
