@@ -3,7 +3,7 @@ import os
 import urllib.request
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
-from litellm import completion
+import google.generativeai as genai
 
 today = date.today().isoformat()
 now_et = datetime.now(ZoneInfo("America/New_York"))
@@ -20,7 +20,8 @@ for fname in sorted(os.listdir(lesson_dir), reverse=True)[:10]:
 
 recent_str = "\n".join(f"- {t}" for t in recent_topics) if recent_topics else "None yet"
 
-os.environ["GEMINI_API_KEY"] = os.environ.get("GEMINI_API_KEY", "")
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+model = genai.GenerativeModel("gemini-2.5-pro-preview-05-06")
 
 prompt = f"""You are an expert semiconductor test engineer with 20+ years of experience in HBM testing, ATE systems, and advanced packaging. Write a daily technical lesson for senior test engineers.
 
@@ -51,13 +52,8 @@ Respond ONLY with a JSON object — no markdown fences, no extra text:
 
 Write 4-5 sections. Be technically precise — register names, timing specs, JEDEC references, real equipment behaviour. No fluff."""
 
-response = completion(
-    model="gemini/gemini-1.5-flash-8b",
-    messages=[{"role": "user", "content": prompt}],
-    max_tokens=4096,
-)
-
-raw = response.choices[0].message.content.strip()
+response = model.generate_content(prompt)
+raw = response.text.strip()
 if raw.startswith("```"):
     raw = raw.split("```")[1]
     if raw.startswith("json"):
