@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSV Continuity Testing in HBM Stacks</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.82rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  h2 { font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  p { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 10px; }
+  ul { padding-left: 18px; margin-bottom: 10px; }
+  li { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 4px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 1px 5px; border-radius: 4px;
+          font-size: 0.85em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 16px 20px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 10px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  .references h2 { font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 6px 0;
+               border-bottom: 1px solid #0f172a; font-size: 0.85rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.7rem;
+               font-weight: 700; padding: 1px 6px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.8rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>TSV Continuity Testing in HBM Stacks</h1>
+  <div class="meta">Saturday, Apr 25 2026</div>
+</header>
+<div class="section"><h2>Why TSV Continuity Matters</h2><p>Through‑silicon vias (TSVs) are the backbone of HBM stacking, providing the high‑bandwidth electrical links between dies. Any open or short in a TSV can cause fatal data‑rate failures, latency spikes, or catastrophic thermal runaway. Continuity testing ensures that each <code>VDDQ_TSV</code> and <code>VSS_TSV</code> path meets the JEDEC <em>JESD235B</em> resistance and inductance limits (<10 mΩ, <5 nH max).</p></div>
+<div class="section"><h2>Test Structures and Probe Options</h2><p>Use dedicated <strong>TSV continuity test pads</strong> (often called <code>TSV_TST</code>) placed on the interposer per JEDEC <em>JESD236B</em>. Two primary probing schemes:</p><ul><li><strong>Micromanipulator needle probing:</strong> 12‑µm tungsten tips, <code>R<sub>probe</sub>≈0.2 Ω</code>, suitable for 4‑point Kelvin measurements.</li><li><strong>Micro‑bump probe cards:</strong> 30‑µm pitch cards with built‑in Kelvin fixtures, enabling simultaneous test of 8‑12 TSVs.</li></ul><p>Choose based on die count and ATE pin budget.</p></div>
+<div class="section"><h2>Measurement Methodology</h2><p>Implement a 4‑wire Kelvin measurement to isolate probe resistance:</p><ol><li>Apply a constant current source (e.g., 5 mA) from <code>I+</code> to <code>I‑</code> across the TSV under test.</li><li>Measure the voltage drop between <code>V+</code> and <code>V‑</code> using a high‑resolution DMM (≤1 µV). </li><li>Calculate resistance: <code>R_TSV = V_drop / I_source</code>.</li></ol><p>For short detection, use a <strong>time‑domain reflectometer (TDR)</strong> sweep (0.5–10 GHz) and compare the reflected amplitude to the reference model; a >2 dB deviation flags a discontinuity.</p></div>
+<div class="section"><h2>Automated Test Flow on ATE</h2><p>Integrate the continuity check into the ATE script (e.g., Advantest V93000):</p><code>test "TSV_Continuity" {
+  parametric {
+    mode = "4W"
+    current = 5mA
+    voltage_limit = 0.05V  // 10 mΩ max
+  }
+  tdr {
+    start_freq = 0.5GHz
+    stop_freq = 10GHz
+    delta = 0.1GHz
+    deviation_limit = 2dB
+  }
+}
+</code><p>Log results per TSV ID, flag fails, and invoke the repair flow if <code>R_TSV</code> > 12 mΩ or TDR deviation exceeds limit.</p></div>
+<div class="section"><h2>Post‑Repair Verification</h2><p>After laser or focused ion beam (FIB) repair, repeat the 4‑wire measurement and TDR sweep. Verify that the repaired TSV meets both resistance (<10 mΩ) and inductance (<5 nH) specs. Document the before/after values in the test database for statistical process control (SPC).</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>4‑wire Kelvin measurement isolates probe resistance and yields sub‑10 mΩ TSV resistance.</li><li>TDR is essential for detecting open/short defects not visible in DC resistance.</li><li>Automate continuity checks in ATE scripts to integrate with the overall HBM test flow.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235B: HBM Electrical Test Specification</div><div class="ref-detail">Section 4.3 – TSV Resistance and Inductance Limits</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD236B: Test Structures for HBM Stacking</div><div class="ref-detail">Section 5.2 – TSV_TST Pad Layout</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">A. Gupta et al., “TSV Characterization Using Time‑Domain Reflectometry,” IEEE Transactions on Components, Packaging and Manufacturing Technology, vol. 9, no. 4, 2021.</div><div class="ref-detail">doi:10.1109/TCPMT.2020.3024678</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Advantest V93000 Application Note 245: 4‑Wire Kelvin Measurements for High‑Speed Devices</div><div class="ref-detail">https://www.advantest.com/appnotes/AN245_Kelvin.pdf</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Micron HBM3 Datasheet – Electrical Parameters</div><div class="ref-detail">Table 6‑2 – TSV Resistance and Inductance</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
