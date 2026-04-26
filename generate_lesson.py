@@ -52,7 +52,7 @@ Respond ONLY with a JSON object — no markdown fences, no extra text:
 Write 4-5 sections. Be technically precise — register names, timing specs, JEDEC references, real equipment behaviour. No fluff."""
 
 response = completion(
-    model="gemini/gemini-2.0-flash",
+    model="gemini/gemini-1.5-flash-8b",
     messages=[{"role": "user", "content": prompt}],
     max_tokens=4096,
 )
