@@ -21,7 +21,7 @@ for fname in sorted(os.listdir(lesson_dir), reverse=True)[:10]:
 recent_str = "\n".join(f"- {t}" for t in recent_topics) if recent_topics else "None yet"
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-2.5-pro-preview-05-06")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 prompt = f"""You are an expert semiconductor test engineer with 20+ years of experience in HBM testing, ATE systems, and advanced packaging. Write a daily technical lesson for senior test engineers.
 
