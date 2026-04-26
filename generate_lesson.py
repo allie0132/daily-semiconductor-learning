@@ -49,10 +49,13 @@ Respond ONLY with a JSON object — no markdown fences, no extra text:
   "sections": [
     {{"title": "Section heading", "content": "HTML body using <p>, <ul>, <li>, <code>, <strong>"}}
   ],
-  "key_takeaways": ["takeaway 1", "takeaway 2", "takeaway 3"]
+  "key_takeaways": ["takeaway 1", "takeaway 2", "takeaway 3"],
+  "references": [
+    {{"title": "Reference title", "type": "JEDEC|IEEE|Book|Paper|Datasheet|Web", "detail": "e.g. JESD235C section 4.2, or author/year, or URL"}}
+  ]
 }}
 
-Write 4-5 sections. Be technically precise — register names, timing specs, JEDEC references, real equipment behaviour. No fluff."""
+Write 4-5 sections. Include 3-6 real, specific references (JEDEC standards, IEEE papers, vendor datasheets, textbooks). Be technically precise — register names, timing specs, JEDEC references, real equipment behaviour. No fluff."""
 
 import time
 models = [
@@ -89,6 +92,7 @@ topic = lesson["topic"]
 summary = lesson["summary"]
 sections = lesson["sections"]
 takeaways = lesson["key_takeaways"]
+references = lesson.get("references", [])
 
 # Markdown
 md_lines = [f"# {topic}\n", f"*{date_str}*\n"]
@@ -104,6 +108,10 @@ for s in sections:
 md_lines.append("## Key Takeaways\n")
 for t in takeaways:
     md_lines.append(f"- {t}")
+if references:
+    md_lines.append("\n## References\n")
+    for i, r in enumerate(references, 1):
+        md_lines.append(f"{i}. **[{r['type']}]** {r['title']} — {r['detail']}")
 
 md_path = os.path.join(lesson_dir, f"{today}.md")
 with open(md_path, "w", encoding="utf-8") as f:
@@ -115,6 +123,17 @@ sections_html = "".join(
     for s in sections
 )
 takeaways_html = "".join(f"<li>{t}</li>" for t in takeaways)
+
+if references:
+    ref_items = "".join(
+        f'<div class="ref-item"><span class="ref-type">{r["type"]}</span>'
+        f'<div><div class="ref-title">{r["title"]}</div>'
+        f'<div class="ref-detail">{r["detail"]}</div></div></div>'
+        for r in references
+    )
+    references_html = f'<div class="references"><h2>📚 References</h2>{ref_items}</div>'
+else:
+    references_html = ""
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -144,6 +163,15 @@ html = f"""<!DOCTYPE html>
                 border-radius: 0 10px 10px 0; padding: 16px 20px; margin-bottom: 14px; }}
   .takeaways h2 {{ color: #60a5fa; margin-bottom: 10px; }}
   .takeaways li {{ color: #94a3b8; }}
+  .references {{ background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }}
+  .references h2 {{ font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }}
+  .ref-item {{ display: flex; gap: 10px; align-items: baseline; padding: 6px 0;
+               border-bottom: 1px solid #0f172a; font-size: 0.85rem; }}
+  .ref-item:last-child {{ border-bottom: none; }}
+  .ref-type {{ flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.7rem;
+               font-weight: 700; padding: 1px 6px; border-radius: 4px; letter-spacing: .04em; }}
+  .ref-title {{ color: #e2e8f0; font-weight: 600; }}
+  .ref-detail {{ color: #64748b; font-size: 0.8rem; }}
   .nav {{ margin-top: 24px; font-size: 0.82rem; }}
   .nav a {{ color: #60a5fa; text-decoration: none; }}
   .nav a:hover {{ text-decoration: underline; }}
@@ -160,6 +188,7 @@ html = f"""<!DOCTYPE html>
   <h2>⚡ Key Takeaways</h2>
   <ul>{takeaways_html}</ul>
 </div>
+{references_html}
 <div class="nav"><a href="../index.html">← All lessons</a></div>
 </body>
 </html>"""
