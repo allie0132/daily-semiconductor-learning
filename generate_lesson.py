@@ -3,7 +3,7 @@ import os
 import urllib.request
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
-from google import genai
+from openai import OpenAI
 
 today = date.today().isoformat()
 now_et = datetime.now(ZoneInfo("America/New_York"))
@@ -20,7 +20,10 @@ for fname in sorted(os.listdir(lesson_dir), reverse=True)[:10]:
 
 recent_str = "\n".join(f"- {t}" for t in recent_topics) if recent_topics else "None yet"
 
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+)
 
 prompt = f"""You are an expert semiconductor test engineer with 20+ years of experience in HBM testing, ATE systems, and advanced packaging. Write a daily technical lesson for senior test engineers.
 
@@ -51,11 +54,12 @@ Respond ONLY with a JSON object — no markdown fences, no extra text:
 
 Write 4-5 sections. Be technically precise — register names, timing specs, JEDEC references, real equipment behaviour. No fluff."""
 
-response = client.models.generate_content(
-    model="gemini-2.0-flash",
-    contents=prompt,
+response = client.chat.completions.create(
+    model="meta-llama/llama-3.3-70b-instruct:free",
+    messages=[{"role": "user", "content": prompt}],
+    max_tokens=4096,
 )
-raw = response.text.strip()
+raw = response.choices[0].message.content.strip()
 if raw.startswith("```"):
     raw = raw.split("```")[1]
     if raw.startswith("json"):
