@@ -56,9 +56,11 @@ Write 4-5 sections. Be technically precise — register names, timing specs, JED
 
 import time
 models = [
-    "deepseek/deepseek-r1:free",
-    "google/gemini-2.0-flash-exp:free",
+    "openai/gpt-oss-120b:free",
+    "nousresearch/hermes-3-llama-3.1-405b:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
     "meta-llama/llama-3.3-70b-instruct:free",
+    "google/gemma-3-27b-it:free",
 ]
 raw = None
 for model_id in models:
