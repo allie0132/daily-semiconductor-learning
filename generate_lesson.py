@@ -205,13 +205,13 @@ with open(html_path, "w", encoding="utf-8") as f:
 all_lessons = sorted([f for f in os.listdir(lesson_dir) if f.endswith(".html")], reverse=True)
 lesson_links = ""
 for fname in all_lessons:
-    d = fname.replace(".html", "")
-    title_line = d
+    date_part = fname[:10]  # YYYY-MM-DD
+    title_line = fname.replace(".html", "")
     md_fpath = os.path.join(lesson_dir, fname.replace(".html", ".md"))
     if os.path.exists(md_fpath):
         with open(md_fpath) as f2:
             title_line = f2.readline().strip().lstrip("# ")
-    lesson_links += f'<li><a href="daily-lessons/{fname}">{d} — {title_line}</a></li>\n'
+    lesson_links += f'<li><span class="lesson-date">{date_part}</span> <a href="daily-lessons/{fname}">{title_line}</a></li>\n'
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(f"""<!DOCTYPE html>
@@ -227,9 +227,10 @@ with open("index.html", "w", encoding="utf-8") as f:
   h1 {{ font-size: 1.3rem; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }}
   .sub {{ color: #64748b; font-size: 0.85rem; margin-bottom: 24px; }}
   ul {{ list-style: none; }}
-  li {{ padding: 12px 0; border-bottom: 1px solid #1e2330; font-size: 0.9rem; }}
+  li {{ padding: 12px 0; border-bottom: 1px solid #1e2330; display: flex; align-items: baseline; gap: 10px; }}
   li:last-child {{ border-bottom: none; }}
-  a {{ color: #60a5fa; text-decoration: none; }}
+  .lesson-date {{ font-size: 0.75rem; color: #475569; white-space: nowrap; min-width: 80px; }}
+  a {{ color: #60a5fa; text-decoration: none; font-size: 0.9rem; }}
   a:hover {{ text-decoration: underline; }}
 </style>
 </head>
