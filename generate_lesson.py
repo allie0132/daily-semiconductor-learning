@@ -150,32 +150,32 @@ html = f"""<!DOCTYPE html>
   body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
          background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }}
   header {{ margin-bottom: 28px; }}
-  h1 {{ font-size: 1.4rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }}
-  .meta {{ font-size: 0.82rem; color: #64748b; margin-top: 6px; }}
+  h1 {{ font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }}
+  .meta {{ font-size: 0.9rem; color: #64748b; margin-top: 6px; }}
   .badge {{ display: inline-block; background: #1e3a5f; color: #60a5fa;
-            font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
             letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }}
-  .section {{ background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }}
-  h2 {{ font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }}
-  p {{ font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 10px; }}
-  ul {{ padding-left: 18px; margin-bottom: 10px; }}
-  li {{ font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 4px; }}
-  code {{ background: #0f172a; color: #a5f3fc; padding: 1px 5px; border-radius: 4px;
-          font-size: 0.85em; font-family: 'SF Mono', Consolas, monospace; }}
+  .section {{ background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }}
+  h2 {{ font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }}
+  p {{ font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }}
+  ul {{ padding-left: 20px; margin-bottom: 12px; }}
+  li {{ font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }}
+  code {{ background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }}
   strong {{ color: #f1f5f9; }}
   .takeaways {{ background: #162032; border-left: 3px solid #3b82f6;
-                border-radius: 0 10px 10px 0; padding: 16px 20px; margin-bottom: 14px; }}
-  .takeaways h2 {{ color: #60a5fa; margin-bottom: 10px; }}
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }}
+  .takeaways h2 {{ color: #60a5fa; margin-bottom: 12px; }}
   .takeaways li {{ color: #94a3b8; }}
-  .references {{ background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }}
-  .references h2 {{ font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }}
-  .ref-item {{ display: flex; gap: 10px; align-items: baseline; padding: 6px 0;
-               border-bottom: 1px solid #0f172a; font-size: 0.85rem; }}
+  .references {{ background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }}
+  .references h2 {{ font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }}
+  .ref-item {{ display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }}
   .ref-item:last-child {{ border-bottom: none; }}
-  .ref-type {{ flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.7rem;
-               font-weight: 700; padding: 1px 6px; border-radius: 4px; letter-spacing: .04em; }}
+  .ref-type {{ flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }}
   .ref-title {{ color: #e2e8f0; font-weight: 600; }}
-  .ref-detail {{ color: #64748b; font-size: 0.8rem; }}
+  .ref-detail {{ color: #64748b; font-size: 0.9rem; }}
   .nav {{ margin-top: 24px; font-size: 0.82rem; }}
   .nav a {{ color: #60a5fa; text-decoration: none; }}
   .nav a:hover {{ text-decoration: underline; }}
