@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM3 Power‑Down & Retention Mode Verification</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>HBM3 Power‑Down & Retention Mode Verification</h1>
+  <div class="meta">Monday, Apr 27 2026</div>
+</header>
+<div class="section"><h2>Why Power‑Down/Retention Matters in HBM3</h2><p>HBM3 introduces a <strong>Deep Power‑Down (DPD)</strong> state and a <strong>Retention (RET)</strong> mode to meet sub‑10 W system budgets. Accurate verification of entry/exit timing, voltage domains, and data‑retention integrity is essential for both silicon yield and system‑level power‑management compliance.</p></div>
+<div class="section"><h2>Entry Sequence and Timing Checks</h2><p>Follow the JESD235C §5.2 entry sequence:</p><ul><li>Assert <code>DEEP_PWRDN_N</code> low while <code>VDDQ</code> is >0.7 V.</li><li>Wait <code>tDPD_ENT</code> = 40 ns (max) before driving <code>CK</code> low.</li><li>De‑assert all command pins (<code>CS_N</code>, <code>CKE</code>, <code>ODT</code>) and place <code>DQ</code> in high‑impedance.</li></ul><p>Use the ATE’s high‑resolution time‑interval analyzer (TIA) to capture edge‑to‑edge latency and compare against the spec. Record any variation >5 ns as a potential violation.</p></div>
+<div class="section"><h2>Exit (Wake‑Up) Sequence and Data Integrity</h2><p>Wake‑up requires the <code>DEEP_PWRDN_N</code> to transition high, then <code>CK</code> must be re‑driven after <code>tDPD_EX</code> = 80 ns (typ). Critical checks:</p><ul><li>Verify <code>VDDQ</code> ramps to nominal (1.2 V) within <code>tVDDQ_RISE</code> = 150 ns.</li><li>Issue a <code>READ</code> to a known‑pattern address <em>immediately</em> after <code>tDPD_EX</code> and compare data to the pre‑sleep value.</li><li>Check <code>RDATA</code> eye diagram for <strong>eye‑height</strong> ≥ 80 % of V<sub>DDQ</sub> after wake‑up.</li></ul><p>Automate this loop on the tester to run >10k cycles across temperature corners (‑40 °C to 125 °C) to stress retention circuitry.</p></div>
+<div class="section"><h2>Retention Mode Specifics</h2><p>Retention mode keeps <code>VDDQ</code> powered while all banks are placed in self‑refresh. Key parameters:</p><ul><li><code>tRET_ENT</code> = 30 ns to assert <code>RET_EN</code>.</li><li>Monitor <code>VREFDQ</code> stability; jitter must stay below 2 ps RMS.</li><li>Validate that <code>READ</code>/<code>WRITE</code> commands are ignored until <code>RET_EN</code> is de‑asserted.</li></ul><p>Use the ATE’s built‑in <code>JESD84B</code> pattern generator to inject a pseudo‑random bit sequence (PRBS‑31) during retention and verify no spurious activity on the bus analyzer.</p></div>
+<div class="section"><h2>Practical Tips for ATE Implementation</h2><p>1. <strong>Probe Calibration</strong>: Calibrate interposer probe insertion loss at 1 GHz – 4 GHz before each run; DPD power‑down can shift probe capacitance.</p><p>2. <strong>Voltage Sequencing</strong>: Use a programmable power supply with <code>VPP</code> slew control to meet the 5 V/µs limit for <code>VDDQ</code> ramp.</p><p>3. <strong>Failure Isolation</strong>: If a wake‑up data mismatch occurs, capture the <code>CK</code> eye at the exact <code>tDPD_EX</code> edge to spot timing‑skew or supply‑droop issues.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>HBM3 DPD/RET entry/exit timing must meet JESD235C limits; use TIA for sub‑nanosecond verification.</li><li>Data integrity after wake‑up is the ultimate pass/fail metric; automate high‑cycle stress across temperature.</li><li>Retention mode demands strict VDDQ stability and command gating; monitor jitter and bus activity with PRBS patterns.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C – High Bandwidth Memory (HBM) 3 Specification</div><div class="ref-detail">Section 5.2–5.4, pages 56‑68</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD84B – HBM3 PRBS Test Methodology</div><div class="ref-detail">Section 3.1, Table 3‑2</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Intel® Xeon® Scalable Processors with HBM3 Design Guide</div><div class="ref-detail">Intel, 2025, https://www.intel.com/content/www/us/en/architecture-and-technology/hbm3-design-guide.html</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">Power‑Down Strategies for 3D‑Stacked Memories</div><div class="ref-detail">K. Lee et al., IEEE TCAD, vol. 44, no. 3, 2023, DOI:10.1109/TCAD.2023.3267891</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Advanced Test‑Equipment for HBM3 Low‑Power Modes</div><div class="ref-detail">A. Gupta, A. S. Borkar, ISSCC 2024, pp. 587‑590</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
