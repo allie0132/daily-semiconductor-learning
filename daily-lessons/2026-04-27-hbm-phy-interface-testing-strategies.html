@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM PHY Interface Testing Strategies</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.82rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  h2 { font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  p { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 10px; }
+  ul { padding-left: 18px; margin-bottom: 10px; }
+  li { font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 4px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 1px 5px; border-radius: 4px;
+          font-size: 0.85em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 16px 20px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 10px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  .references h2 { font-size: 1rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 6px 0;
+               border-bottom: 1px solid #0f172a; font-size: 0.85rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.7rem;
+               font-weight: 700; padding: 1px 6px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.8rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>HBM PHY Interface Testing Strategies</h1>
+  <div class="meta">Monday, Apr 27 2026</div>
+</header>
+<div class="section"><h2>Why PHY Testing Matters</h2><p>The PHY layer bridges the memory controller and the HBM stack, handling high‑speed serial lanes (DDR‑T for HBM2e/3) up to 6.4 Gb/s per lane. Errors at this layer propagate to data‑integrity failures that are hard to debug later.</p><p>Key parameters to validate:</p><ul><li>Lane-to-lane skew (<code>tSKew</code>) – max 20 ps per JEDEC JESD235C.</li><li>Eye‑height and eye‑width – meet <code>tRCD</code>, <code>tRP</code> timing budgets.</li><li>Clock‑data recovery (CDR) lock time – <code>tCKE</code> ≤ 1 µs.</li></ul></div>
+<div class="section"><h2>Test Setup and Instrumentation</h2><p>Typical ATE configuration:</p><ul><li><strong>High‑speed BERT</strong> (e.g., Keysight 86100) for lane‑by‑lane eye diagram and BER measurement.</li><li><strong>Vector‑based pattern generator</strong> (Advantest T3 or Teradyne J750) to drive JEDEC‑compliant training sequences (e.g., <code>JESD235C TSEQ001</code>).</li><li><strong>Mixed‑signal scope</strong> (Tektronix MSO58) with ≥ 20 GHz bandwidth for jitter analysis.</li></ul><p>Use a custom interposer with <code>OTV</code> probes or a dedicated <code>Hexus</code> test socket to maintain impedance (<code>Z0 = 105 Ω</code>) and minimize stub length.</p></div>
+<div class="section"><h2>Core PHY Test Patterns</h2><p>1. <strong>Clock Training (CT)</strong> – Apply <code>CTPAT</code> sequence, verify CDR lock within <code>tCKE</code>. Capture lock status register <code>PHY_CTRL[LOCK]</code>.</p><p>2. <strong>Write Leveling (WL)</strong> – Use JEDEC <code>WLDQ</code> pattern, read back <code>WL_STATUS</code> bits; ensure <code>VREF</code> offset < 25 mV.</p><p>3. <strong>Eye Test (ET)</strong> – Sweep data eye with PRBS‑31, target BER ≤ 1×10⁻⁹. Record eye opening at <code>0.5 UI</code> margin.</p><p>4. <strong>Latency Calibration (LC)</strong> – Issue <code>READ_LATENCY</code> command, compare measured vs. programmed <code>LATENCY_REG</code> (max deviation 2 ns).</p></div>
+<div class="section"><h2>Statistical and Temperature‑Aware Validation</h2><p>Run the full PHY suite across three temperature points: –40 °C, 85 °C, and 125 °C (JEDEC T‑catalog). Capture timing drift (<code>ΔtSKew</code>) and eye‑closure trends. Use <code>Monte‑Carlo</code> analysis on jitter sources (jitter budget: <code>Tj,total ≤ 120 ps</code>) to verify worst‑case margin.</p><p>Document any failed corner with <code>Fail‑Log</code> entries referencing the specific register (e.g., <code>PHY_ERR[SKW_ERR]</code>) for root‑cause tracing.</p></div>
+<div class="section"><h2>Post‑Silicon Regression and Repair</h2><p>After initial silicon qualification, integrate PHY tests into the production test flow:</p><ul><li>Run a reduced‑time <code>CT+WL</code> sequence (≤ 250 µs) on every device.</li><li>Collect <code>PHY_ERR</code> histograms; apply bin‑level repair by re‑programming <code>DLL</code> tap values if <code>tDQS</code> skew exceeds 15 ps.</li><li>Perform a final full‑eye BERT on a statistically sampled 0.1 % of parts to guard against systematic drift.</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>PHY timing margins (skew, jitter) are tighter in HBM3; verify against JESD235C specs.</li><li>Use a combination of BERT, vector patterns, and mixed‑signal scope for comprehensive coverage.</li><li>Include temperature corners and statistical analysis to ensure robustness across the full operating range.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C: HBM2E/3 PHY Specification</div><div class="ref-detail">Section 4.2 (Lane Skew), 5.1 (Training Sequences), 6.3 (Eye‑Diagram Requirements)</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE Std 1500‑2022: Core Test Access Mechanism (CTAM) for Memory</div><div class="ref-detail">Advisory for integrating PHY TBIST with core-level testing</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">HBM3 Datasheet – Samsung Electronics</div><div class="ref-detail">Table 11‑1: PHY Timing Parameters, Max Skew 20 ps</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">High‑Speed Serial Interface Test Methodology</div><div class="ref-detail">K. Lee et al., ISSCC 2023, pp. 102‑107</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Advanced Test Solutions for 2.5D/3D Interposers</div><div class="ref-detail">M. Patel, “3D IC Test”, 2nd ed., Springer 2021, ch. 8</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
