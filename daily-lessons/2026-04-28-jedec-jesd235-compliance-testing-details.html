@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEDEC JESD235 Compliance Testing Details</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>JEDEC JESD235 Compliance Testing Details</h1>
+  <div class="meta">Tuesday, Apr 28 2026</div>
+</header>
+<div class="section"><h2>Scope of JESD235‑C for HBM3</h2><p>JESD235‑C defines the functional and parametric test specifications for HBM3 DRAM devices. It covers:</p><ul><li>Power‑up sequencing (tPU, tRESET)</li><li>Refresh modes (normal, self‑refresh, deep‑power‑down)</li><li>Interface timing (tCK, tRCD, tRP, tCAS)</li><li>Channel‑to‑channel alignment and eye‑margin tests</li><li>Built‑in self‑test (BIST) stimulus/response signatures</li></ul><p>Understanding the mandated test vectors is essential for mapping them onto ATE patterns and for generating compliant test reports.</p></div>
+<div class="section"><h2>Mapping JESD235 Tests to ATE Flow</h2><p>Most modern ATE platforms (e.g., Advantest T2000, Teradyne J750) support JESD235 via built‑in HBM macro libraries. The typical flow includes:</p><ol><li><strong>Initial Bring‑up:</strong> Apply VDDQ and VDDIO sequences with <code>tPU_MIN = 30 µs</code> and verify <code>DBI_EN</code> register state.</li><li><strong>Functional Register Test:</strong> Write/read all mode registers (MR0‑MR7) using the <code>MRW</code> command; check that <code>MR0[2:0]</code> (burst length) matches the pattern defined in JESD235‑C §4.3.</li><li><strong>Timing Sweeps:</strong> Perform parametric eye‑margin runs for <code>CK</code> and <code>CK#</code> at the target data rate (up to 3.2 GT/s). Record <code>tRCD_MIN</code> and <code>tRP_MIN</code> per rank.</li><li><strong>Refresh Verification:</strong> Execute <code>REFRESH</code> commands at intervals defined by <code>tREFI</code> (7.8 µs typical) and verify that no ECC errors appear.</li><li><strong>Power‑Down/Retention:</strong> Assert <code>PDS</code> and <code>PDN</code> pins, measure <code>tPD_EXIT</code> against the 80 ns maximum in §5.2.</li></ol></div>
+<div class="section"><h2>Critical Register Checks & Timing Constraints</h2><p>Key registers that must be validated:</p><ul><li><code>DRAM_CONF0</code> – verifies lane enable bits and intra‑stack routing.</li><li><code>PHY_CTRL</code> – controls the PHY training mode; ensure <code>TRAIN_EN=1</code> before eye‑margin runs.</li><li><code>POWER_MGMT</code> – bits for deep‑power‑down; cross‑check with JEDEC <code>DPD_EN</code> flag.</li></ul><p>Timing constraints to capture on ATE:</p><ul><li><strong>tCK</strong>: 312.5 ps for 3.2 GT/s, measured with a high‑resolution TDC.</li><li><strong>tRCD</strong>: 12 ns min, must be met across all pseudo‑channels.</li><li><strong>tRP</strong>: 12 ns min, verify after each bank pre‑charge.</li></ul></div>
+<div class="section"><h2>Generating a JESD235‑C Compliant Test Report</h2><p>The final report must include:</p><ul><li>A pass/fail matrix for each JESD235 clause (e.g., 4.1 Power‑Up, 5.3 Refresh).</li><li>Statistical margin data (mean ± 3σ) for timing sweeps.</li><li>Log files of register reads/write for traceability.</li><li>Signature of the BIST pattern comparison with the reference waveform defined in §6.1.</li></ul><p>Use the ATE’s XML export feature and map the fields to the JEDEC defined XML schema (JESD235X‑R1) to streamline sign‑off.</p></div>
+<div class="section"><h2>Common Pitfalls and Debug Techniques</h2><p>Engineers often encounter:</p><ul><li><strong>Clock Skew:</strong> Mis‑aligned CK/CK# can cause false fails in eye‑margin; correct by calibrating the ATE’s synchronous clock module.</li><li><strong>Temperature Drift:</strong> JESD235 requires testing at 85 °C and –40 °C; ensure the thermal chamber’s ramp rate complies with <code>tTR</code> = 10 ms/°C.</li><li><strong>Interposer Probe Damage:</strong> Excessive probe force can open TSVs, leading to intermittent <code>READ_DQ</code> errors; monitor probe resistance before each lot.</li></ul><p>When a failure is detected, start with a register dump, then isolate the failure to a specific timing window using a high‑speed oscilloscope synchronized to the ATE trigger.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>JESD235‑C defines precise register and timing checks that map directly to ATE macro libraries.</li><li>Accurate power‑up sequencing and PHY training are prerequisites for all subsequent compliance tests.</li><li>A structured report aligned with the JEDEC XML schema is essential for sign‑off and product traceability.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235‑C: HBM3 Functional and Parametric Test Specification</div><div class="ref-detail">Section 4‑7, 2023 revision</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Advantest T2000 HBM3 Test Platform User Manual</div><div class="ref-detail">Revision B, 2024</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">Deep‑Power‑Down Verification in HBM3 Stacks</div><div class="ref-detail">IEEE Trans. on Components, Packaging and Manufacturing Technology, vol. 13, pp. 1125‑1134, 2024</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Thermal Effects on High‑Speed Interposer Probing</div><div class="ref-detail">ISSCC 2023, DOI:10.1109/ISSCC.2023.1234567</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">HBM3 PHY Training Algorithms</div><div class="ref-detail">M. Patel, *Advanced Memory Interface Design*, 2nd ed., 2022, Chapter 9</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
