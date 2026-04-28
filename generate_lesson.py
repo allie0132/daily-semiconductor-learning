@@ -86,7 +86,18 @@ if raw.startswith("```"):
     raw = raw.split("```")[1]
     if raw.startswith("json"):
         raw = raw[4:]
-lesson = json.loads(raw.strip())
+raw = raw.strip()
+
+# Fix invalid JSON escape sequences produced by some models
+import re
+def fix_json_escapes(s):
+    # Replace invalid backslash sequences (not followed by valid JSON escape chars)
+    return re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', s)
+
+try:
+    lesson = json.loads(raw)
+except json.JSONDecodeError:
+    lesson = json.loads(fix_json_escapes(raw))
 
 topic = lesson["topic"]
 summary = lesson["summary"]
