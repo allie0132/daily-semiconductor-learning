@@ -2,7 +2,7 @@ name: Daily Semiconductor Lesson
 
 on:
   schedule:
-    - cron: '5 12 * * 1-5'   # 8:05am ET, weekdays
+    - cron: '5 12 * * 1-5'   # 8:05am ET (12:05 UTC), weekdays
   workflow_dispatch:
 
 jobs:
