@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSV Continuity Testing in HBM Stacks</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>TSV Continuity Testing in HBM Stacks</h1>
+  <div class="meta">Wednesday, Apr 29 2026</div>
+</header>
+<div class="section"><h2>Why TSV Continuity Matters</h2><p>Through‑silicon vias (TSVs) carry high‑speed data, power, and ground across the HBM stack. An open TSV leads to loss of a channel, while a short between TSVs can cause crosstalk, timing violations, or latch‑up. JEDEC JESD235‑C specifies <strong>continuity‑test (CT)</strong> as a mandatory parametric for each TSV‑pair before functional qualification.</p></div>
+<div class="section"><h2>Test Methodology Overview</h2><p>The continuity test is performed on a wafer‑level probed die or on a packaged interposer using a 400 µm pitch micro‑probe card. The flow comprises:</p><ul><li>Apply a DC bias (typically +5 V on the TSV under test and 0 V on the reference ground TSV).</li><li>Measure the resulting current through a low‑value sense resistor (10 mΩ–100 mΩ) to derive resistance.</li><li>Repeat for each TSV pair using a <code>pin‑to‑pin sweep</code> matrix, leveraging the ATE's <code>DC_TSV_CONT</code> routine.</li></ul><p>Typical pass/fail limits: <code>R<sub>TSV</sub> ≤ 30 mΩ</code> for power/ground TSVs, <code>R<sub>TSV</code> ≤ 50 mΩ</code> for signal TSVs. Open detection is flagged when measured current < 1 µA (i.e., >5 MΩ).</p></div>
+<div class="section"><h2>Timing and Stress Conditions</h2><p>Continuity should be verified under both ambient (25 °C) and elevated (125 °C) conditions to capture thermally‑induced opens.</p><ul><li>Temperature ramp: 25 °C → 125 °C at 3 °C/min, hold 10 min, then measure.</li><li>Voltage stress: Apply +12 V for 100 ms before measurement to pre‑condition marginal contacts (JEDEC JESD235‑C §5.4).</li></ul><p>Record resistance versus temperature; a slope >0.2 µΩ/°C may indicate a compromised TSV wall.</p></div>
+<div class="section"><h2>Automated Failure Analysis</h2><p>If a TSV fails continuity, the ATE logs the failing pin pair and triggers a <strong>focused IR‑thermal scan</strong> on the wafer or an <strong>EBIC</strong> (electron‑beam induced current) map on the diced die. Correlate the resistance value with the physical location to differentiate between:</p><ul><li>Open due to void or delamination.</li><li>Short to adjacent TSV (usually <code>R ≤ 5 mΩ</code> and accompanied by a parallel‑path signature in the sweep matrix).</li></ul><p>Use the ATE’s <code>CONT_FAIL_ANALYSIS()</code> macro to generate a CSV report for yield tracking.</p></div>
+<div class="section"><h2>Best‑Practice Checklist for Production</h2><p>Integrate these steps into the production test flow:</p><ul><li>Run a quick <code>DC_TSV_CONT</code> at 25 °C before burn‑in.</li><li>Perform a full temperature‑stress sweep only on wafers flagged by the quick test.</li><li>Document resistance trends per lot to spot systematic process drifts.</li><li>Maintain a calibrated sense‑resistor bank (±0.5 % tolerance) and verify with a 4‑wire Kelvin measurement.</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>TSV continuity is a parametric requirement (JESD235‑C) and must be measured at both room and high temperature.</li><li>Resistance limits differ for power/ground vs. signal TSVs; open detection relies on sub‑µA current thresholds.</li><li>Automated failure analysis (IR‑thermal, EBIC) accelerates root‑cause identification and improves yield tracking.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235‑C: HBM Test Specification</div><div class="ref-detail">Section 5.3–5.5, 2022</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">S. Kim et al., “Reliability of TSVs in 2.5‑D HBM Stacks,” IEEE Transactions on Components, Packaging and Manufacturing Technology, vol. 11, no. 4, pp. 642‑650, 2021</div><div class="ref-detail">doi:10.1109/TCPMT.2021.3059234</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">TSMC 2.5‑D Interposer Design Handbook</div><div class="ref-detail">TSMC, 2020, Chapter 7 – TSV Test Methods</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Micron HBM3 Datasheet</div><div class="ref-detail">Micron Technology, Rev. 3.2, 2023, Table 3‑9 – TSV resistance spec</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">A. Patel, “Automated IR‑Thermal Imaging for TSV Fault Localization,” Proc. ISSCC, 2022</div><div class="ref-detail">ISSCC, 2022, pp. 115‑117</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
