@@ -13,7 +13,7 @@ os.makedirs(lesson_dir, exist_ok=True)
 
 # Collect recent topics to avoid repeats
 recent_topics = []
-for fname in sorted(os.listdir(lesson_dir), reverse=True)[:10]:
+for fname in sorted(os.listdir(lesson_dir), reverse=True)[:5]:
     if fname.endswith(".md"):
         with open(os.path.join(lesson_dir, fname)) as f:
             recent_topics.append(f.readline().strip().lstrip("# "))
@@ -30,17 +30,7 @@ prompt = f"""You are an expert semiconductor test engineer with 20+ years of exp
 Recent topics covered (do NOT repeat):
 {recent_str}
 
-Pick a fresh, specific HBM testing topic. Examples:
-- HBM PHY interface testing strategies
-- JEDEC JESD235 compliance testing details
-- HBM2e vs HBM3 electrical test differences
-- Pseudo-channel mode test patterns
-- TSV continuity testing in HBM stacks
-- DFT approaches for HBM in 2.5D packages
-- Temperature-aware HBM parametric testing
-- HBM repair flow and post-repair verification
-- Interposer probe challenges for HBM
-- HBM MBIST implementation and coverage
+Pick a fresh, specific HBM testing topic not already in the recent list above.
 
 Respond ONLY with a JSON object — no markdown fences, no extra text:
 {{
