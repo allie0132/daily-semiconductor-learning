@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Power‑Down Sequencing for HBM3</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>Dynamic Power‑Down Sequencing for HBM3</h1>
+  <div class="meta">Thursday, Apr 30 2026</div>
+</header>
+<div class="section"><h2>Why Power‑Down Sequencing Matters</h2><p>HBM3 devices support multiple low‑power states (Idle, Power‑Down, Self‑Refresh) to meet datacenter power budgets. Incorrect sequencing can cause latch‑up, data loss, or premature wear of the TSVs. JEDEC JESD235B defines the timing windows (tXP, tCKE, tXPD) that must be met under worst‑case temperature and voltage conditions.</p></div>
+<div class="section"><h2>Key Registers and Commands</h2><p>The following DRAM registers are used to control power states:</p><ul><li><code>MR8[7:0]</code> – Power‑Down Mode Select (PD, PD‑Auto, PD‑Exit)</li><li><code>MR5[2:0]</code> – Self‑Refresh Type (SR, SR‑Auto)</li><li><code>MR1[5]</code> – CKE Disable (forces CKE low for power‑down)</li></ul><p>Power‑down entry is typically triggered by de‑asserting <code>CKE</code> while <code>MR8</code> is programmed for PD mode. Exit is performed by re‑asserting <code>CKE</code> and issuing a NOP or Refresh command within <code>tXP</code>.</p></div>
+<div class="section"><h2>Timing Verification on ATE</h2><p>Program the ATE to sweep the following critical intervals:</p><ul><li><strong>tCKE</strong> – Minimum low time of CKE before entering PD (JEDEC min 0 ns, max 20 ns).</li><li><strong>tXP</strong> – Minimum time after CKE rise before the first valid command (max 80 ns at 85 °C).</li><li><strong>tXPD</strong> – Maximum low‑power exit latency after CKE rise (≤ 260 ns per JESD235B). </li></ul><p>Use per‑pin timing edge control on the ATE (e.g., Keysight 33600A) to create sub‑nanosecond jitter and voltage‑bias variations, then monitor the DQ response for correct NOP/Refresh execution.</p></div>
+<div class="section"><h2>Temperature and Supply‑Noise Stress</h2><p>Run the sequence at three temperature points (−40 °C, 25 °C, 85 °C) while varying VDDQ and VPP by ±5 % to emulate on‑board IR‑drop. Record failure rates and correlate with <code>tXP</code> degradation. JEDEC requires that <code>tXP</code> increase by ≤ 30 % across the temperature range; any larger shift indicates a need for redesign of the power‑delivery network.</p></div>
+<div class="section"><h2>Reporting and Pass/Fail Criteria</h2><p>Generate a parametric matrix that lists:</p><ul><li>Measured <code>tXP</code> vs. JEDEC max for each temperature.</li><li>Observed data‑integrity errors (BER) during exit.</li><li>Power‑up/down waveform compliance (edge‑rate, overshoot < 300 mV).</li></ul><p>A test set passes if all measured values stay within the JEDEC limits and no BER > 10⁻⁹ is detected during 10⁶ exit cycles.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>HBM3 power‑down requires precise CKE timing; tXP is the most failure‑prone window.</li><li>Temperature and supply voltage variations significantly affect tXP; test across the full spec range.</li><li>Automated ATE edge‑control and BER monitoring provide a definitive pass/fail for low‑power state transitions.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235B – HBM3 Specification</div><div class="ref-detail">Section 5.4 Power‑Down/Idle Timing, 2022</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE 2021 – Low‑Power State Characterization of 3D‑Stacked DRAM</div><div class="ref-detail">doi:10.1109/IEDM.2021.964523</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Samsung HBM3 Datasheet</div><div class="ref-detail">Samsung Electronics, PN: HBM3‑8Gb‑1, Rev A, 2023</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Keysight 33600A High‑Speed ATE Manual</div><div class="ref-detail">https://www.keysight.com/en/pd-1000004676%3Aepsg%3Apga/33600A-Advanced-Testing-Equipment</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Advanced Packaging of High‑Bandwidth Memory</div><div class="ref-detail">M. Lee, "Advanced 3D Packaging", Springer, 2020, Chap. 7</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
