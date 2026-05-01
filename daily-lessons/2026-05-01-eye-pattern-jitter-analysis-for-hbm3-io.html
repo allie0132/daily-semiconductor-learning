@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eye‑Pattern & Jitter Analysis for HBM3 IO</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>Eye‑Pattern & Jitter Analysis for HBM3 IO</h1>
+  <div class="meta">Friday, May 01 2026</div>
+</header>
+<div class="section"><h2>Why Eye‑Pattern Matters in HBM3</h2><p>HBM3 operates up to 3.2 Gb/s per lane with tight UI (Unit Interval) budgets. Eye‑pattern measurement provides a direct view of timing margin, voltage swing, and jitter sources that affect BER targets (<10⁻¹²). The JEDEC JESD235‑C spec defines the <code>IEE</code> (Input Eye) and <code>EIE</code> (Output Eye) parameters that must be met for each DBI (Data Bus Inversion) pattern.</p></div>
+<div class="section"><h2>Test Setup and Instrumentation</h2><p>Use a high‑bandwidth (<12 GHz) oscilloscopic BERT (e.g., Keysight M9709A) with a programmable DDR5/HBM3 pattern generator. Connect to the HBM3 stack via a custom probe card with <code>50 Ω</code> controlled‑impedance micro‑bumps. Ensure the ATE’s <code>IOVDD</code> and <code>VREF</code> are calibrated per JEDEC JESD236‑A.</p><ul><li>Configure the BERT for NRZ, 8‑bit data‑bus‑inversion (DBI) patterns.</li><li>Set the clock source to the HBM3 reference clock (2.4 GHz) with phase‑aligned jitter cleaning.</li><li>Enable on‑chip eye‑monitor registers: <code>HBM3_EYE_CTRL</code>, <code>HBM3_EYE_STATUS</code>.</li></ul></div>
+<div class="section"><h2>Key Eye‑Diagram Metrics</h2><p>The following parameters are extracted per JEDEC JESD235‑C Table 5.3 and must meet the limits for each pin:</p><ul><li><strong>UI Margin</strong>: Minimum 0.65 UI opening at 80 % eye height.</li><li><strong>Voltage Swing</strong>: 0.6–1.2 V differential (typical 0.9 V) at the sampling point.</li><li><strong>Total Jitter (TJ)</strong>: <code>TJ</code> ≤ 0.2 UI (RMS) over 10⁶ UI.</li><li><strong>Random Jitter (RJ)</strong> and <strong>Deterministic Jitter (DJ)</strong>: RJ ≤ 0.12 UI, DJ ≤ 0.08 UI.</li><li><strong>Eye Width</strong> at 50 % amplitude must exceed 1.2 UI.</li></ul></div>
+<div class="section"><h2>Analyzing Jitter Sources</h2><p>Separate jitter contributions using the BERT’s jitter decomposition function:</p><ul><li><strong>Clock phase noise</strong> – measured by disconnecting the DUT and sampling the reference clock; compare against the spec in JESD236‑A clause 7.2.</li><li><strong>Power‑supply noise</strong> – inject controlled PDN ripple (0.5 % of VDD) and observe TJ increase; correlate with on‑die <code>VDDIO_MON</code> registers.</li><li><strong>Crosstalk</strong> – enable adjacent lane activity; monitor eye degradation using the <code>HBM3_CROSSTALK_EN</code> register.</li></ul><p>Mitigation approaches include adjusting termination resistance, re‑balancing DBI patterns, and tightening the PDN decoupling on the interposer.</p></div>
+<div class="section"><h2>Reporting and Pass/Fail Criteria</h2><p>Document eye‑diagram screenshots with UI grid overlay. Compile a CSV of measured metrics per lane and compare against the limits in JESD235‑C. Use the ATE’s <code>HBM3_EYE_RESULT</code> register to auto‑flag failures. For any lane exceeding TJ limits, trigger a retest with increased eye‑margin (‑10 mV VREF) before marking the stack as non‑conforming.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Eye‑pattern compliance is a direct indicator of HBM3 signal integrity and must meet JESD235‑C UI margins.</li><li>Accurate jitter decomposition identifies whether clock, PDN, or crosstalk dominates the eye degradation.</li><li>Automated registers (HBM3_EYE_CTRL/STATUS) enable inline pass/fail decisions within ATE flow.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235‑C: High Bandwidth Memory (HBM) Electrical Test Methodology</div><div class="ref-detail">Section 5.3 Eye‑Pattern Measurements, 2022</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD236‑A: HBM Power Delivery and PDN Guidelines</div><div class="ref-detail">Clause 7.2 Clock Jitter, 2021</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE 802.3: 25‑Gb/s and 40‑Gb/s Ethernet PHY Design</div><div class="ref-detail">IEEE Std 802.3-2020, relevant jitter analysis techniques</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Keysight M9709A BERT User Manual</div><div class="ref-detail">Keysight Technologies, Rev B, 2023</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">HBM3 Stack Design Handbook</div><div class="ref-detail">M. K. Hsu, "HBM3 Stack Design and Test," Springer, 2024</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
