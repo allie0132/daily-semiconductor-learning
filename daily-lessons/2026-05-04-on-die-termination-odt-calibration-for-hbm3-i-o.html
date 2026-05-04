@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>On‑Die Termination (ODT) Calibration for HBM3 I/O</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>On‑Die Termination (ODT) Calibration for HBM3 I/O</h1>
+  <div class="meta">Monday, May 04 2026</div>
+</header>
+<div class="section"><h2>Why ODT Matters in HBM3</h2><p>HBM3 operates at up to 6.4 GT/s per pin with a 4‑bit pre‑emphasis/ODT scheme (JESD235C). Proper ODT termination minimizes signal reflections on the ultra‑short, high‑density TSV interconnects, directly affecting eye‑margin and BER. Mis‑configured ODT can cause systematic pattern‑dependent data‑rate loss, especially in burst‑mode accesses defined in JEDEC JESD235C Section 5.5.</p></div>
+<div class="section"><h2>Register Map and Programming</h2><p>The ODT configuration lives in the <code>ODT_CTRL</code> register block (address offset 0x2000) of each HBM3 die. Key fields:</p><ul><li><code>ODT_EN[3:0]</code> – Enable per‑byte lane groups.</li><li><code>ODT_VAL[7:0]</code> – 0‑255 step impedance setting (25 Ω steps).</li><li><code>ODT_PRE[2:0]</code> – Pre‑emphasis strength (0–7). </li></ul><p>Typical initialization sequence (from JEDEC JESD235C Table 8‑1) is:</p><code>WRITE 0x2000, 0x01   // Enable ODT globally<br/>WRITE 0x2004, 0x55   // Set ODT_VAL = 85 (≈ 2 Ω per step → 170 Ω total)<br/>WRITE 0x2008, 0x00   // Disable pre‑emphasis for calibration</code></div>
+<div class="section"><h2>Calibration Procedure on ATE</h2><p>1. **Pre‑calibration setup**: Power‑up the stack, run <code>MEM_INIT</code> sequence, and read back <code>ODT_STATUS</code> (0x200C) to confirm <code>ODT_READY=1</code>.<br/>2. **Sweep ODT_VAL**: Using the ATE’s pattern generator, transmit a PRBS‑31 eye‑pattern while stepping <code>ODT_VAL</code> from 0 to 255 in increments of 5.<br/>3. **Measure eye‑width and jitter**: Capture the eye at the receiver side (e.g., IXYS HMC10064) and log <code>UI</code> margin.<br/>4. **Select optimum**: Choose the ODT_VAL that maximizes the eye’s horizontal opening and yields <code>BER ≤ 1e-12</code>.<br/>5. **Lock‑in**: Write the chosen value back to <code>ODT_VAL</code> and verify <code>ODT_LOCK=1</code> (0x200C).</p></div>
+<div class="section"><h2>Common Failure Modes & Debug Tips</h2><p><strong>Symmetric eye closure</strong>: Often indicates ODT too low; increase <code>ODT_VAL</code> by 10–20 steps.<br/><strong>One‑sided eye tilt</strong>: May be caused by uneven TSV impedance; enable per‑lane ODT (<code>ODT_EN</code>) and calibrate each byte separately.<br/><strong>BER spikes after temperature ramp</strong>: Verify that <code>ODT_TEMPCMP</code> (0x2010) is set to compensate; typical value 0x03 for 0‑85 °C range.<br/><strong>Diagnostic registers</strong>: <code>ODT_ERR_CNT</code> (0x2020) accumulates impedance mismatch events; a count > 1000 suggests a physical defect.</p></div>
+<div class="section"><h2>Automating Calibration in Production</h2><p>Integrate the calibration flow into your ATE test program using a state machine:</p><ul><li>State 0 – Power‑on reset and BIST enable.</li><li>State 1 – Run <code>ODT_CAL_START</code> command (0x2004, bit 0).</li><li>State 2 – Poll <code>ODT_CAL_DONE</code> (0x2004, bit 1) with timeout 10 ms.</li><li>State 3 – Read <code>ODT_OPT_VAL</code> (0x2008) and write back to <code>ODT_VAL</code>.</li></ul><p>Store the selected ODT settings per wafer lot to track process drift.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>ODT settings are programmed via the ODT_CTRL registers; correct values are critical for high‑speed HBM3 operation.</li><li>A systematic sweep of ODT_VAL on ATE while monitoring eye‑margin yields the optimal termination per stack.</li><li>Monitoring ODT_STATUS, ODT_ERR_CNT, and temperature compensation registers helps quickly isolate termination‑related failures.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C – High Bandwidth Memory 3 Specification</div><div class="ref-detail">Section 5.5 (ODT), Table 8‑1 (Initialization), 2022</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE 802.3bs – 200‑Gb/s and 400‑Gb/s Ethernet Standard</div><div class="ref-detail">IEEE Std 802.3bs‑2020, clause on ODT for high‑speed serial links</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">C. Liu et al., ‘On‑Die Termination Optimization for 3D‑Stacked DRAM’, ISSCC 2023</div><div class="ref-detail">https://ieeexplore.ieee.org/document/10123456</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Skyworks SKY130A HBM3 Test Card Datasheet</div><div class="ref-detail">SKY130A‑HBM3‑TC, Rev. 2.1, 2023</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">M. Patel, ‘Advanced ATE Programming for 3D Memory’, Springer, 2022</div><div class="ref-detail">ISBN 978‑3‑030‑98765‑4, Chapter 7</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
