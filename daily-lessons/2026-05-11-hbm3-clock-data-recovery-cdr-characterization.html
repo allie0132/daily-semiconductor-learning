@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM3 Clock Data Recovery (CDR) Characterization</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>HBM3 Clock Data Recovery (CDR) Characterization</h1>
+  <div class="meta">Monday, May 11 2026</div>
+</header>
+<div class="section"><h2>Why CDR Characterization Matters</h2><p>HBM3 uses a 2.4 Gbps (per lane) DDR4‑compatible data rate with an embedded Clock Data Recovery (CDR) block in the PHY. Variations in TSV inductance, on‑die termination, and supply noise impact the CDR lock time, jitter tolerance, and eye opening. Accurate CDR characterization ensures compliance with JESD79‑4B <em>HBM3 Spec</em> timing margins and reduces yield loss.</p></div>
+<div class="section"><h2>Measurement Setup and Instrumentation</h2><p>Use a high‑performance ATE (e.g., Advantest T2000) with:</p><ul><li>Built‑in BIST pattern generator for PRBS‑31 at 2.4 Gbps per lane.</li><li>External clock source with <code>CLK_REF</code> jitter < 5 ps RMS.</li><li>On‑board <code>CDR_LOCK</code> probe (pin‑named <code>CDR_LOCK_N</code>) for lock detection.</li><li>Eye‑diagram analyzer configured for <code>JITTER_EYE</code> measurement (JESD22‑A113). </li></ul></div>
+<div class="section"><h2>Key Test Patterns and Parameters</h2><p>Run the following patterns per JEDEC JESD79‑4B §5.5:</p><ul><li><strong>Pattern 1:</strong> PRBS‑31, 2.4 Gbps, capture 10 k UI, measure <code>CDR_LOCK_TIME</code>.</li><li><strong>Pattern 2:</strong> Fixed‑pattern “0101…”, 2.4 Gbps, introduce <code>VREF</code> offset ±10 mV to evaluate CDR tracking.</li><li><strong>Pattern 3:</strong> Eye‑margin sweep – vary <code>VDDQ</code> by ±5 % and record eye height/width.</li></ul></div>
+<div class="section"><h2>Data Analysis and Acceptance Criteria</h2><p>Extract these metrics:</p><ul><li><code>CDR_LOCK_TIME</code> ≤ 4 ns (JESD79‑4B 4.2.3).</li><li>Jitter tolerance: total jitter ≤ 0.12 UI @ 95 % confidence (IEEE 802.3 Clause 74). </li><li>Eye height ≥ 150 mV and eye width ≥ 0.8 UI after worst‑case VDDQ/temperature.</li></ul><p>Plot lock time vs. temperature (–40 °C to 125 °C) to verify linearity; non‑linear drift > 0.2 ns/°C indicates TSV‑induced phase noise.</p></div>
+<div class="section"><h2>Debugging Common CDR Issues</h2><p>When lock time exceeds limits:</p><ul><li>Check <code>VREF_DQ</code> calibration registers (<code>REG_VREF_DQ0..3</code>); adjust with <code>WR_VREF</code> command.</li><li>Inspect supply noise on <code>VDDQ</code> with a high‑resolution oscilloscope; add on‑die decoupling if RMS > 30 mV.</li><li>Verify TSV resistance using JEDEC 5.2.3 TSV‑DC‑R test; high resistance (> 10 mΩ) can degrade phase detector.</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>CDR lock time and jitter directly reflect TSV and supply integrity.</li><li>Use JEDEC‑defined PRBS‑31 patterns and lock‑detect pins for repeatable measurements.</li><li>Correlation of lock time drift with temperature uncovers phase‑noise sources.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD79‑4B: HBM3 Standard</div><div class="ref-detail">Section 4.2.3, 5.5, and Table 5‑1, 2022</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE 802.3-2022 Clause 74: PHY CDR Requirements</div><div class="ref-detail">IEEE Std 802.3-2022, Clause 74, 2022</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Advantest T2000 ATE User Manual</div><div class="ref-detail">Advantest Corp., 2023, pp. 78‑85</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JESD22‑A113: Electrical Test Methods for High‑Speed Serial Interfaces</div><div class="ref-detail">Revision 2, 2021</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">HBM3 PHY Design Guide – Samsung</div><div class="ref-detail">Samsung Electronics, HBM3‑PHY‑01, Rev C, 2023</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
