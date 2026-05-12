@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real‑Time Power Monitoring for HBM3 Thermal Characterization</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>Real‑Time Power Monitoring for HBM3 Thermal Characterization</h1>
+  <div class="meta">Tuesday, May 12 2026</div>
+</header>
+<div class="section"><h2>Why Real‑Time Power Monitoring Matters</h2><p>HBM3 stacks dissipate >5 W per die at peak data rates, and thermal gradients directly affect timing margins and retention. Traditional IR‑thermography cannot capture transient power spikes; on‑die power sensors provide the necessary bandwidth (up to 100 MHz) to correlate instantaneous power with temperature.</p></div>
+<div class="section"><h2>Available On‑Die Power Sensors and Registers</h2><p>Most HBM3 manufacturers expose a <code>POWER_MONITOR</code> register block (JEDEC JESD235C&nbsp;Table 7‑4). Typical registers include:</p><ul><li><code>PMON_CTRL</code> – enable, sample rate (bits 0‑2)</li><li><code>PMON_ACCUM</code> – 32‑bit accumulator for energy integration</li><li><code>PMON_TEMP</code> – calibrated temperature offset</li></ul><p>Read/write access is performed over the MDQ interface using the standard MDQ commands defined in JESD235C&nbsp;§5.3.</p></div>
+<div class="section"><h2>Measurement Setup on ATE</h2><p>Configure the tester as follows:</p><ul><li>Connect the MDQ pins to the ATE’s high‑speed I/O module (e.g., Advantest V93000) with 10 ps jitter budget.</li><li>Program the <code>PMON_CTRL</code> register to enable sampling at 20 MHz (recommended for < 5 ns thermal time constant).</li><li>Synchronize the power‑monitor acquisition with the traffic generator using a <code>TRIG_SYNC</code> pulse on the ATE’s GPIO.</li></ul><p>Capture the <code>PMON_ACCUM</code> value every 100 µs while running a patterned read/write burst (e.g., 64‑bit, 4 Gb/s per pin). Export the data stream as CSV for post‑processing.</p></div>
+<div class="section"><h2>Data Analysis and Thermal Mapping</h2><p>Convert accumulator counts to power using the calibration factor provided in the device datasheet (<code>POWER_LSB = 1 mW</code> typical). Apply a moving‑average filter (window 10 samples) to reduce quantization noise. Then map power density to temperature using the thermal resistance model:</p><pre><code>ΔT = P_total × R_θJA + ΔT_ambient</code></pre><p>Validate the model by comparing predicted temperatures with on‑board thermal diodes (<code>TDIO</code> registers) and, if available, with an infrared camera snapshot taken after the test.</p></div>
+<div class="section"><h2>Best Practices and Pitfalls</h2><p><strong>Do:</strong></p><ul><li>Zero the accumulator before each test run (<code>PMON_ACCUM = 0</code>).</li><li>Use a low‑impedance power delivery network to avoid measurement artifacts.</li><li>Log both raw MDQ traffic and power data to correlate specific command sequences with heating events.</li></ul><p><strong>Don’t:</strong></p><ul><li>Run the monitor at >50 MHz; the sensor bandwidth is limited and will alias high‑frequency components.</li><li>Ignore the <code>PMON_TEMP</code> offset; failure to apply it can introduce up to ±5 °C error.</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>On‑die power monitors provide >10 µs temporal resolution for HBM3 thermal studies.</li><li>Synchronizing MDQ traffic with power sampling yields direct correlation between traffic patterns and hot‑spot formation.</li><li>Accurate thermal mapping requires calibrating accumulator LSBs and applying stack‑level thermal resistance values.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C – High Bandwidth Memory DDR4 SDRAM Specification</div><div class="ref-detail">Section 4.2 (Power Monitoring), Table 7‑4</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">Thermal Modeling of 3D-Stacked Memory</div><div class="ref-detail">S. K. Lim et al., IEEE TCAD, 2021, doi:10.1109/TCAD.2021.3067894</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">HBM3 Datasheet – Micron Technology</div><div class="ref-detail">Rev 1.2, 2023, Power Monitor Register Map, p. 57</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Advanced Test System Integration for 3D-ICs</div><div class="ref-detail">R. D. MacLeod, “3D IC Test Architecture”, Springer, 2022, ch. 6</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD79‑4A – DDR5 SDRAM Specification</div><div class="ref-detail">Reference for MDQ command timing, §5.2</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
