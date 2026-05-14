@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM3 Refresh‑Cancel Stress and Retention Testing</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>HBM3 Refresh‑Cancel Stress and Retention Testing</h1>
+  <div class="meta">Thursday, May 14 2026</div>
+</header>
+<div class="section"><h2>Background and Objectives</h2><p>The JEDEC JESD235C standard defines the <code>REFRESH_CANCEL</code> command used by the controller to abort a scheduled refresh. Improper handling can cause data loss or timing violations, especially when operating near the limits of the <strong>VDDQ</strong> and temperature range.</p><p>This lesson covers a systematic stress test to verify that the memory array retains data when refreshes are cancelled under worst‑case conditions.</p></div>
+<div class="section"><h2>Test Overview and Flow</h2><p>1. <strong>Initialize</strong> the HBM3 stack at the target temperature (e.g., -40 °C, 125 °C).<br>2. Write a known pattern (e.g., <code>0xAA55AA55</code>) to all addresses using the <code>WRITE</code> command.<br>3. Issue <code>REFRESH_CANCEL</code> after the <code>tRFC</code> timer expires but before the actual refresh begins.<br>4. Wait for a programmable interval (e.g., 10 ms to 1 s) to simulate multiple missed refresh windows.<br>5. Issue a full <code>REFRESH</code> burst and read back the data.<br>6. Log any bit errors and capture timing traces via the ATE’s high‑resolution scope.</p></div>
+<div class="section"><h2>ATE Configuration and Register Settings</h2><p>Use a Keysight 33600‑A/32000‑A platform with a 5 GHz sampling clock. Configure the following registers on each DRAM channel:</p><ul><li><code>REG_0x0100 (REFRESH_INTERVAL)</code> – set to maximum allowed value (e.g., 7.8 µs) to stretch refresh windows.</li><li><code>REG_0x0114 (REFRESH_CANCEL_EN)</code> – enable command.</li><li><code>REG_0x0208 (VDDQ_TUNE)</code> – program to low‑voltage corner (0.8 V typ).</li><li><code>REG_0x030C (TEMP_SENSE)</code> – read back temperature for verification.</li></ul><p>Enable <code>TRACE_MODE = ON</code> to capture the <code>tRC</code> and <code>tRFC</code> edges with 20 ps resolution.</p></div>
+<div class="section"><h2>Data Analysis and Pass/Fail Criteria</h2><p>Analyze error maps per die:</p><ul><li>If <strong>BER ≤ 1e‑12</strong> after 100 ms of cancelled refresh, the die passes.</li><li>Any single‑bit error occurring within the first 10 ms indicates a failure to retain charge.</li><li>Check that the controller re‑issues a <code>REFRESH</code> after the cancel and that <code>tRFC</code> meets the spec (≤ 350 ns typical for HBM3). </li></ul><p>Document the worst‑case corner that produced errors for root‑cause analysis.</p></div>
+<div class="section"><h2>Mitigation Strategies</h2><p>If failures are observed, consider the following actions:</p><ul><li>Increase <code>REFRESH_INTERVAL</code> safety margin by 10 %.</li><li>Adjust <code>VDDQ_TUNE</code> to high‑voltage corner (+0.05 V) for marginal dies.</li><li>Implement controller firmware that limits consecutive <code>REFRESH_CANCEL</code> commands to three per 100 µs.</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Refresh‑cancel must be exercised at extreme voltage/temperature to expose latent retention failures.</li><li>JEDEC JESD235C timing margins (tRFC, tRC) are critical when refresh is aborted.</li><li>ATE must capture sub‑nanosecond timing to verify that the controller correctly re‑issues refresh after cancel.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C: HBM3 Standard</div><div class="ref-detail">Section 4.5.2 Refresh Cancel, Section 5.3 Timing</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE Tran. on VLSI Systems, 2022, "Refresh Management in 3D Stacked DRAM"</div><div class="ref-detail">doi:10.1109/TVLSI.2022.3156789</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Micron HBM3 Datasheet, Rev. B</div><div class="ref-detail">Table 2‑8: VDDQ ranges, Table 3‑12: Refresh timing</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Keysight 33600‑A ATE User Guide</div><div class="ref-detail">https://www.keysight.com/pdf/33600A_UG.pdf</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">High‑Performance Memory Systems, 2nd Ed., S. Marculescu, 2020</div><div class="ref-detail">Chapter 7: DRAM Refresh Schemes</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
