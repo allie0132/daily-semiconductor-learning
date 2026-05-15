@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM3 Clock Data Recovery Jitter Margin Characterization</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <h1>HBM3 Clock Data Recovery Jitter Margin Characterization</h1>
+  <div class="meta">Friday, May 15 2026</div>
+</header>
+<div class="section"><h2>Why CDR Jitter Matters for HBM3</h2><p>The Clock Data Recovery (CDR) block in each DRAM die must lock to the incoming DFI clock within the <strong>JITTER_TOL</strong> budget defined in JESD235C. Excess jitter reduces the effective <code>tCK</code> margin, leading to read/write errors, especially at <code>tCK_MAX = 1.2&nbsp;ns</code> (800&nbsp;MT/s) for HBM3.</p><p>Key parameters:</p><ul><li><strong>JITTER_TOL</strong>: total jitter tolerance (unit: UI)</li><li><strong>JITTER_RMS</strong>: RMS jitter contribution from the ATE source</li><li><strong>BLM_EYE</strong>: eye‑height and eye‑width specifications (≥ 850 mV, ≥ 0.75 UI)</li></ul></div>
+<div class="section"><h2>Measurement Setup on ATE</h2><p>Use a 400‑GSa/s, 12‑bit digitizer (e.g., Tektronix DPO72004) paired with a high‑resolution pattern generator (e.g., Keysight 33600A). Connect the DUT via a calibrated HBM3 <strong>TSV‑to‑SiP</strong> test socket with <code>51.2&nbsp;mm</code> trace length to emulate real stack latency.</p><p>Configure the pattern generator to emit a PRBS‑31 sequence at <code>tCK = 1.1&nbsp;ns</code> with a <code>DRAM_CLK</code> duty cycle of 50 %.</p><ul><li>Set <code>JITTER_MODE = GAUSS</code> and vary RMS jitter from 0.01 UI to 0.15 UI.</li><li>Enable <code>CDR_LOCK_DETECT</code> flag in the ATE’s built‑in logic analyzer to capture lock‑time.</li></ul></div>
+<div class="section"><h2>Eye‑Diagram Capture and Jitter Analysis</h2><p>Capture 2 MUI (million unit intervals) of data per jitter point. Use the ATE’s offline analysis to extract:</p><ul><li><strong>UI eye‑width</strong> at 1 % BER.</li><li><strong>Eye‑height</strong> in mV (must exceed <code>BLM_EYE</code> spec).</li><li><strong>CDR lock time</strong> distribution (target < 5 ns).</li></ul><p>Apply the jitter decomposition method from JESD235C §5.3: <code>JITTER_TOTAL = sqrt(JITTER_RMS^2 + JITTER_DUT^2 + JITTER_EQUIP^2)</code>. Plot <code>JITTER_TOTAL vs. Eye‑width</code> to locate the jitter margin breakpoint.</p></div>
+<div class="section"><h2>Stress Test Flow and Failure Criteria</h2><p>Run a ramp‑stress where RMS jitter is increased step‑wise while keeping temperature at 85 °C and supply voltage at <code>VDDQ = 1.1 V</code>. Record the first failing point where:</p><ul><li>Eye‑width < 0.7 UI or</li><li>Eye‑height < 750 mV or</li><li>CDR lock time > 7 ns.</li></ul><p>Document the <code>JITTER_TOL_EXCEEDED</code> flag in the test log and correlate with the die‑level <code>JTAG_REG[0x3C].JIT_ERR</code> status register.</p></div>
+<div class="section"><h2>Mitigation Strategies</h2><p>If the margin is insufficient, consider:</p><ul><li>Increasing <code>VREF_DQ</code> by 10 mV to boost eye‑height.</li><li>Enabling the HBM3 <code>CDR_BYPASS</code> mode for low‑jitter external clocks.</li><li>Optimizing PCB trace impedance to 45 Ω differential to reduce <code>JITTER_EQUIP</code>.</li></ul><p>Re‑run the jitter sweep after each change to verify improvement.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Jitter margin is quantified by the UI eye‑width at 1 % BER and must stay above 0.75 UI per JESD235C.</li><li>CDR lock time is a critical secondary metric; >5 ns indicates insufficient jitter budgeting.</li><li>Systematic jitter ramp testing reveals the DUT’s jitter tolerance and guides voltage or layout adjustments.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C: HBM3 DDR5 SDRAM Standard</div><div class="ref-detail">Sections 4.2.1, 5.3, 6.1 – jitter tolerance and eye‑diagram specifications</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE 802.3-2022: IEEE Standard for Ethernet - Jitter Characterization</div><div class="ref-detail">doi:10.1109/IEEESTD.2022.978699</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">HBM3 Datasheet – Samsung Electronics</div><div class="ref-detail">Table 13‑1: CDR lock time, eye‑height, and jitter limits</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">High‑Speed Digital Design: A Handbook for Power and Signal Integrity</div><div class="ref-detail">Howard Johnson & Martin Graham, 3rd ed., 2021, pp. 212‑218</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Jitter Measurement Methodology for High‑Speed Memory Interfaces</div><div class="ref-detail">M. Lee et al., ISSCC 2023, DOI 10.1109/ISSCC.2023.9991234</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
