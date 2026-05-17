@@ -71,7 +71,7 @@ prompt = f"""You are an expert semiconductor test engineer with 20+ years of exp
 Today's assigned topic (Module {topic_id} — {module_name}):
 {topic_title}
 
-Write a focused, technically precise lesson specifically on this topic.
+Write a focused, technically precise lesson specifically on this topic. Also include one short "additional learning" item — a recent development, emerging technique, or closely related topic beyond the curriculum that a senior engineer should be aware of.
 
 Respond ONLY with a JSON object — no markdown fences, no extra text:
 {{
@@ -83,7 +83,11 @@ Respond ONLY with a JSON object — no markdown fences, no extra text:
   "key_takeaways": ["takeaway 1", "takeaway 2", "takeaway 3"],
   "references": [
     {{"title": "Reference title", "type": "JEDEC|IEEE|Book|Paper|Datasheet|Web", "detail": "e.g. JESD235C section 4.2, or author/year, or URL"}}
-  ]
+  ],
+  "additional_learning": {{
+    "title": "Short title under 60 chars",
+    "content": "2-3 sentences on a related emerging topic or technique not covered in the main lesson."
+  }}
 }}
 
 Write 4-5 sections. Include 3-6 real, specific references (JEDEC standards, IEEE papers, vendor datasheets, textbooks). Be technically precise — register names, timing specs, JEDEC references, real equipment behaviour. No fluff."""
@@ -131,6 +135,7 @@ summary = lesson["summary"]
 sections = lesson["sections"]
 takeaways = lesson["key_takeaways"]
 references = lesson.get("references", [])
+additional = lesson.get("additional_learning")
 
 slug = re.sub(r'[^a-z0-9]+', '-', topic.lower()).strip('-')[:60]
 base_name = f"{today}-{slug}"
@@ -153,6 +158,9 @@ if references:
     md_lines.append("\n## References\n")
     for i, r in enumerate(references, 1):
         md_lines.append(f"{i}. **[{r['type']}]** {r['title']} — {r['detail']}")
+if additional:
+    md_lines.append(f"\n## 🔍 Additional Learning: {additional['title']}\n")
+    md_lines.append(additional["content"])
 
 md_path = os.path.join(lesson_dir, f"{base_name}.md")
 with open(md_path, "w", encoding="utf-8") as f:
@@ -214,6 +222,12 @@ html = f"""<!DOCTYPE html>
                font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }}
   .ref-title {{ color: #e2e8f0; font-weight: 600; }}
   .ref-detail {{ color: #64748b; font-size: 0.9rem; }}
+  .additional {{ background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 10px 10px 0;
+                  padding: 18px 22px; margin-bottom: 14px; }}
+  .additional h2 {{ color: #a78bfa; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 8px; }}
+  .additional h3 {{ color: #c4b5fd; font-size: 1rem; font-weight: 700; margin-bottom: 10px; }}
+  .additional p {{ color: #94a3b8; font-size: 1rem; line-height: 1.8; }}
   .nav {{ margin-top: 24px; font-size: 0.82rem; }}
   .nav a {{ color: #60a5fa; text-decoration: none; }}
   .nav a:hover {{ text-decoration: underline; }}
@@ -231,6 +245,7 @@ html = f"""<!DOCTYPE html>
   <ul>{takeaways_html}</ul>
 </div>
 {references_html}
+{"" if not additional else f'<div class="additional"><h2>🔍 Additional Learning</h2><h3>{additional["title"]}</h3><p>{additional["content"]}</p></div>'}
 <div class="nav"><a href="../index.html">← All lessons</a></div>
 </body>
 </html>"""
@@ -388,6 +403,7 @@ if tg_token and tg_chat_id:
         f"📊 Progress: {progress_bar}\n\n"
         f"[Read Lesson]({base_url}/daily-lessons/{base_name}.html)  ·  "
         f"[Curriculum]({base_url}/curriculum.html#module-{module['id']})"
+        + (f"\n\n🔍 *Additional Learning*\n_{additional['title']}_\n{additional['content']}" if additional else "")
     )
     payload = json.dumps({"chat_id": tg_chat_id, "text": msg, "parse_mode": "Markdown"}).encode()
     req = urllib.request.Request(
