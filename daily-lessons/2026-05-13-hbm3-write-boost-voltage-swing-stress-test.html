@@ -35,9 +35,11 @@
                font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
   .ref-title { color: #e2e8f0; font-weight: 600; }
   .ref-detail { color: #64748b; font-size: 0.9rem; }
-  .nav { margin-top: 24px; font-size: 0.82rem; }
-  .nav a { color: #60a5fa; text-decoration: none; }
-  .nav a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; }
+  .nav a:hover { background: #263347; }
 </style>
 </head>
 <body>
@@ -57,6 +59,6 @@
   <ul><li>Enable write‑boost via MR0, MR2, MR3 and verify timing with JESD235C §5.3.2.</li><li>Use high‑bandwidth VDDQ probing to capture boost voltage, rise time, and jitter.</li><li>Identify overshoot, slow rise, and jitter root causes and mitigate with on‑die decoupling, driver impedance tuning, and clock termination.</li></ul>
 </div>
 <div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C: High Bandwidth Memory (HBM) Specification</div><div class="ref-detail">Section 5.3.2 Write‑Boost Voltage, Table 14, 2022</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">HBM3 Test Flow Specification – Micron</div><div class="ref-detail">Micron Technologies, Rev B, 2023, http://www.micron.com/hbm3-test-flow</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE 802.3bt Power Over Ethernet – Voltage Swing Considerations</div><div class="ref-detail">IEEE Std 802.3bt-2021, §7.4, 2021</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Advanced Signal Integrity for 3D‑Stacked Memories</div><div class="ref-detail">M. Patel, "Signal Integrity in 3D Packages," Springer, 2021</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Characterization of Write‑Boost in HBM3 Using TSMC 3D-IC Test Chips</div><div class="ref-detail">S. Lee et al., ISSCC 2023, pp. 124‑125</div></div></div></div>
-<div class="nav"><a href="../index.html">← All lessons</a></div>
+<div class="nav"><a href="../index.html">← Back to Curriculum</a></div>
 </body>
 </html>

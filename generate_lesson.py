@@ -238,9 +238,11 @@ html = f"""<!DOCTYPE html>
                     letter-spacing: .08em; margin-bottom: 8px; }}
   .additional h3 {{ color: #c4b5fd; font-size: 1rem; font-weight: 700; margin-bottom: 10px; }}
   .additional p {{ color: #94a3b8; font-size: 1rem; line-height: 1.8; }}
-  .nav {{ margin-top: 24px; font-size: 0.82rem; }}
-  .nav a {{ color: #60a5fa; text-decoration: none; }}
-  .nav a:hover {{ text-decoration: underline; }}
+  .nav {{ margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }}
+  .nav a {{ display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }}
+  .nav a:hover {{ background: #263347; }}
 </style>
 </head>
 <body>
@@ -256,7 +258,7 @@ html = f"""<!DOCTYPE html>
 </div>
 {references_html}
 {additional_html}
-<div class="nav"><a href="../index.html">← All lessons</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
 </body>
 </html>"""
 

@@ -35,9 +35,11 @@
                font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
   .ref-title { color: #e2e8f0; font-weight: 600; }
   .ref-detail { color: #64748b; font-size: 0.9rem; }
-  .nav { margin-top: 24px; font-size: 0.82rem; }
-  .nav a { color: #60a5fa; text-decoration: none; }
-  .nav a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; }
+  .nav a:hover { background: #263347; }
 </style>
 </head>
 <body>
@@ -57,6 +59,6 @@
   <ul><li>ODT settings are programmed via the ODT_CTRL registers; correct values are critical for high‑speed HBM3 operation.</li><li>A systematic sweep of ODT_VAL on ATE while monitoring eye‑margin yields the optimal termination per stack.</li><li>Monitoring ODT_STATUS, ODT_ERR_CNT, and temperature compensation registers helps quickly isolate termination‑related failures.</li></ul>
 </div>
 <div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C – High Bandwidth Memory 3 Specification</div><div class="ref-detail">Section 5.5 (ODT), Table 8‑1 (Initialization), 2022</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE 802.3bs – 200‑Gb/s and 400‑Gb/s Ethernet Standard</div><div class="ref-detail">IEEE Std 802.3bs‑2020, clause on ODT for high‑speed serial links</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">C. Liu et al., ‘On‑Die Termination Optimization for 3D‑Stacked DRAM’, ISSCC 2023</div><div class="ref-detail">https://ieeexplore.ieee.org/document/10123456</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Skyworks SKY130A HBM3 Test Card Datasheet</div><div class="ref-detail">SKY130A‑HBM3‑TC, Rev. 2.1, 2023</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">M. Patel, ‘Advanced ATE Programming for 3D Memory’, Springer, 2022</div><div class="ref-detail">ISBN 978‑3‑030‑98765‑4, Chapter 7</div></div></div></div>
-<div class="nav"><a href="../index.html">← All lessons</a></div>
+<div class="nav"><a href="../index.html">← Back to Curriculum</a></div>
 </body>
 </html>

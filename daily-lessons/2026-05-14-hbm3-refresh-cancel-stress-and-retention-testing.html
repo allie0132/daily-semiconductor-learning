@@ -35,9 +35,11 @@
                font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
   .ref-title { color: #e2e8f0; font-weight: 600; }
   .ref-detail { color: #64748b; font-size: 0.9rem; }
-  .nav { margin-top: 24px; font-size: 0.82rem; }
-  .nav a { color: #60a5fa; text-decoration: none; }
-  .nav a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; }
+  .nav a:hover { background: #263347; }
 </style>
 </head>
 <body>
@@ -57,6 +59,6 @@
   <ul><li>Refresh‑cancel must be exercised at extreme voltage/temperature to expose latent retention failures.</li><li>JEDEC JESD235C timing margins (tRFC, tRC) are critical when refresh is aborted.</li><li>ATE must capture sub‑nanosecond timing to verify that the controller correctly re‑issues refresh after cancel.</li></ul>
 </div>
 <div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C: HBM3 Standard</div><div class="ref-detail">Section 4.5.2 Refresh Cancel, Section 5.3 Timing</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE Tran. on VLSI Systems, 2022, "Refresh Management in 3D Stacked DRAM"</div><div class="ref-detail">doi:10.1109/TVLSI.2022.3156789</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Micron HBM3 Datasheet, Rev. B</div><div class="ref-detail">Table 2‑8: VDDQ ranges, Table 3‑12: Refresh timing</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Keysight 33600‑A ATE User Guide</div><div class="ref-detail">https://www.keysight.com/pdf/33600A_UG.pdf</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">High‑Performance Memory Systems, 2nd Ed., S. Marculescu, 2020</div><div class="ref-detail">Chapter 7: DRAM Refresh Schemes</div></div></div></div>
-<div class="nav"><a href="../index.html">← All lessons</a></div>
+<div class="nav"><a href="../index.html">← Back to Curriculum</a></div>
 </body>
 </html>
