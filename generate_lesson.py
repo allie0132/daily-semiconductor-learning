@@ -254,17 +254,50 @@ html_path = os.path.join(lesson_dir, f"{base_name}.html")
 with open(html_path, "w", encoding="utf-8") as f:
     f.write(html)
 
-# ── Rebuild index ─────────────────────────────────────────────────────────────
-all_lessons = sorted([f for f in os.listdir(lesson_dir) if f.endswith(".html")], reverse=True)
-lesson_links = ""
-for fname in all_lessons:
-    date_part = fname[:10]
-    title_line = fname.replace(".html", "")
-    md_fpath = os.path.join(lesson_dir, fname.replace(".html", ".md"))
-    if os.path.exists(md_fpath):
-        with open(md_fpath) as f2:
-            title_line = f2.readline().strip().lstrip("# ")
-    lesson_links += f'<li><span class="lesson-date">{date_part}</span> <a href="daily-lessons/{fname}">{title_line}</a></li>\n'
+# ── Rebuild index (grouped by module) ────────────────────────────────────────
+def parse_lesson_meta(fname):
+    """Return (title, module_id, module_name, date_str) from a lesson md file."""
+    md_path = os.path.join(lesson_dir, fname.replace(".html", ".md"))
+    if not os.path.exists(md_path):
+        return fname.replace(".html", ""), None, None, fname[:10]
+    with open(md_path, encoding="utf-8") as f:
+        lines = [l.strip() for l in f.readlines()[:4]]
+    title = lines[0].lstrip("# ") if lines else fname
+    date_s = lines[1].strip("*") if len(lines) > 1 else fname[:10]
+    mod_line = lines[2].strip("*") if len(lines) > 2 else ""
+    if mod_line.startswith("Module "):
+        parts = mod_line.split(" — ", 1)
+        mod_id = parts[0].replace("Module ", "").strip()
+        mod_name = parts[1] if len(parts) > 1 else ""
+    else:
+        mod_id, mod_name = None, None
+    return title, mod_id, mod_name, date_s
+
+all_html = sorted([f for f in os.listdir(lesson_dir) if f.endswith(".html")])
+
+# Group lessons: keyed by (module_num_float, module_name) or None for pre-curriculum
+grouped_lessons = {}  # key: (sort_key, label) → list of (date, title, fname)
+for fname in all_html:
+    title, mod_id, mod_name, date_s = parse_lesson_meta(fname)
+    if mod_id:
+        try:
+            sort_key = float(mod_id.split(".")[0])
+        except ValueError:
+            sort_key = 99
+        key = (sort_key, f"M{mod_id} — {mod_name}")
+    else:
+        key = (-1, "Pre-Curriculum")
+    grouped_lessons.setdefault(key, []).append((date_s, title, fname))
+
+sections_html_idx = ""
+for (sort_key, label) in sorted(grouped_lessons.keys()):
+    entries = sorted(grouped_lessons[(sort_key, label)])
+    items = "".join(
+        f'<li><span class="lesson-date">{d}</span> <a href="daily-lessons/{fn}">{t}</a></li>\n'
+        for d, t, fn in entries
+    )
+    header_color = "#64748b" if sort_key == -1 else "#93c5fd"
+    sections_html_idx += f'<div class="module-section"><h2 style="color:{header_color}">{label}</h2><ul>{items}</ul></div>\n'
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(f"""<!DOCTYPE html>
@@ -278,11 +311,14 @@ with open("index.html", "w", encoding="utf-8") as f:
   body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
          background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 680px; margin: 0 auto; }}
   h1 {{ font-size: 1.3rem; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }}
-  .sub {{ color: #64748b; font-size: 0.85rem; margin-bottom: 24px; }}
-  .nav-links {{ margin-bottom: 20px; font-size: 0.85rem; }}
+  .sub {{ color: #64748b; font-size: 0.85rem; margin-bottom: 8px; }}
+  .nav-links {{ margin-bottom: 24px; font-size: 0.85rem; }}
   .nav-links a {{ color: #60a5fa; text-decoration: none; margin-right: 16px; }}
-  ul {{ list-style: none; }}
-  li {{ padding: 12px 0; border-bottom: 1px solid #1e2330; display: flex; align-items: baseline; gap: 10px; }}
+  .module-section {{ margin-bottom: 28px; }}
+  .module-section h2 {{ font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+                        letter-spacing: .06em; margin-bottom: 10px; }}
+  ul {{ list-style: none; background: #1e2330; border-radius: 10px; overflow: hidden; }}
+  li {{ padding: 10px 14px; border-bottom: 1px solid #0f172a; display: flex; align-items: baseline; gap: 10px; }}
   li:last-child {{ border-bottom: none; }}
   .lesson-date {{ font-size: 0.75rem; color: #475569; white-space: nowrap; min-width: 80px; }}
   a {{ color: #60a5fa; text-decoration: none; font-size: 0.9rem; }}
@@ -292,8 +328,8 @@ with open("index.html", "w", encoding="utf-8") as f:
 <body>
   <h1>📚 Daily Semiconductor Learning</h1>
   <div class="sub">HBM Testing · Senior Engineer Level</div>
-  <div class="nav-links"><a href="curriculum.html">📋 View Curriculum</a></div>
-  <ul>{lesson_links}</ul>
+  <div class="nav-links"><a href="curriculum.html">📋 Curriculum</a></div>
+  {sections_html_idx}
 </body>
 </html>""")
 
