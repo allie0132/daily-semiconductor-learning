@@ -1,0 +1,74 @@
+{
+  "modules": [
+    {
+      "id": 1,
+      "name": "Foundations",
+      "topics": [
+        {"id": "1.1", "title": "HBM Architecture Overview — die stacking, channels, pseudo-channels", "done": false},
+        {"id": "1.2", "title": "JEDEC HBM Standards Family — HBM1, HBM2, HBM2e, HBM3, HBM3e comparison", "done": false},
+        {"id": "1.3", "title": "HBM Electrical Interface Basics — AWORD, DWORD, command/address signals", "done": false},
+        {"id": "1.4", "title": "HBM Timing & Parametric Basics — tRCD, tCL, tRP, bandwidth calculation", "done": false},
+        {"id": "1.5", "title": "2.5D Packaging & Interposer Technology — CoWoS, EMIB, HBM placement", "done": false},
+        {"id": "1.6", "title": "TSV Fundamentals — structure, via-last/middle, role in HBM stacking", "done": false}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Electrical Testing",
+      "topics": [
+        {"id": "2.1", "title": "HBM PHY Interface Testing Strategies", "done": true},
+        {"id": "2.2", "title": "TSV Continuity Testing in HBM Stacks", "done": true},
+        {"id": "2.3", "title": "Temperature-Aware HBM Parametric Testing", "done": true},
+        {"id": "2.4", "title": "HBM Signal Integrity Testing — eye diagrams, Vref calibration, ISI", "done": false},
+        {"id": "2.5", "title": "HBM Power Delivery Network Testing — PDN, decap, VDD/VDDQ margins", "done": false},
+        {"id": "2.6", "title": "Cattrip & Thermal Shutdown Verification in HBM", "done": false}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Protocol & Compliance",
+      "topics": [
+        {"id": "3.1", "title": "JEDEC JESD235 Compliance Testing Details", "done": true},
+        {"id": "3.2", "title": "HBM3 Power-Down & Retention Mode Verification", "done": true},
+        {"id": "3.3", "title": "HBM2e vs HBM3 Electrical Test Differences", "done": false},
+        {"id": "3.4", "title": "Pseudo-Channel Mode Test Patterns", "done": false},
+        {"id": "3.5", "title": "HBM Mode Registers & Configuration Testing", "done": false},
+        {"id": "3.6", "title": "HBM Command Truth Table & Illegal Command Testing", "done": false}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "DFT & Built-In Test",
+      "topics": [
+        {"id": "4.1", "title": "HBM MBIST Implementation and Coverage", "done": true},
+        {"id": "4.2", "title": "HBM Repair Flow & Post-Repair Verification", "done": true},
+        {"id": "4.3", "title": "DFT Approaches for HBM in 2.5D Packages", "done": false},
+        {"id": "4.4", "title": "BIST Pattern Algorithms for DRAM — March, Checkerboard, GALPAT", "done": false},
+        {"id": "4.5", "title": "Scan Chain Testing for HBM Logic", "done": false},
+        {"id": "4.6", "title": "Post-Repair Yield Analysis & Redundancy Allocation", "done": false}
+      ]
+    },
+    {
+      "id": 5,
+      "name": "ATE & Production",
+      "topics": [
+        {"id": "5.1", "title": "ATE System Setup for HBM Testing — Advantest, Teradyne architectures", "done": false},
+        {"id": "5.2", "title": "Interposer Probe Challenges for HBM Testing", "done": false},
+        {"id": "5.3", "title": "HBM Production Test Flow & Test Time Optimization", "done": false},
+        {"id": "5.4", "title": "Known Good Die (KGD) Strategy for HBM Stacking", "done": false},
+        {"id": "5.5", "title": "HBM Burn-In & Reliability Screening", "done": false}
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Advanced Topics",
+      "topics": [
+        {"id": "6.1", "title": "HBM in AI Accelerators — GPU/TPU integration testing challenges", "done": false},
+        {"id": "6.2", "title": "CoWoS and SoIC Advanced Packaging Test Challenges", "done": false},
+        {"id": "6.3", "title": "HBM4 Architecture & Test Implications", "done": false},
+        {"id": "6.4", "title": "Reliability Qualification for HBM Stacks — HTOL, HAST, TC", "done": false},
+        {"id": "6.5", "title": "Failure Analysis Techniques for HBM — FIB, e-beam, acoustic microscopy", "done": false}
+      ]
+    }
+  ]
+}

@@ -1,7 +1,10 @@
 import json
 import os
+import re
+import time
 import urllib.request
 from datetime import date, datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
 from openai import OpenAI
 
@@ -11,15 +14,53 @@ date_str = now_et.strftime("%A, %b %d %Y")
 lesson_dir = "daily-lessons"
 os.makedirs(lesson_dir, exist_ok=True)
 
-# Collect recent topics to avoid repeats
-recent_topics = []
-for fname in sorted(os.listdir(lesson_dir), reverse=True)[:5]:
-    if fname.endswith(".md"):
-        with open(os.path.join(lesson_dir, fname)) as f:
-            recent_topics.append(f.readline().strip().lstrip("# "))
+# ── Curriculum ────────────────────────────────────────────────────────────────
+curriculum_path = Path("curriculum.json")
+with open(curriculum_path, encoding="utf-8") as f:
+    curriculum = json.load(f)
 
-recent_str = "\n".join(f"- {t}" for t in recent_topics) if recent_topics else "None yet"
+def next_topic():
+    for module in curriculum["modules"]:
+        for topic in module["topics"]:
+            if not topic["done"]:
+                return module, topic
+    return None, None
 
+def mark_done(topic_id):
+    for module in curriculum["modules"]:
+        for topic in module["topics"]:
+            if topic["id"] == topic_id:
+                topic["done"] = True
+    with open(curriculum_path, "w", encoding="utf-8") as f:
+        json.dump(curriculum, f, ensure_ascii=False, indent=2)
+
+def curriculum_progress():
+    total = sum(len(m["topics"]) for m in curriculum["modules"])
+    done = sum(1 for m in curriculum["modules"] for t in m["topics"] if t["done"])
+    return done, total
+
+def module_progress_str():
+    lines = []
+    for m in curriculum["modules"]:
+        done = sum(1 for t in m["topics"] if t["done"])
+        total = len(m["topics"])
+        bar = "▓" * done + "░" * (total - done)
+        lines.append(f"M{m['id']} {m['name']}: {bar} {done}/{total}")
+    return "\n".join(lines)
+
+module, topic_item = next_topic()
+if topic_item is None:
+    print("🎉 Curriculum complete!")
+    exit(0)
+
+topic_title = topic_item["title"]
+module_name = module["name"]
+topic_id = topic_item["id"]
+done_count, total_count = curriculum_progress()
+
+print(f"Module {topic_id}: {topic_title}")
+
+# ── Generate lesson ───────────────────────────────────────────────────────────
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.environ.get("OPENROUTER_API_KEY"),
@@ -27,10 +68,10 @@ client = OpenAI(
 
 prompt = f"""You are an expert semiconductor test engineer with 20+ years of experience in HBM testing, ATE systems, and advanced packaging. Write a daily technical lesson for senior test engineers.
 
-Recent topics covered (do NOT repeat):
-{recent_str}
+Today's assigned topic (Module {topic_id} — {module_name}):
+{topic_title}
 
-Pick a fresh, specific HBM testing topic not already in the recent list above.
+Write a focused, technically precise lesson specifically on this topic.
 
 Respond ONLY with a JSON object — no markdown fences, no extra text:
 {{
@@ -47,7 +88,6 @@ Respond ONLY with a JSON object — no markdown fences, no extra text:
 
 Write 4-5 sections. Include 3-6 real, specific references (JEDEC standards, IEEE papers, vendor datasheets, textbooks). Be technically precise — register names, timing specs, JEDEC references, real equipment behaviour. No fluff."""
 
-import time
 models = [
     "openai/gpt-oss-120b:free",
     "nousresearch/hermes-3-llama-3.1-405b:free",
@@ -78,10 +118,7 @@ if raw.startswith("```"):
         raw = raw[4:]
 raw = raw.strip()
 
-# Fix invalid JSON escape sequences produced by some models
-import re
 def fix_json_escapes(s):
-    # Replace invalid backslash sequences (not followed by valid JSON escape chars)
     return re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', s)
 
 try:
@@ -95,12 +132,11 @@ sections = lesson["sections"]
 takeaways = lesson["key_takeaways"]
 references = lesson.get("references", [])
 
-import re
 slug = re.sub(r'[^a-z0-9]+', '-', topic.lower()).strip('-')[:60]
 base_name = f"{today}-{slug}"
 
-# Markdown
-md_lines = [f"# {topic}\n", f"*{date_str}*\n"]
+# ── Markdown ──────────────────────────────────────────────────────────────────
+md_lines = [f"# {topic}\n", f"*{date_str}*\n", f"*Module {topic_id} — {module_name}*\n"]
 for s in sections:
     md_lines.append(f"## {s['title']}\n")
     content = (s["content"]
@@ -122,7 +158,7 @@ md_path = os.path.join(lesson_dir, f"{base_name}.md")
 with open(md_path, "w", encoding="utf-8") as f:
     f.write("\n".join(md_lines) + "\n")
 
-# HTML
+# ── HTML ──────────────────────────────────────────────────────────────────────
 sections_html = "".join(
     f'<div class="section"><h2>{s["title"]}</h2>{s["content"]}</div>\n'
     for s in sections
@@ -156,6 +192,7 @@ html = f"""<!DOCTYPE html>
   .badge {{ display: inline-block; background: #1e3a5f; color: #60a5fa;
             font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
             letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }}
+  .module-badge {{ background: #1a2e1a; color: #86efac; }}
   .section {{ background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }}
   h2 {{ font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }}
   p {{ font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }}
@@ -184,9 +221,9 @@ html = f"""<!DOCTYPE html>
 </head>
 <body>
 <header>
-  <div><span class="badge">HBM Testing</span><span class="badge">Senior Level</span></div>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M{topic_id} {module_name}</span></div>
   <h1>{topic}</h1>
-  <div class="meta">{date_str}</div>
+  <div class="meta">{date_str} · Lesson {done_count + 1} of {total_count}</div>
 </header>
 {sections_html}
 <div class="takeaways">
@@ -202,11 +239,11 @@ html_path = os.path.join(lesson_dir, f"{base_name}.html")
 with open(html_path, "w", encoding="utf-8") as f:
     f.write(html)
 
-# Rebuild index.html
+# ── Rebuild index ─────────────────────────────────────────────────────────────
 all_lessons = sorted([f for f in os.listdir(lesson_dir) if f.endswith(".html")], reverse=True)
 lesson_links = ""
 for fname in all_lessons:
-    date_part = fname[:10]  # YYYY-MM-DD
+    date_part = fname[:10]
     title_line = fname.replace(".html", "")
     md_fpath = os.path.join(lesson_dir, fname.replace(".html", ".md"))
     if os.path.exists(md_fpath):
@@ -244,12 +281,23 @@ with open("index.html", "w", encoding="utf-8") as f:
 
 print(f"Lesson saved: {html_path} — {topic}")
 
-# Telegram
+# ── Mark curriculum done ──────────────────────────────────────────────────────
+mark_done(topic_id)
+print(f"Curriculum progress: {done_count + 1}/{total_count}")
+
+# ── Telegram ──────────────────────────────────────────────────────────────────
 tg_token = os.environ.get("TELEGRAM_TOKEN")
 tg_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 if tg_token and tg_chat_id:
-    msg = (f"📚 *Daily Lesson — {today}*\n\n*{topic}*\n\n{summary}\n\n"
-           f"[Read full lesson](https://allie0132.github.io/daily-semiconductor-learning/daily-lessons/{base_name}.html)")
+    progress_bar = f"{done_count + 1}/{total_count}"
+    msg = (
+        f"📚 *Daily Lesson — {today}*\n"
+        f"_Module {topic_id} · {module_name}_\n\n"
+        f"*{topic}*\n\n"
+        f"{summary}\n\n"
+        f"📊 Progress: {progress_bar}\n"
+        f"[Read full lesson](https://allie0132.github.io/daily-semiconductor-learning/daily-lessons/{base_name}.html)"
+    )
     payload = json.dumps({"chat_id": tg_chat_id, "text": msg, "parse_mode": "Markdown"}).encode()
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{tg_token}/sendMessage",
