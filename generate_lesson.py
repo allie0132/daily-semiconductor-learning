@@ -264,6 +264,8 @@ with open("index.html", "w", encoding="utf-8") as f:
          background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 680px; margin: 0 auto; }}
   h1 {{ font-size: 1.3rem; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }}
   .sub {{ color: #64748b; font-size: 0.85rem; margin-bottom: 24px; }}
+  .nav-links {{ margin-bottom: 20px; font-size: 0.85rem; }}
+  .nav-links a {{ color: #60a5fa; text-decoration: none; margin-right: 16px; }}
   ul {{ list-style: none; }}
   li {{ padding: 12px 0; border-bottom: 1px solid #1e2330; display: flex; align-items: baseline; gap: 10px; }}
   li:last-child {{ border-bottom: none; }}
@@ -275,7 +277,94 @@ with open("index.html", "w", encoding="utf-8") as f:
 <body>
   <h1>📚 Daily Semiconductor Learning</h1>
   <div class="sub">HBM Testing · Senior Engineer Level</div>
+  <div class="nav-links"><a href="curriculum.html">📋 View Curriculum</a></div>
   <ul>{lesson_links}</ul>
+</body>
+</html>""")
+
+# ── Rebuild curriculum page ───────────────────────────────────────────────────
+# Build a lookup: lesson file slug → html filename (most recent per topic)
+lesson_file_map = {}
+for fname in sorted(os.listdir(lesson_dir)):
+    if fname.endswith(".html"):
+        lesson_file_map[fname] = fname
+
+# Build curriculum HTML
+modules_html = ""
+for m in curriculum["modules"]:
+    done_count_m = sum(1 for t in m["topics"] if t["done"])
+    total_m = len(m["topics"])
+    bar = "▓" * done_count_m + "░" * (total_m - done_count_m)
+    topics_html = ""
+    for t in m["topics"]:
+        # Find matching lesson file by scanning md files for matching topic
+        lesson_link = ""
+        for fname in sorted(os.listdir(lesson_dir), reverse=True):
+            if fname.endswith(".md"):
+                md_p = os.path.join(lesson_dir, fname)
+                with open(md_p, encoding="utf-8") as mf:
+                    first_line = mf.readline().strip().lstrip("# ")
+                # loose match on first few words
+                topic_words = t["title"].split(" — ")[0].lower().split()[:4]
+                if all(w in first_line.lower() for w in topic_words):
+                    html_fname = fname.replace(".md", ".html")
+                    lesson_link = f'href="daily-lessons/{html_fname}"'
+                    break
+        status = "✅" if t["done"] else "○"
+        link_open = f'<a {lesson_link}>' if lesson_link else '<span>'
+        link_close = '</a>' if lesson_link else '</span>'
+        short_title = t["title"].split(" — ")[0]
+        topics_html += f'<li class="{"done" if t["done"] else "pending"}">{status} {link_open}{short_title}{link_close}</li>\n'
+
+    modules_html += f"""
+<div class="module" id="module-{m['id']}">
+  <div class="module-header">
+    <span class="module-num">M{m['id']}</span>
+    <span class="module-name">{m['name']}</span>
+    <span class="module-bar">{bar} {done_count_m}/{total_m}</span>
+  </div>
+  <ul class="topics">{topics_html}</ul>
+</div>"""
+
+total_topics = sum(len(m["topics"]) for m in curriculum["modules"])
+done_topics = sum(1 for m in curriculum["modules"] for t in m["topics"] if t["done"])
+
+with open("curriculum.html", "w", encoding="utf-8") as f:
+    f.write(f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM Learning Curriculum</title>
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 720px; margin: 0 auto; }}
+  h1 {{ font-size: 1.4rem; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }}
+  .sub {{ color: #64748b; font-size: 0.85rem; margin-bottom: 6px; }}
+  .progress {{ font-size: 0.9rem; color: #86efac; margin-bottom: 24px; }}
+  .nav {{ font-size: 0.85rem; margin-bottom: 20px; }}
+  .nav a {{ color: #60a5fa; text-decoration: none; }}
+  .module {{ background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }}
+  .module-header {{ display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }}
+  .module-num {{ background: #1e3a5f; color: #60a5fa; font-size: 0.75rem; font-weight: 700;
+                 padding: 2px 8px; border-radius: 4px; }}
+  .module-name {{ font-weight: 700; color: #f1f5f9; font-size: 1rem; flex: 1; }}
+  .module-bar {{ font-size: 0.8rem; color: #64748b; font-family: monospace; }}
+  .topics {{ list-style: none; padding-left: 4px; }}
+  .topics li {{ padding: 6px 0; border-bottom: 1px solid #0f172a; font-size: 0.9rem; color: #94a3b8; }}
+  .topics li:last-child {{ border-bottom: none; }}
+  .topics li.done {{ color: #cbd5e1; }}
+  .topics a {{ color: #60a5fa; text-decoration: none; }}
+  .topics a:hover {{ text-decoration: underline; }}
+</style>
+</head>
+<body>
+  <h1>📋 HBM Learning Curriculum</h1>
+  <div class="sub">Senior Test Engineer Level · 6 Modules · {total_topics} Topics</div>
+  <div class="progress">Progress: {done_topics}/{total_topics} topics completed</div>
+  <div class="nav"><a href="index.html">← All Lessons</a></div>
+  {modules_html}
 </body>
 </html>""")
 
@@ -290,13 +379,15 @@ tg_token = os.environ.get("TELEGRAM_TOKEN")
 tg_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 if tg_token and tg_chat_id:
     progress_bar = f"{done_count + 1}/{total_count}"
+    base_url = "https://allie0132.github.io/daily-semiconductor-learning"
     msg = (
         f"📚 *Daily Lesson — {today}*\n"
         f"_Module {topic_id} · {module_name}_\n\n"
         f"*{topic}*\n\n"
         f"{summary}\n\n"
-        f"📊 Progress: {progress_bar}\n"
-        f"[Read full lesson](https://allie0132.github.io/daily-semiconductor-learning/daily-lessons/{base_name}.html)"
+        f"📊 Progress: {progress_bar}\n\n"
+        f"[Read Lesson]({base_url}/daily-lessons/{base_name}.html)  ·  "
+        f"[Curriculum]({base_url}/curriculum.html#module-{module['id']})"
     )
     payload = json.dumps({"chat_id": tg_chat_id, "text": msg, "parse_mode": "Markdown"}).encode()
     req = urllib.request.Request(
