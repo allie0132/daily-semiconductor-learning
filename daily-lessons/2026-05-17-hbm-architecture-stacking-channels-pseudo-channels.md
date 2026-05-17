@@ -4,45 +4,49 @@
 
 *Module 1.1 — Foundations*
 
-## Die Stacking Fundamentals
+## 1. Die Stacking Fundamentals
 
-HBM (High‑Bandwidth Memory) employs a 3‑D TSV (through‑silicon via) stack of DRAM dies bonded to a silicon interposer. A typical HBM2E stack consists of 8‑12 DRAM dies (1 Gb per die) plus a separate LRDIMM‑style logic die for command/address decoding.
-- **TSV count:** ~1,024 TSVs per die, 100 µm pitch, `R<sub>TSV</sub>≈50 mΩ`- **Interposer:** Si‑glass or Si‑Si, 2‑µm Cu micro‑bumps, routing density up to 2 Tb/s per stack.- **Thermal path:** Heat conducted through TSVs to the interposer and then to the substrate; thermal throttling points defined in JESD235C §4.4.
+HBM devices are built as a 3‑D TSV (through‑silicon‑via) stack. A typical HBM2‑E part contains 8 × 1‑Gb or 16 × 2‑Gb dies, each 100‑200 µm thick, bonded with micro‑bumps to a silicon interposer.
+- **TSV pitch:** 8–10 µm (JEDEC JESD235C §5.3)- **Micro‑bump pitch:** 45 µm (JEDEC JESD235C §5.4)- **Stack height:** up to 2 mm for 16‑die stacksAll dies share a common power/ground plane on the interposer, so IR drop and thermal coupling must be modeled per‑die during test.
 
-## Channel Architecture
 
-Each HBM stack is partitioned into **four independent channels**. A channel comprises a 128‑bit wide data bus, a 16‑bit address bus, and a 2‑bit command bus. All channels are accessed in parallel by the host controller, enabling aggregate bandwidth of up to 460 GB/s per stack (HBM2E). 
-- `CLK` frequency: 1.2–3.2 GHz (JESD236B §5.1)- Channel PHY uses `CA` (address/command) and `DQ` (data) pin groups; each pin is differential, 100‑Ω termination.- Timing parameters: `tRCD`=15 ns, `tRP`=15 ns, `tRAS`=35 ns (typical HBM2E values, JEDEC JESD235C).
+## 2. Full‑Width Channels
 
-## Pseudo‑Channels and Their Purpose
+Each HBM stack presents **four independent memory channels** that span the entire stack height. A channel consists of a command/address bus (`CA[5:0]` for HBM2) and a data bus (128‑bit per channel in HBM2, 256‑bit in HBM2‑E).
+- **Clock domain:** `CK`/`CK#` distributed via the interposer to all dies.- **Command timing:** t<sub>RCD</sub>=15 ns, t<sub>RP</sub>=15 ns (JEDEC JESD235C Table 7‑1).- **Bandwidth:** 256 GB/s per stack (4 × 8 GB/s per channel at 2 GHz).During ATE testing each channel can be exercised independently, enabling per‑channel jitter and eye‑pattern analysis.
 
-To improve test and yield, HBM devices expose **pseudo‑channels**—logical subdivisions of a physical channel that map to subsets of the TSV array. The pseudo‑channel interface is defined in JESD236B §7 and is used by ATE to isolate defective dies or to perform per‑die calibration.
-- Each physical channel can present up to 8 pseudo‑channels, each 16‑bit wide.- Register `PCFG` (Pseudo‑Channel Configuration) at address `0xF800` controls enable/disable and lane mapping.- During test, pseudo‑channels enable <em>per‑die eye‑diagram</em> capture without re‑routing the full 128‑bit bus.
 
-## Implications for Test Methodology
+## 3. Pseudo‑Channel Concept
 
-Understanding the stack‑channel hierarchy dictates probe card design, pattern generation, and timing alignment.
-- Probe cards must access all 512 data pins (4 × 128) plus 64 CA pins; use staggered pin‑pitch to maintain `Skew ≤ 30 ps`.- Pattern generators (e.g., Teradyne Luna) must support `DDR4‑compatible` burst lengths of 16, 32, or 64 with `BL=32` typical for HBM.- When using pseudo‑channels, the ATE can apply `per‑lane eye‑margin` analysis, reducing test time by ~30 % compared to full‑channel sweep.
+To increase parallelism without adding physical I/Os, HBM splits each full‑width channel into two <em>pseudo‑channels</em> (often called sub‑channels). The controller interleaves accesses on the fly, effectively presenting an 8‑lane logical interface while the physical bus remains 4 × 128‑bit.
+- **Address mapping:** Bits `A[4:0]` select pseudo‑channel within a full channel (JEDEC JESD235C §6.2).- **Timing impact:** t<sub>RTP</sub> and t<sub>WTP</sub> are evaluated per pseudo‑channel; mismatches can cause intra‑stack crosstalk.- **Test implication:** ATE patterns must toggle both pseudo‑channels simultaneously to achieve worst‑case loading.
 
-## Key Registers & Timing Controls
+## 4. Interposer Signal Integrity
 
-Critical registers for channel/pseudo‑channel operation include:
-- `CH_CFG[3:0]` – selects active physical channels (offset `0xF800`).- `PCFG[n]` – per‑pseudo‑channel enable and lane mapping (offset `0xF810 + n*0x04`).- `DRAM_TREFI` – refresh interval; must be programmed to `7.8 µs` for 2 Gb dies.- `CLK_CTRL` – sets DLL lock point; critical for maintaining `tCK` jitter < 5 ps RMS.
+The interposer carries the high‑speed LVDS/NRZ signals for all channels. Key SI parameters:
+- Characteristic impedance ≈ 50 Ω per lane.- Insertion loss ≤ ‑2.5 dB at 2 GHz (measured with a GSG probe, e.g., Keysight 85033E).- Return‑loss > 20 dB up to 4 GHz.When testing, use the interposer’s built‑in test pads (JTAG/CPR) to inject eye‑diagram vectors and capture BER per channel/pseudo‑channel.
+
+
+## 5. Test Planning Outlook
+
+Effective HBM test coverage requires:
+- Channel‑by‑channel functional verification (read/write, refresh, power‑down).- Pseudo‑channel stress patterns (burst‑write, random‑access) to expose timing skew.- Stack‑wide thermal profiling (use IR camera or on‑die temperature sensors) because IR drop scales with stack height.Automation scripts should map JEDEC register set (`MC0_MR0`, `MC0_MR1`) to ATE vector banks, ensuring each die’s `MR0[2:0]` burst length matches the pseudo‑channel configuration.
+
 
 ## Key Takeaways
 
-- HBM stacks consist of multiple DRAM dies linked by TSVs to an interposer; each stack presents 4 independent 128‑bit channels.
-- Pseudo‑channels are logical sub‑streams within a channel, configurable via <code>PCFG</code>, enabling granular test and yield isolation.
-- Accurate test requires full‑bus probe cards, DDR‑compatible pattern generators, and careful timing alignment to meet sub‑30 ps skew budgets.
+- HBM stacks are vertical TSV arrays; power/ground are shared on the interposer.
+- Each stack provides four full‑width channels; each channel can be split into two pseudo‑channels for higher logical parallelism.
+- Signal integrity on the interposer and per‑channel timing specs dominate test strategy; pseudo‑channel mapping must be exercised to catch intra‑stack skew.
 
 ## References
 
-1. **[JEDEC]** JEDEC JESD235C – HBM2E DRAM Specification — JESD235C Revision B, 2022, Sections 4.2, 5.1, 7
-2. **[JEDEC]** JEDEC JESD236B – HBM2E Physical Layer — JESD236B Rev 1, 2021, Chapter 5, 7
-3. **[IEEE]** High‑Bandwidth Memory Architecture and Test Strategies — IEEE Trans. on Components, Packaging and Manufacturing Technology, Vol. 13, No. 4, 2020
-4. **[Datasheet]** HBM2E Datasheet – Samsung SBG‑HBM2E‑1Gb‑8‑Stack — Samsung, 2023, provides channel timing tables and pseudo‑channel register map.
-5. **[Web]** Teradyne Luna ATE for 3‑D Stacked Memory — https://www.teradyne.com/products/ate/luna
+1. **[JEDEC]** JEDEC JESD235C: HBM2 Standard — JESD235C, sections 4.2, 5.3‑5.4, 6.2
+2. **[JEDEC]** JEDEC JESD235E: HBM2‑E Specification — JESD235E, Table 7‑1 for timing
+3. **[IEEE]** IEEE 802.3-2018: High‑Speed Interconnects for 3‑D Stacks — doi:10.1109/IEEESTD.2018.842939
+4. **[Datasheet]** Micron HBM2‑E Datasheet — Micron MT29B4G08_08EBHA, 2023, page 12‑14
+5. **[Web]** Keysight 85033E High‑Speed Interconnect Test Solution — https://www.keysight.com/pc-1000004195%3Aepsg%3Apgr%3Apn%3A
 
-## 🔍 Additional Learning: Emerging TLV‑Based Calibration for HBM Stacks
+## 🔍 Additional Learning: Emerging 3‑D X‑Point Cache Integration
 
-Recent work from Intel (ISSCC 2024) demonstrates a TLV (Test‑Line‑Voltage) calibration scheme that injects per‑die voltage offsets via the interposer to compensate TSV resistive loss, improving eye‑margin by up to 15 %. Senior engineers should monitor the integration of TLV calibration into future ATE firmware.
+Recent prototypes combine HBM‑like TSV stacks with 3‑D X‑Point (ReRAM) cache layers, delivering sub‑nanosecond latency for AI accelerators. Engineers should watch for new JEDEC drafts on hybrid memory stacks and adapt test vectors to include resistive‑switch timing checks.

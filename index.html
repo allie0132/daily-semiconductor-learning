@@ -1,1 +1,54 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Daily Semiconductor Learning</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f1117;color:#e2e8f0;padding:20px;max-width:680px;margin:0 auto}h1{font-size:1.3rem;font-weight:700;color:#f8fafc;margin-bottom:6px}.sub{color:#64748b;font-size:.85rem;margin-bottom:8px}.nav-links{margin-bottom:24px;font-size:.85rem}.nav-links a{color:#60a5fa;text-decoration:none;margin-right:16px}.module-section{margin-bottom:28px}.module-section h2{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}ul{list-style:none;background:#1e2330;border-radius:10px;overflow:hidden}li{padding:10px 14px;border-bottom:1px solid #0f172a;display:flex;align-items:baseline;gap:10px}li:last-child{border-bottom:none}.lesson-date{font-size:.75rem;color:#475569;white-space:nowrap;min-width:80px}a{color:#60a5fa;text-decoration:none;font-size:.9rem}a:hover{text-decoration:underline}</style></head><body><h1>📚 Daily Semiconductor Learning</h1><div class="sub">HBM Testing · Senior Engineer Level</div><div class="nav-links"><a href="curriculum.html">📋 Curriculum</a></div><div class="module-section"><h2 style="color:#64748b">Pre-Curriculum</h2><ul><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-30-dynamic-power-down-sequencing-for-hbm3.html">Dynamic Power‑Down Sequencing for HBM3</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-07-dynamic-voltage-scaling-for-hbm3-stress-characterization.html">Dynamic Voltage Scaling for HBM3 Stress Characterization</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-08-eye-diagram-margin-analysis-for-hbm3-channels.html">Eye‑Diagram Margin Analysis for HBM3 Channels</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-01-eye-pattern-jitter-analysis-for-hbm3-io.html">Eye‑Pattern & Jitter Analysis for HBM3 IO</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-17-hbm-architecture-stacking-channels-pseudo-channels.html">HBM Architecture: Stacking, Channels & Pseudo‑Channels</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-26-hbm-mbist-implementation-and-coverage.html">HBM MBIST Implementation and Coverage</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-27-hbm-phy-interface-testing-strategies.html">HBM PHY Interface Testing Strategies</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-27-hbm-repair-flow-post-repair-verification.html">HBM Repair Flow & Post‑Repair Verification</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-11-hbm3-clock-data-recovery-cdr-characterization.html">HBM3 Clock Data Recovery (CDR) Characterization</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-15-hbm3-clock-data-recovery-jitter-margin-characterization.html">HBM3 Clock Data Recovery Jitter Margin Characterization</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-27-hbm3-power-down-retention-mode-verification.html">HBM3 Power‑Down & Retention Mode Verification</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-14-hbm3-refresh-cancel-stress-and-retention-testing.html">HBM3 Refresh‑Cancel Stress and Retention Testing</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-13-hbm3-write-boost-voltage-swing-stress-test.html">HBM3 Write‑Boost Voltage Swing Stress Test</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-28-jedec-jesd235-compliance-testing-details.html">JEDEC JESD235 Compliance Testing Details</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-04-on-die-termination-odt-calibration-for-hbm3-i-o.html">On‑Die Termination (ODT) Calibration for HBM3 I/O</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-12-real-time-power-monitoring-for-hbm3-thermal-characterization.html">Real‑Time Power Monitoring for HBM3 Thermal Characterization</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-26-tsv-continuity-testing-in-hbm-stacks.html">TSV Continuity Testing in HBM Stacks</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-29-tsv-continuity-testing-in-hbm-stacks.html">TSV Continuity Testing in HBM Stacks</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-28-temperature-aware-hbm-parametric-testing.html">Temperature‑Aware HBM Parametric Testing</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-26-temperature-aware-parametric-testing-for-hbm.html">Temperature‑Aware Parametric Testing for HBM</a></li><li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-06-thermal-aware-calibration-of-hbm3-tsv-parasitics.html">Thermal‑Aware Calibration of HBM3 TSV Parasitics</a></li></ul></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Semiconductor Learning</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 1.3rem; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }
+  .sub { color: #64748b; font-size: 0.85rem; margin-bottom: 8px; }
+  .nav-links { margin-bottom: 24px; font-size: 0.85rem; }
+  .nav-links a { color: #60a5fa; text-decoration: none; margin-right: 16px; }
+  .module-section { margin-bottom: 28px; }
+  .module-section h2 { font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+                        letter-spacing: .06em; margin-bottom: 10px; }
+  ul { list-style: none; background: #1e2330; border-radius: 10px; overflow: hidden; }
+  li { padding: 10px 14px; border-bottom: 1px solid #0f172a; display: flex; align-items: baseline; gap: 10px; }
+  li:last-child { border-bottom: none; }
+  .lesson-date { font-size: 0.75rem; color: #475569; white-space: nowrap; min-width: 80px; }
+  a { color: #60a5fa; text-decoration: none; font-size: 0.9rem; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+  <h1>📚 Daily Semiconductor Learning</h1>
+  <div class="sub">HBM Testing · Senior Engineer Level</div>
+  <div class="nav-links"><a href="curriculum.html">📋 Curriculum</a></div>
+  <div class="module-section"><h2 style="color:#64748b">Pre-Curriculum</h2><ul><li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-30-dynamic-power-down-sequencing-for-hbm3.html">Dynamic Power‑Down Sequencing for HBM3</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-07-dynamic-voltage-scaling-for-hbm3-stress-characterization.html">Dynamic Voltage Scaling for HBM3 Stress Characterization</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-08-eye-diagram-margin-analysis-for-hbm3-channels.html">Eye‑Diagram Margin Analysis for HBM3 Channels</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-01-eye-pattern-jitter-analysis-for-hbm3-io.html">Eye‑Pattern & Jitter Analysis for HBM3 IO</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-17-hbm-architecture-stacking-channels-pseudo-channels.html">HBM Architecture: Stacking, Channels & Pseudo‑Channels</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-26-hbm-mbist-implementation-and-coverage.html">HBM MBIST Implementation and Coverage</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-27-hbm-phy-interface-testing-strategies.html">HBM PHY Interface Testing Strategies</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-27-hbm-repair-flow-post-repair-verification.html">HBM Repair Flow & Post‑Repair Verification</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-11-hbm3-clock-data-recovery-cdr-characterization.html">HBM3 Clock Data Recovery (CDR) Characterization</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-15-hbm3-clock-data-recovery-jitter-margin-characterization.html">HBM3 Clock Data Recovery Jitter Margin Characterization</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-27-hbm3-power-down-retention-mode-verification.html">HBM3 Power‑Down & Retention Mode Verification</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-14-hbm3-refresh-cancel-stress-and-retention-testing.html">HBM3 Refresh‑Cancel Stress and Retention Testing</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-13-hbm3-write-boost-voltage-swing-stress-test.html">HBM3 Write‑Boost Voltage Swing Stress Test</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-28-jedec-jesd235-compliance-testing-details.html">JEDEC JESD235 Compliance Testing Details</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-04-on-die-termination-odt-calibration-for-hbm3-i-o.html">On‑Die Termination (ODT) Calibration for HBM3 I/O</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-12-real-time-power-monitoring-for-hbm3-thermal-characterization.html">Real‑Time Power Monitoring for HBM3 Thermal Characterization</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-26-tsv-continuity-testing-in-hbm-stacks.html">TSV Continuity Testing in HBM Stacks</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-29-tsv-continuity-testing-in-hbm-stacks.html">TSV Continuity Testing in HBM Stacks</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-28-temperature-aware-hbm-parametric-testing.html">Temperature‑Aware HBM Parametric Testing</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-04-26-temperature-aware-parametric-testing-for-hbm.html">Temperature‑Aware Parametric Testing for HBM</a></li>
+<li><span class="lesson-date"></span> <a href="daily-lessons/2026-05-06-thermal-aware-calibration-of-hbm3-tsv-parasitics.html">Thermal‑Aware Calibration of HBM3 TSV Parasitics</a></li>
+</ul></div>
+
+</body>
+</html>
