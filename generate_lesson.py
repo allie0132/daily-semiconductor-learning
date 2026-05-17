@@ -173,6 +173,16 @@ sections_html = "".join(
 )
 takeaways_html = "".join(f"<li>{t}</li>" for t in takeaways)
 
+additional_html = ""
+if additional:
+    additional_html = (
+        f'<div class="additional">'
+        f'<h2>🔍 Additional Learning</h2>'
+        f'<h3>{additional["title"]}</h3>'
+        f'<p>{additional["content"]}</p>'
+        f'</div>'
+    )
+
 if references:
     ref_items = "".join(
         f'<div class="ref-item"><span class="ref-type">{r["type"]}</span>'
@@ -245,7 +255,7 @@ html = f"""<!DOCTYPE html>
   <ul>{takeaways_html}</ul>
 </div>
 {references_html}
-{"" if not additional else f'<div class="additional"><h2>🔍 Additional Learning</h2><h3>{additional["title"]}</h3><p>{additional["content"]}</p></div>'}
+{additional_html}
 <div class="nav"><a href="../index.html">← All lessons</a></div>
 </body>
 </html>"""
