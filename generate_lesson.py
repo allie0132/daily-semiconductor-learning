@@ -264,50 +264,94 @@ html_path = os.path.join(lesson_dir, f"{base_name}.html")
 with open(html_path, "w", encoding="utf-8") as f:
     f.write(html)
 
-# ── Rebuild index (grouped by module) ────────────────────────────────────────
+# ── Rebuild index (curriculum main page) ────────────────────────────────────
 def parse_lesson_meta(fname):
-    """Return (title, module_id, module_name, date_str) from a lesson md file."""
     md_path = os.path.join(lesson_dir, fname.replace(".html", ".md"))
     if not os.path.exists(md_path):
-        return fname.replace(".html", ""), None, None, fname[:10]
+        return fname.replace(".html", ""), None, fname[:10]
     with open(md_path, encoding="utf-8") as f:
         lines = [l.strip() for l in f.readlines()[:4]]
     title = lines[0].lstrip("# ") if lines else fname
     date_s = lines[1].strip("*") if len(lines) > 1 else fname[:10]
     mod_line = lines[2].strip("*") if len(lines) > 2 else ""
+    mod_id = None
     if mod_line.startswith("Module "):
-        parts = mod_line.split(" — ", 1)
-        mod_id = parts[0].replace("Module ", "").strip()
-        mod_name = parts[1] if len(parts) > 1 else ""
-    else:
-        mod_id, mod_name = None, None
-    return title, mod_id, mod_name, date_s
+        mod_id = mod_line.split(" — ")[0].replace("Module ", "").strip()
+    return title, mod_id, date_s
 
-all_html = sorted([f for f in os.listdir(lesson_dir) if f.endswith(".html")])
-
-# Group lessons: keyed by (module_num_float, module_name) or None for pre-curriculum
-grouped_lessons = {}  # key: (sort_key, label) → list of (date, title, fname)
-for fname in all_html:
-    title, mod_id, mod_name, date_s = parse_lesson_meta(fname)
+# Build topic_id → lesson file map (most recent match wins)
+topic_lesson_map = {}  # topic_id → (title, fname, date_s)
+pre_curriculum = []
+all_html_files = sorted(os.listdir(lesson_dir))
+for fname in all_html_files:
+    if not fname.endswith(".html"):
+        continue
+    title, mod_id, date_s = parse_lesson_meta(fname)
     if mod_id:
-        try:
-            sort_key = float(mod_id.split(".")[0])
-        except ValueError:
-            sort_key = 99
-        key = (sort_key, f"M{mod_id} — {mod_name}")
+        topic_lesson_map[mod_id] = (title, fname, date_s)
     else:
-        key = (-1, "Pre-Curriculum")
-    grouped_lessons.setdefault(key, []).append((date_s, title, fname))
+        pre_curriculum.append((date_s, title, fname))
 
-sections_html_idx = ""
-for (sort_key, label) in sorted(grouped_lessons.keys()):
-    entries = sorted(grouped_lessons[(sort_key, label)])
+total_topics = sum(len(m["topics"]) for m in curriculum["modules"])
+done_topics = sum(1 for m in curriculum["modules"] for t in m["topics"] if t["done"])
+
+# Build module sections HTML
+modules_sections_html = ""
+for m in curriculum["modules"]:
+    done_m = sum(1 for t in m["topics"] if t["done"])
+    total_m = len(m["topics"])
+    pct = int(done_m / total_m * 100)
+    topics_html = ""
+    for t in m["topics"]:
+        lesson_info = topic_lesson_map.get(t["id"])
+        if lesson_info:
+            l_title, l_fname, l_date = lesson_info
+            topics_html += (
+                f'<li class="done">'
+                f'<span class="status">✅</span>'
+                f'<span class="topic-info"><a href="daily-lessons/{l_fname}">{l_title}</a>'
+                f'<span class="topic-date">{l_date}</span></span>'
+                f'</li>\n'
+            )
+        elif t["done"]:
+            short = t["title"].split(" — ")[0]
+            topics_html += (
+                f'<li class="done">'
+                f'<span class="status">✅</span>'
+                f'<span class="topic-info"><span class="topic-title">{short}</span></span>'
+                f'</li>\n'
+            )
+        else:
+            short = t["title"].split(" — ")[0]
+            topics_html += (
+                f'<li class="upcoming">'
+                f'<span class="status">○</span>'
+                f'<span class="topic-info"><span class="topic-title dim">{short}</span></span>'
+                f'</li>\n'
+            )
+    modules_sections_html += f"""
+<div class="module" id="module-{m['id']}">
+  <div class="module-head">
+    <div class="module-meta">
+      <span class="module-num">M{m['id']}</span>
+      <span class="module-name">{m['name']}</span>
+    </div>
+    <span class="module-prog">{done_m}/{total_m}</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="width:{pct}%"></div></div>
+  <ul class="topic-list">{topics_html}</ul>
+</div>"""
+
+# Pre-curriculum section
+pre_html = ""
+if pre_curriculum:
     items = "".join(
-        f'<li><span class="lesson-date">{d}</span> <a href="daily-lessons/{fn}">{t}</a></li>\n'
-        for d, t, fn in entries
+        f'<li class="done"><span class="status">📄</span>'
+        f'<span class="topic-info"><a href="daily-lessons/{fn}">{t}</a>'
+        f'<span class="topic-date">{d}</span></span></li>\n'
+        for d, t, fn in sorted(pre_curriculum)
     )
-    header_color = "#64748b" if sort_key == -1 else "#93c5fd"
-    sections_html_idx += f'<div class="module-section"><h2 style="color:{header_color}">{label}</h2><ul>{items}</ul></div>\n'
+    pre_html = f'<div class="module" id="pre-curriculum"><div class="module-head"><div class="module-meta"><span class="module-num dim">PRE</span><span class="module-name">Pre-Curriculum</span></div></div><ul class="topic-list">{items}</ul></div>'
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(f"""<!DOCTYPE html>
@@ -315,26 +359,51 @@ with open("index.html", "w", encoding="utf-8") as f:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daily Semiconductor Learning</title>
+<title>HBM Learning — All Lessons</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 680px; margin: 0 auto; }}
-  h1 {{ font-size: 1.3rem; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }}
-  .sub {{ color: #64748b; font-size: 0.85rem; margin-bottom: 8px; }}
-  .nav-links {{ margin-bottom: 24px; font-size: 0.85rem; }}
-  .nav-links a {{ color: #60a5fa; text-decoration: none; margin-right: 16px; }}
-  .module-section {{ margin-bottom: 28px; }}
-  .module-section h2 {{ font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
-                        letter-spacing: .06em; margin-bottom: 10px; }}
-  ul {{ list-style: none; background: #1e2330; border-radius: 10px; overflow: hidden; }}
-  li {{ padding: 10px 14px; border-bottom: 1px solid #0f172a; display: flex; align-items: baseline; gap: 10px; }}
-  li:last-child {{ border-bottom: none; }}
-  .lesson-date {{ font-size: 0.75rem; color: #475569; white-space: nowrap; min-width: 80px; }}
-  a {{ color: #60a5fa; text-decoration: none; font-size: 0.9rem; }}
-  a:hover {{ text-decoration: underline; }}
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 700px; margin: 0 auto; }}
+  header {{ margin-bottom: 28px; }}
+  h1 {{ font-size: 1.4rem; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }}
+  .sub {{ color: #64748b; font-size: 0.85rem; margin-bottom: 10px; }}
+  .overall-prog {{ font-size: 0.9rem; color: #86efac; margin-bottom: 6px; }}
+  .overall-bar {{ height: 4px; background: #1e2330; border-radius: 2px; margin-bottom: 24px; }}
+  .overall-bar-fill {{ height: 4px; background: #22c55e; border-radius: 2px; }}
+  .module {{ background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }}
+  .module-head {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }}
+  .module-meta {{ display: flex; align-items: center; gap: 10px; }}
+  .module-num {{ background: #1e3a5f; color: #60a5fa; font-size: 0.72rem; font-weight: 700;
+                 padding: 2px 8px; border-radius: 4px; }}
+  .module-num.dim {{ background: #1a1f2e; color: #475569; }}
+  .module-name {{ font-weight: 700; color: #f1f5f9; font-size: 1rem; }}
+  .module-prog {{ font-size: 0.8rem; color: #64748b; }}
+  .progress-bar {{ height: 3px; background: #0f172a; border-radius: 2px; margin-bottom: 14px; }}
+  .progress-fill {{ height: 3px; background: #3b82f6; border-radius: 2px; }}
+  .topic-list {{ list-style: none; }}
+  .topic-list li {{ display: flex; align-items: baseline; gap: 10px; padding: 8px 0;
+                    border-bottom: 1px solid #0f172a; }}
+  .topic-list li:last-child {{ border-bottom: none; }}
+  .status {{ font-size: 0.85rem; flex-shrink: 0; width: 20px; }}
+  .topic-info {{ display: flex; flex-direction: column; gap: 2px; flex: 1; }}
+  .topic-info a {{ color: #60a5fa; text-decoration: none; font-size: 0.9rem; }}
+  .topic-info a:hover {{ text-decoration: underline; }}
+  .topic-title {{ font-size: 0.9rem; color: #cbd5e1; }}
+  .topic-title.dim {{ color: #334155; }}
+  .topic-date {{ font-size: 0.72rem; color: #475569; }}
 </style>
 </head>
+<body>
+<header>
+  <h1>📚 HBM Learning Curriculum</h1>
+  <div class="sub">Senior Test Engineer · 6 Modules · {total_topics} Topics</div>
+  <div class="overall-prog">Overall progress: {done_topics}/{total_topics} topics completed</div>
+  <div class="overall-bar"><div class="overall-bar-fill" style="width:{int(done_topics/total_topics*100)}%"></div></div>
+</header>
+{modules_sections_html}
+{pre_html}
+</body>
+</html>""")
 <body>
   <h1>📚 Daily Semiconductor Learning</h1>
   <div class="sub">HBM Testing · Senior Engineer Level</div>
