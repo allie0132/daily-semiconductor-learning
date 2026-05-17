@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM Architecture: Stacking, Channels & Pseudo‑Channels</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .nav { margin-top: 24px; font-size: 0.82rem; }
+  .nav a { color: #60a5fa; text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M1.1 Foundations</span></div>
+  <h1>HBM Architecture: Stacking, Channels & Pseudo‑Channels</h1>
+  <div class="meta">Sunday, May 17 2026 · Lesson 8 of 34</div>
+</header>
+<div class="section"><h2>Die Stack Overview</h2><p>HBM (High‑Bandwidth Memory) consists of multiple DRAM dies bonded face‑to‑face on a silicon interposer. A typical HBM2E stack contains 8‑12 dies, each 1 mm × 1 mm, with a total stack height ≈ 200 µm. The stack is mounted on an interposer that provides TSV (Through‑Silicon Via) connections to the logic die and peripheral I/O.</p><p>Key parameters:</p><ul><li><strong>Die count</strong>: 8 (HBM2), 12 (HBM2E), up to 16 (future HBM3)</li><li><strong>Die density</strong>: 4 Gb per die (HBM2), 8 Gb per die (HBM2E)</li><li><strong>Pitch</strong>: 45 µm TSV, 28 µm interconnect pitch on the interposer</li><li><strong>Operating voltage</strong>: 1.2 V nominal (HBM2), 1.1 V (HBM3)</li></ul></div>
+<div class="section"><h2>Channel Architecture</h2><p>Each HBM stack is divided into independent <strong>channels</strong>. A channel is a 128‑bit wide data path (plus 16‑bit ECC) and contains its own command/address bus (16‑bit) and clock domain.</p><p>Typical configurations:</p><ul><li>HBM2: 4 channels per stack, each 128‑bit data + 16‑bit ECC = 144‑bit total</li><li>HBM2E: 8 channels (two channels per die pair) – still 128‑bit effective data per channel</li><li>HBM3: 8 channels, but each can be split into two 64‑bit pseudo‑channels</li></ul><p>All channels share a common reference clock (e.g., 1.6 GHz for HBM2) but are clock‑synchronised via the PHY on the interposer.</p></div>
+<div class="section"><h2>Pseudo‑Channel Concept</h2><p>JEDEC introduced <strong>pseudo‑channels</strong> in JESD235C to increase flexibility for logical partitioning without adding physical I/O. A pseudo‑channel is a logical 64‑bit slice of a physical 128‑bit channel, accessed via a <code>PCFG</code> register in the DRAM controller.</p><p>When enabled:</p><ul><li>Two pseudo‑channels can operate with independent timing parameters (e.g., <code>tRCD</code>, <code>tRP</code>)</li><li>Address mapping uses bits <code>A[15:0]</code> for pseudo‑channel selection</li><li>Testing requires separate eye‑pattern and jitter analysis per pseudo‑channel because crosstalk differs from full‑width operation</li></ul><p>In HBM3, pseudo‑channels are mandatory for <strong>dual‑rank</strong> operation, allowing simultaneous access to two halves of a die while keeping the 128‑bit physical bus.</p></div>
+<div class="section"><h2>Implications for Test and Characterization</h2><p>Senior test engineers must consider the following when building ATE test programs:</p><ul><li>Each physical channel needs a dedicated high‑speed I/O pair on the tester (e.g., Keysight M9495A). For pseudo‑channels, the same pair is reused but with distinct timing vectors.</li><li>Eye‑diagram specifications are defined per channel: <code>JESD235C 5.4.1</code> mandates ≥ 125 ps UI eye opening at 2 Gb/s per lane.</li><li>TSV‑to‑interposer resistance and inductance affect channel skew; measure using <code>DCV</code> and <code>ACR</code> tests on each die pair.</li><li>Channel‑to‑channel crosstalk is limited to –45 dB (max) per JESD235C 7.2; pseudo‑channel isolation is tighter (‑50 dB) because the same physical bus is time‑multiplexed.</li></ul></div>
+<div class="section"><h2>Key Registers and Timing Parameters</h2><p>Relevant DRAM mode registers (per JEDEC JESD235C):</p><ul><li><code>MR0[0:2]</code> – CAS latency (<code>tCL</code>) selection</li><li><code>MR1[3:5]</code> – Write latency (<code>tWL</code>)</li><li><code>MR2[0]</code> – Pseudo‑channel enable (0 = disabled, 1 = enabled)</li><li><code>PCFG[7:0]</code> – Pseudo‑channel configuration (maps logical channel IDs to physical lanes)</li></ul><p>Typical timing for HBM2E at 2 Gb/s per lane:</p><ul><li><code>tRCD</code> = 17 ns</li><li><code>tRP</code> = 18 ns</li><li><code>tRFC</code> = 260 ns (full stack)</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>HBM stacks are built from multiple thin DRAM dies on an interposer, each die pair forming a physical 128‑bit channel.</li><li>Pseudo‑channels are logical 64‑bit subdivisions of a 128‑bit channel, controlled via MR/PCFG registers, enabling independent timing per half‑channel.</li><li>Testing must address both physical channels and pseudo‑channels: separate vectors, eye‑diagram compliance, and crosstalk limits per JESD235C.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C – High Bandwidth Memory (HBM) Standard</div><div class="ref-detail">Section 4.2 (Channel Architecture), 5.4.1 (Eye Diagram), 7.2 (Crosstalk), 9.3 (Pseudo‑Channel Registers)</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235D – HBM3 Specification</div><div class="ref-detail">Chapter 6 (Dual‑Rank & Pseudo‑Channel Operation)</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">M. Liu et al., “Design and Test of 8‑Channel HBM2E Interposer,” IEEE Transactions on Components, Packaging and Manufacturing Technology, 2022</div><div class="ref-detail">doi:10.1109/TCPMT.2022.3156789</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">SK Hynix HBM2E Datasheet (2023)</div><div class="ref-detail">Table 3‑4: Timing Parameters, Table 5‑1: Stack Organization</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Keysight M9495A 5‑GSa/s 48‑Channel ATE User Manual</div><div class="ref-detail">Section 2.3 – Mapping HBM Channels to Tester Resources</div></div></div></div>
+<div class="nav"><a href="../index.html">← All lessons</a></div>
+</body>
+</html>
