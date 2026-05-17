@@ -258,7 +258,7 @@ html = f"""<!DOCTYPE html>
 </div>
 {references_html}
 {additional_html}
-<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+<div class="nav"><a href="../curriculum.html">&#x2190; Back to Curriculum</a></div>
 </body>
 </html>"""
 
