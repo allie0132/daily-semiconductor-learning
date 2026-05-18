@@ -71,7 +71,7 @@ prompt = f"""You are an expert semiconductor test engineer with 20+ years of exp
 Today's assigned topic (Module {topic_id} — {module_name}):
 {topic_title}
 
-Write a focused, technically precise lesson specifically on this topic. Also include one short "additional learning" item — a recent development, emerging technique, or closely related topic beyond the curriculum that a senior engineer should be aware of.
+Write a focused, technically precise lesson specifically on this topic. Also include one short "additional learning" item that is directly related to today's topic — a deeper detail, recent development, or practical extension of what was just taught that goes one step beyond the main lesson.
 
 Respond ONLY with a JSON object — no markdown fences, no extra text:
 {{
@@ -85,8 +85,8 @@ Respond ONLY with a JSON object — no markdown fences, no extra text:
     {{"title": "Reference title", "type": "JEDEC|IEEE|Book|Paper|Datasheet|Web", "detail": "e.g. JESD235C section 4.2, or author/year, or URL"}}
   ],
   "additional_learning": {{
-    "title": "Short title under 60 chars",
-    "content": "2-3 sentences on a related emerging topic or technique not covered in the main lesson."
+    "title": "Short title under 60 chars — must relate directly to today's topic",
+    "content": "2-3 sentences going deeper or further on today's topic specifically."
   }}
 }}
 
