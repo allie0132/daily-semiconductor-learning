@@ -99,7 +99,31 @@ models = [
     "meta-llama/llama-3.3-70b-instruct:free",
     "google/gemma-3-27b-it:free",
 ]
-raw = None
+
+def fix_json_escapes(s):
+    return re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', s)
+
+def extract_json(raw):
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    raw = raw.strip()
+    # Try to find JSON object boundaries
+    start = raw.find("{")
+    end = raw.rfind("}") + 1
+    if start != -1 and end > start:
+        raw = raw[start:end]
+    return raw
+
+def try_parse(raw):
+    raw = extract_json(raw)
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return json.loads(fix_json_escapes(raw))
+
+lesson = None
 for model_id in models:
     try:
         response = client.chat.completions.create(
@@ -109,26 +133,17 @@ for model_id in models:
         )
         raw = response.choices[0].message.content.strip()
         print(f"Used model: {model_id}")
+        lesson = try_parse(raw)
         break
+    except json.JSONDecodeError as e:
+        print(f"Model {model_id} returned invalid JSON: {e}, trying next...")
+        time.sleep(5)
     except Exception as e:
         print(f"Model {model_id} failed: {e}, trying next...")
         time.sleep(5)
 
-if raw is None:
-    raise RuntimeError("All models failed")
-if raw.startswith("```"):
-    raw = raw.split("```")[1]
-    if raw.startswith("json"):
-        raw = raw[4:]
-raw = raw.strip()
-
-def fix_json_escapes(s):
-    return re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', s)
-
-try:
-    lesson = json.loads(raw)
-except json.JSONDecodeError:
-    lesson = json.loads(fix_json_escapes(raw))
+if lesson is None:
+    raise RuntimeError("All models failed to return valid JSON")
 
 topic = lesson["topic"]
 summary = lesson["summary"]
