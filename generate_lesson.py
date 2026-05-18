@@ -265,6 +265,7 @@ html = f"""<!DOCTYPE html>
   <div><span class="badge">HBM Testing</span><span class="badge module-badge">M{topic_id} {module_name}</span></div>
   <h1>{topic}</h1>
   <div class="meta">{date_str} · Lesson {done_count + 1} of {total_count}</div>
+  {additional_html}
 </header>
 {sections_html}
 <div class="takeaways">
@@ -272,7 +273,6 @@ html = f"""<!DOCTYPE html>
   <ul>{takeaways_html}</ul>
 </div>
 {references_html}
-{additional_html}
 <div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
 </body>
 </html>"""
