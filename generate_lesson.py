@@ -198,6 +198,8 @@ if additional:
         f'</div>'
     )
 
+# additional_html goes after main content
+
 if references:
     ref_items = "".join(
         f'<div class="ref-item"><span class="ref-type">{r["type"]}</span>'
@@ -248,10 +250,10 @@ html = f"""<!DOCTYPE html>
   .ref-title {{ color: #e2e8f0; font-weight: 600; }}
   .ref-detail {{ color: #64748b; font-size: 0.9rem; }}
   .additional {{ background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
-                  padding: 12px 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }}
+                  padding: 14px 18px; margin-bottom: 14px; }}
   .additional h2 {{ color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-                    letter-spacing: .08em; white-space: nowrap; }}
-  .additional a {{ color: #c4b5fd; font-size: 0.9rem; text-decoration: none; }}
+                    letter-spacing: .08em; margin-bottom: 6px; }}
+  .additional a {{ color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }}
   .additional a:hover {{ text-decoration: underline; }}
   .nav {{ margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }}
   .nav a {{ display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
@@ -265,7 +267,6 @@ html = f"""<!DOCTYPE html>
   <div><span class="badge">HBM Testing</span><span class="badge module-badge">M{topic_id} {module_name}</span></div>
   <h1>{topic}</h1>
   <div class="meta">{date_str} · Lesson {done_count + 1} of {total_count}</div>
-  {additional_html}
 </header>
 {sections_html}
 <div class="takeaways">
@@ -273,6 +274,7 @@ html = f"""<!DOCTYPE html>
   <ul>{takeaways_html}</ul>
 </div>
 {references_html}
+{additional_html}
 <div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
 </body>
 </html>"""
