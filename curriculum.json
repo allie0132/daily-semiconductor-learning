@@ -4,92 +4,316 @@
       "id": 1,
       "name": "Foundations",
       "topics": [
-        {"id": "1.1", "title": "HBM Architecture Overview — die stacking, channels, pseudo-channels", "done": true},
-        {"id": "1.2", "title": "JEDEC HBM Standards Family — HBM1, HBM2, HBM2e, HBM3, HBM3e comparison", "done": false},
-        {"id": "1.3", "title": "HBM vs DDR5 and GDDR6 — bandwidth, power, and density tradeoffs", "done": false},
-        {"id": "1.4", "title": "HBM Channel Architecture — 8-channel organization and pseudo-channel deep dive", "done": false},
-        {"id": "1.5", "title": "HBM Electrical Interface Basics — AWORD, DWORD, command/address signals", "done": false},
-        {"id": "1.6", "title": "HBM Timing & Parametric Basics — tRCD, tCL, tRP, bandwidth calculation", "done": false},
-        {"id": "1.7", "title": "HBM Power Architecture — VDD domains, VDDQ, power gating schemes", "done": false},
-        {"id": "1.8", "title": "2.5D Packaging & Interposer Technology — CoWoS, EMIB, HBM placement", "done": false},
-        {"id": "1.9", "title": "TSV Fundamentals — structure, via-last/middle, role in HBM stacking", "done": false},
-        {"id": "1.10", "title": "HBM Capacity and Density Evolution — HBM1 4GB to HBM3e 36GB per stack", "done": false}
+        {
+          "id": "1.1",
+          "title": "HBM Architecture Overview — die stacking, channels, pseudo-channels",
+          "done": false
+        },
+        {
+          "id": "1.2",
+          "title": "JEDEC HBM Standards Family — HBM1, HBM2, HBM2e, HBM3, HBM3e comparison",
+          "done": false
+        },
+        {
+          "id": "1.3",
+          "title": "HBM vs DDR5 and GDDR6 — bandwidth, power, and density tradeoffs",
+          "done": false
+        },
+        {
+          "id": "1.4",
+          "title": "HBM Channel Architecture — 8-channel organization and pseudo-channel deep dive",
+          "done": false
+        },
+        {
+          "id": "1.5",
+          "title": "HBM Electrical Interface Basics — AWORD, DWORD, command/address signals",
+          "done": false
+        },
+        {
+          "id": "1.6",
+          "title": "HBM Timing & Parametric Basics — tRCD, tCL, tRP, bandwidth calculation",
+          "done": false
+        },
+        {
+          "id": "1.7",
+          "title": "HBM Power Architecture — VDD domains, VDDQ, power gating schemes",
+          "done": false
+        },
+        {
+          "id": "1.8",
+          "title": "2.5D Packaging & Interposer Technology — CoWoS, EMIB, HBM placement",
+          "done": false
+        },
+        {
+          "id": "1.9",
+          "title": "TSV Fundamentals — structure, via-last/middle, role in HBM stacking",
+          "done": false
+        },
+        {
+          "id": "1.10",
+          "title": "HBM Capacity and Density Evolution — HBM1 4GB to HBM3e 36GB per stack",
+          "done": false
+        }
       ]
     },
     {
       "id": 2,
       "name": "Electrical Testing",
       "topics": [
-        {"id": "2.1", "title": "HBM PHY Interface Testing Strategies", "done": true},
-        {"id": "2.2", "title": "TSV Continuity Testing in HBM Stacks", "done": true},
-        {"id": "2.3", "title": "Temperature-Aware HBM Parametric Testing", "done": true},
-        {"id": "2.4", "title": "HBM AC/DC Parametric Testing — IDD current, timing margins, operating limits", "done": false},
-        {"id": "2.5", "title": "HBM Vref Calibration and Training Procedures", "done": false},
-        {"id": "2.6", "title": "Read/Write Leveling and Skew Compensation Testing", "done": false},
-        {"id": "2.7", "title": "HBM Signal Integrity Testing — eye diagrams, ISI, crosstalk", "done": false},
-        {"id": "2.8", "title": "HBM Power Delivery Network Testing — PDN, decap, VDD/VDDQ margins", "done": false},
-        {"id": "2.9", "title": "HBM DRAM Cell Retention Testing — tREFI, refresh timing verification", "done": false},
-        {"id": "2.10", "title": "Cattrip & Thermal Shutdown Verification in HBM", "done": false}
+        {
+          "id": "2.1",
+          "title": "HBM PHY Interface Testing Strategies",
+          "done": false
+        },
+        {
+          "id": "2.2",
+          "title": "TSV Continuity Testing in HBM Stacks",
+          "done": false
+        },
+        {
+          "id": "2.3",
+          "title": "Temperature-Aware HBM Parametric Testing",
+          "done": false
+        },
+        {
+          "id": "2.4",
+          "title": "HBM AC/DC Parametric Testing — IDD current, timing margins, operating limits",
+          "done": false
+        },
+        {
+          "id": "2.5",
+          "title": "HBM Vref Calibration and Training Procedures",
+          "done": false
+        },
+        {
+          "id": "2.6",
+          "title": "Read/Write Leveling and Skew Compensation Testing",
+          "done": false
+        },
+        {
+          "id": "2.7",
+          "title": "HBM Signal Integrity Testing — eye diagrams, ISI, crosstalk",
+          "done": false
+        },
+        {
+          "id": "2.8",
+          "title": "HBM Power Delivery Network Testing — PDN, decap, VDD/VDDQ margins",
+          "done": false
+        },
+        {
+          "id": "2.9",
+          "title": "HBM DRAM Cell Retention Testing — tREFI, refresh timing verification",
+          "done": false
+        },
+        {
+          "id": "2.10",
+          "title": "Cattrip & Thermal Shutdown Verification in HBM",
+          "done": false
+        }
       ]
     },
     {
       "id": 3,
       "name": "Protocol & Compliance",
       "topics": [
-        {"id": "3.1", "title": "JEDEC JESD235 Compliance Testing Details", "done": true},
-        {"id": "3.2", "title": "HBM3 Power-Down & Retention Mode Verification", "done": true},
-        {"id": "3.3", "title": "HBM Initialization and Training Sequence Testing", "done": false},
-        {"id": "3.4", "title": "HBM2e vs HBM3 Electrical Test Differences", "done": false},
-        {"id": "3.5", "title": "Pseudo-Channel Mode Test Patterns", "done": false},
-        {"id": "3.6", "title": "HBM Mode Registers & Configuration Testing — MR0–MR15 coverage", "done": false},
-        {"id": "3.7", "title": "HBM Command Truth Table & Illegal Command Testing", "done": false},
-        {"id": "3.8", "title": "HBM3 Read/Write Command Protocol Verification", "done": false},
-        {"id": "3.9", "title": "HBM Error Correction Code (ECC) Testing — SECDED implementation", "done": false},
-        {"id": "3.10", "title": "HBM CRC and Parity Error Injection Testing", "done": false}
+        {
+          "id": "3.1",
+          "title": "JEDEC JESD235 Compliance Testing Details",
+          "done": false
+        },
+        {
+          "id": "3.2",
+          "title": "HBM3 Power-Down & Retention Mode Verification",
+          "done": false
+        },
+        {
+          "id": "3.3",
+          "title": "HBM Initialization and Training Sequence Testing",
+          "done": false
+        },
+        {
+          "id": "3.4",
+          "title": "HBM2e vs HBM3 Electrical Test Differences",
+          "done": false
+        },
+        {
+          "id": "3.5",
+          "title": "Pseudo-Channel Mode Test Patterns",
+          "done": false
+        },
+        {
+          "id": "3.6",
+          "title": "HBM Mode Registers & Configuration Testing — MR0–MR15 coverage",
+          "done": false
+        },
+        {
+          "id": "3.7",
+          "title": "HBM Command Truth Table & Illegal Command Testing",
+          "done": false
+        },
+        {
+          "id": "3.8",
+          "title": "HBM3 Read/Write Command Protocol Verification",
+          "done": false
+        },
+        {
+          "id": "3.9",
+          "title": "HBM Error Correction Code (ECC) Testing — SECDED implementation",
+          "done": false
+        },
+        {
+          "id": "3.10",
+          "title": "HBM CRC and Parity Error Injection Testing",
+          "done": false
+        }
       ]
     },
     {
       "id": 4,
       "name": "DFT & Built-In Test",
       "topics": [
-        {"id": "4.1", "title": "HBM MBIST Implementation and Coverage", "done": true},
-        {"id": "4.2", "title": "HBM Repair Flow & Post-Repair Verification", "done": true},
-        {"id": "4.3", "title": "DFT Approaches for HBM in 2.5D Packages", "done": false},
-        {"id": "4.4", "title": "BIST Pattern Algorithms — March, Checkerboard, GALPAT for DRAM", "done": false},
-        {"id": "4.5", "title": "Column Repair vs Row Repair Strategy and Fuse Allocation", "done": false},
-        {"id": "4.6", "title": "HBM Fuse Programming and Trim Verification Testing", "done": false},
-        {"id": "4.7", "title": "Scan Chain Testing for HBM PHY and Controller Logic", "done": false},
-        {"id": "4.8", "title": "Logic BIST for HBM Controller and PHY", "done": false},
-        {"id": "4.9", "title": "IEEE 1149.1 JTAG Boundary Scan for HBM Integration", "done": false},
-        {"id": "4.10", "title": "Post-Repair Yield Analysis & Redundancy Allocation Optimization", "done": false}
+        {
+          "id": "4.1",
+          "title": "HBM MBIST Implementation and Coverage",
+          "done": false
+        },
+        {
+          "id": "4.2",
+          "title": "HBM Repair Flow & Post-Repair Verification",
+          "done": false
+        },
+        {
+          "id": "4.3",
+          "title": "DFT Approaches for HBM in 2.5D Packages",
+          "done": false
+        },
+        {
+          "id": "4.4",
+          "title": "BIST Pattern Algorithms — March, Checkerboard, GALPAT for DRAM",
+          "done": false
+        },
+        {
+          "id": "4.5",
+          "title": "Column Repair vs Row Repair Strategy and Fuse Allocation",
+          "done": false
+        },
+        {
+          "id": "4.6",
+          "title": "HBM Fuse Programming and Trim Verification Testing",
+          "done": false
+        },
+        {
+          "id": "4.7",
+          "title": "Scan Chain Testing for HBM PHY and Controller Logic",
+          "done": false
+        },
+        {
+          "id": "4.8",
+          "title": "Logic BIST for HBM Controller and PHY",
+          "done": false
+        },
+        {
+          "id": "4.9",
+          "title": "IEEE 1149.1 JTAG Boundary Scan for HBM Integration",
+          "done": false
+        },
+        {
+          "id": "4.10",
+          "title": "Post-Repair Yield Analysis & Redundancy Allocation Optimization",
+          "done": false
+        }
       ]
     },
     {
       "id": 5,
       "name": "ATE & Production",
       "topics": [
-        {"id": "5.1", "title": "ATE System Setup for HBM Testing — Advantest T2000/93K, Teradyne J750", "done": false},
-        {"id": "5.2", "title": "Interposer Probe Challenges for HBM — contact resistance, planarity", "done": false},
-        {"id": "5.3", "title": "HBM Wafer Sort vs Final Test Strategy and KGD requirements", "done": false},
-        {"id": "5.4", "title": "Known Good Die (KGD) Testing — electrical and reliability screening", "done": false},
-        {"id": "5.5", "title": "HBM Production Test Flow & Test Time Optimization", "done": false},
-        {"id": "5.6", "title": "HBM Multi-Site Parallel Testing Architecture", "done": false},
-        {"id": "5.7", "title": "HBM Burn-In & HTOL Reliability Screening", "done": false},
-        {"id": "5.8", "title": "Test Cost Reduction Strategies — compression, parallelism, triage", "done": false}
+        {
+          "id": "5.1",
+          "title": "ATE System Setup for HBM Testing — Advantest T2000/93K, Teradyne J750",
+          "done": false
+        },
+        {
+          "id": "5.2",
+          "title": "Interposer Probe Challenges for HBM — contact resistance, planarity",
+          "done": false
+        },
+        {
+          "id": "5.3",
+          "title": "HBM Wafer Sort vs Final Test Strategy and KGD requirements",
+          "done": false
+        },
+        {
+          "id": "5.4",
+          "title": "Known Good Die (KGD) Testing — electrical and reliability screening",
+          "done": false
+        },
+        {
+          "id": "5.5",
+          "title": "HBM Production Test Flow & Test Time Optimization",
+          "done": false
+        },
+        {
+          "id": "5.6",
+          "title": "HBM Multi-Site Parallel Testing Architecture",
+          "done": false
+        },
+        {
+          "id": "5.7",
+          "title": "HBM Burn-In & HTOL Reliability Screening",
+          "done": false
+        },
+        {
+          "id": "5.8",
+          "title": "Test Cost Reduction Strategies — compression, parallelism, triage",
+          "done": false
+        }
       ]
     },
     {
       "id": 6,
       "name": "Advanced Topics",
       "topics": [
-        {"id": "6.1", "title": "HBM in AI Accelerators — GPU/TPU/NPU HBM integration testing", "done": false},
-        {"id": "6.2", "title": "CoWoS and SoIC Advanced Packaging Test Challenges", "done": false},
-        {"id": "6.3", "title": "HBM4 Architecture & Test Implications — 1024-bit interface, NDP", "done": false},
-        {"id": "6.4", "title": "HBM Reliability Qualification — HTOL, HAST, TC, ESD stress", "done": false},
-        {"id": "6.5", "title": "Failure Analysis Techniques — FIB, e-beam, acoustic microscopy", "done": false},
-        {"id": "6.6", "title": "HBM in HPC Systems — memory bandwidth optimization and testing", "done": false},
-        {"id": "6.7", "title": "Machine Learning-Based HBM Test Diagnostics and Yield Learning", "done": false},
-        {"id": "6.8", "title": "Emerging Memory and HBM Future — CXL memory, 3D DRAM roadmap", "done": false}
+        {
+          "id": "6.1",
+          "title": "HBM in AI Accelerators — GPU/TPU/NPU HBM integration testing",
+          "done": false
+        },
+        {
+          "id": "6.2",
+          "title": "CoWoS and SoIC Advanced Packaging Test Challenges",
+          "done": false
+        },
+        {
+          "id": "6.3",
+          "title": "HBM4 Architecture & Test Implications — 1024-bit interface, NDP",
+          "done": false
+        },
+        {
+          "id": "6.4",
+          "title": "HBM Reliability Qualification — HTOL, HAST, TC, ESD stress",
+          "done": false
+        },
+        {
+          "id": "6.5",
+          "title": "Failure Analysis Techniques — FIB, e-beam, acoustic microscopy",
+          "done": false
+        },
+        {
+          "id": "6.6",
+          "title": "HBM in HPC Systems — memory bandwidth optimization and testing",
+          "done": false
+        },
+        {
+          "id": "6.7",
+          "title": "Machine Learning-Based HBM Test Diagnostics and Yield Learning",
+          "done": false
+        },
+        {
+          "id": "6.8",
+          "title": "Emerging Memory and HBM Future — CXL memory, 3D DRAM roadmap",
+          "done": false
+        }
       ]
     }
   ]
