@@ -188,7 +188,15 @@ sections_html = "".join(
 )
 takeaways_html = "".join(f"<li>{t}</li>" for t in takeaways)
 
-additional_html = ""  # Additional learning is on its own page (additional-learning.html)
+additional_html = ""
+if additional:
+    additional_html = (
+        f'<div class="additional">'
+        f'<h2>&#x1F50D; Additional Learning</h2>'
+        f'<a href="../additional-learning.html#module-{topic_id.split(".")[0]}">'
+        f'{additional["title"]}</a>'
+        f'</div>'
+    )
 
 if references:
     ref_items = "".join(
@@ -239,12 +247,12 @@ html = f"""<!DOCTYPE html>
                font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }}
   .ref-title {{ color: #e2e8f0; font-weight: 600; }}
   .ref-detail {{ color: #64748b; font-size: 0.9rem; }}
-  .additional {{ background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 10px 10px 0;
-                  padding: 18px 22px; margin-bottom: 14px; }}
-  .additional h2 {{ color: #a78bfa; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
-                    letter-spacing: .08em; margin-bottom: 8px; }}
-  .additional h3 {{ color: #c4b5fd; font-size: 1rem; font-weight: 700; margin-bottom: 10px; }}
-  .additional p {{ color: #94a3b8; font-size: 1rem; line-height: 1.8; }}
+  .additional {{ background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 12px 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }}
+  .additional h2 {{ color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; white-space: nowrap; }}
+  .additional a {{ color: #c4b5fd; font-size: 0.9rem; text-decoration: none; }}
+  .additional a:hover {{ text-decoration: underline; }}
   .nav {{ margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }}
   .nav a {{ display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
             font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
