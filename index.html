@@ -5,15 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HBM Learning Curriculum</title>
 <style>
+  
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
          background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 700px; margin: 0 auto; }
   header { margin-bottom: 28px; }
   h1 { font-size: 1.4rem; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }
   .sub { color: #64748b; font-size: 0.85rem; margin-bottom: 10px; }
+  a { color: #60a5fa; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
   .overall-prog { font-size: 0.9rem; color: #86efac; margin-bottom: 6px; }
-  .overall-bar { height: 4px; background: #1e2330; border-radius: 2px; margin-bottom: 24px; }
+  .overall-bar { height: 4px; background: #1e2330; border-radius: 2px; margin-bottom: 6px; }
   .overall-bar-fill { height: 4px; background: #22c55e; border-radius: 2px; }
+  .nav-links { font-size: 0.85rem; margin-bottom: 20px; }
   .module { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
   .module-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   details.module summary { list-style: none; cursor: pointer; margin-bottom: 0; }
@@ -22,16 +27,14 @@
   details.module summary .module-meta::before { content: "▶"; font-size: 0.65rem; color: #475569; margin-right: 4px; }
   details.module[open] summary .module-meta::before { content: "▼"; }
   .module-meta { display: flex; align-items: center; gap: 10px; }
-  .module-num { background: #1e3a5f; color: #60a5fa; font-size: 0.72rem; font-weight: 700;
-                 padding: 2px 8px; border-radius: 4px; }
+  .module-num { background: #1e3a5f; color: #60a5fa; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
   .module-num.dim { background: #1a1f2e; color: #475569; }
   .module-name { font-weight: 700; color: #f1f5f9; font-size: 1rem; }
   .module-prog { font-size: 0.8rem; color: #64748b; }
   .progress-bar { height: 3px; background: #0f172a; border-radius: 2px; margin-bottom: 14px; }
   .progress-fill { height: 3px; background: #3b82f6; border-radius: 2px; }
   .topic-list { list-style: none; }
-  .topic-list li { display: flex; align-items: baseline; gap: 10px; padding: 8px 0;
-                    border-bottom: 1px solid #0f172a; }
+  .topic-list li { display: flex; align-items: baseline; gap: 10px; padding: 8px 0; border-bottom: 1px solid #0f172a; }
   .topic-list li:last-child { border-bottom: none; }
   .status { font-size: 0.85rem; flex-shrink: 0; width: 22px; }
   .topic-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
@@ -48,6 +51,7 @@
   <div class="sub">Senior Test Engineer &middot; 6 Modules &middot; 56 Topics</div>
   <div class="overall-prog">Overall progress: 0/56 topics completed</div>
   <div class="overall-bar"><div class="overall-bar-fill" style="width:0%"></div></div>
+  <div class="nav-links"><a href="additional-learning.html">&#x1F50D; Additional Learning (2)</a></div>
 </header>
 
 <div class="module" id="module-1">
@@ -178,31 +182,29 @@
     <div class="module-meta">
       <span class="module-num dim">PRE</span>
       <span class="module-name">Pre-Curriculum</span>
-      <span class="module-prog">22 lessons</span>
+      <span class="module-prog">20 lessons</span>
     </div>
   </summary>
-  <ul class="topic-list"><li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-30-dynamic-power-down-sequencing-for-hbm3.html">Dynamic Power‑Down Sequencing for HBM3</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-07-dynamic-voltage-scaling-for-hbm3-stress-characterization.html">Dynamic Voltage Scaling for HBM3 Stress Characterization</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-08-eye-diagram-margin-analysis-for-hbm3-channels.html">Eye‑Diagram Margin Analysis for HBM3 Channels</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-01-eye-pattern-jitter-analysis-for-hbm3-io.html">Eye‑Pattern & Jitter Analysis for HBM3 IO</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-17-hbm-architecture-stacking-channels-pseudo-channels.html">HBM Architecture: Stacking, Channels & Pseudo‑Channels</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-18-hbm-architecture-stacking-channels-pseudo-channels.html">HBM Architecture: Stacking, Channels & Pseudo‑Channels</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-26-hbm-mbist-implementation-and-coverage.html">HBM MBIST Implementation and Coverage</a><span class="topic-date"></span></span></li>
+  <ul class="topic-list"><li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-26-hbm-mbist-implementation-and-coverage.html">HBM MBIST Implementation and Coverage</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-26-temperature-aware-parametric-testing-for-hbm.html">Temperature‑Aware Parametric Testing for HBM</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-26-tsv-continuity-testing-in-hbm-stacks.html">TSV Continuity Testing in HBM Stacks</a><span class="topic-date"></span></span></li>
 <li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-27-hbm-phy-interface-testing-strategies.html">HBM PHY Interface Testing Strategies</a><span class="topic-date"></span></span></li>
 <li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-27-hbm-repair-flow-post-repair-verification.html">HBM Repair Flow & Post‑Repair Verification</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-11-hbm3-clock-data-recovery-cdr-characterization.html">HBM3 Clock Data Recovery (CDR) Characterization</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-15-hbm3-clock-data-recovery-jitter-margin-characterization.html">HBM3 Clock Data Recovery Jitter Margin Characterization</a><span class="topic-date"></span></span></li>
 <li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-27-hbm3-power-down-retention-mode-verification.html">HBM3 Power‑Down & Retention Mode Verification</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-14-hbm3-refresh-cancel-stress-and-retention-testing.html">HBM3 Refresh‑Cancel Stress and Retention Testing</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-13-hbm3-write-boost-voltage-swing-stress-test.html">HBM3 Write‑Boost Voltage Swing Stress Test</a><span class="topic-date"></span></span></li>
 <li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-28-jedec-jesd235-compliance-testing-details.html">JEDEC JESD235 Compliance Testing Details</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-04-on-die-termination-odt-calibration-for-hbm3-i-o.html">On‑Die Termination (ODT) Calibration for HBM3 I/O</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-12-real-time-power-monitoring-for-hbm3-thermal-characterization.html">Real‑Time Power Monitoring for HBM3 Thermal Characterization</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-26-tsv-continuity-testing-in-hbm-stacks.html">TSV Continuity Testing in HBM Stacks</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-29-tsv-continuity-testing-in-hbm-stacks.html">TSV Continuity Testing in HBM Stacks</a><span class="topic-date"></span></span></li>
 <li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-28-temperature-aware-hbm-parametric-testing.html">Temperature‑Aware HBM Parametric Testing</a><span class="topic-date"></span></span></li>
-<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-26-temperature-aware-parametric-testing-for-hbm.html">Temperature‑Aware Parametric Testing for HBM</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-30-dynamic-power-down-sequencing-for-hbm3.html">Dynamic Power‑Down Sequencing for HBM3</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-01-eye-pattern-jitter-analysis-for-hbm3-io.html">Eye‑Pattern & Jitter Analysis for HBM3 IO</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-04-on-die-termination-odt-calibration-for-hbm3-i-o.html">On‑Die Termination (ODT) Calibration for HBM3 I/O</a><span class="topic-date"></span></span></li>
 <li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-06-thermal-aware-calibration-of-hbm3-tsv-parasitics.html">Thermal‑Aware Calibration of HBM3 TSV Parasitics</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-07-dynamic-voltage-scaling-for-hbm3-stress-characterization.html">Dynamic Voltage Scaling for HBM3 Stress Characterization</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-08-eye-diagram-margin-analysis-for-hbm3-channels.html">Eye‑Diagram Margin Analysis for HBM3 Channels</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-11-hbm3-clock-data-recovery-cdr-characterization.html">HBM3 Clock Data Recovery (CDR) Characterization</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-12-real-time-power-monitoring-for-hbm3-thermal-characterization.html">Real‑Time Power Monitoring for HBM3 Thermal Characterization</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-13-hbm3-write-boost-voltage-swing-stress-test.html">HBM3 Write‑Boost Voltage Swing Stress Test</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-14-hbm3-refresh-cancel-stress-and-retention-testing.html">HBM3 Refresh‑Cancel Stress and Retention Testing</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-15-hbm3-clock-data-recovery-jitter-margin-characterization.html">HBM3 Clock Data Recovery Jitter Margin Characterization</a><span class="topic-date"></span></span></li>
+<li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-17-hbm-architecture-stacking-channels-pseudo-channels.html">HBM Architecture: Stacking, Channels & Pseudo‑Channels</a><span class="topic-date"></span></span></li>
 </ul>
 </details>
 </body>

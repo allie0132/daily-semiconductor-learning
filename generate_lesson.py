@@ -188,15 +188,7 @@ sections_html = "".join(
 )
 takeaways_html = "".join(f"<li>{t}</li>" for t in takeaways)
 
-additional_html = ""
-if additional:
-    additional_html = (
-        f'<div class="additional">'
-        f'<h2>🔍 Additional Learning</h2>'
-        f'<h3>{additional["title"]}</h3>'
-        f'<p>{additional["content"]}</p>'
-        f'</div>'
-    )
+additional_html = ""  # Additional learning is on its own page (additional-learning.html)
 
 if references:
     ref_items = "".join(
