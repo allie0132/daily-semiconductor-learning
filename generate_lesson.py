@@ -279,13 +279,16 @@ def parse_lesson_meta(fname):
     if not os.path.exists(md_path):
         return fname.replace(".html", ""), None, fname[:10]
     with open(md_path, encoding="utf-8") as f:
-        lines = [l.strip() for l in f.readlines()[:4]]
-    title = lines[0].lstrip("# ") if lines else fname
-    date_s = lines[1].strip("*") if len(lines) > 1 else fname[:10]
-    mod_line = lines[2].strip("*") if len(lines) > 2 else ""
+        lines = [l.strip() for l in f.readlines()[:10]]
+    title = next((l.lstrip("# ") for l in lines if l.startswith("# ")), fname)
+    date_s = next((l.strip("*").strip() for l in lines
+                   if any(m in l for m in ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"])), fname[:10])
     mod_id = None
-    if mod_line.startswith("Module "):
-        mod_id = mod_line.split(" — ")[0].replace("Module ", "").strip()
+    for l in lines:
+        s = l.strip("*").strip()
+        if s.startswith("Module "):
+            mod_id = s.split(" — ")[0].replace("Module ", "").strip()
+            break
     return title, mod_id, date_s
 
 # Build topic_id → lesson file map (most recent match wins)

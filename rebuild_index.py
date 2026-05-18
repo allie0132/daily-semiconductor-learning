@@ -29,14 +29,29 @@ def parse_lesson_meta(fname):
         return fname.replace(".html", ""), None, fname[:10], None
     with open(md_path, encoding="utf-8") as f:
         content = f.read()
-    lines = [l.strip() for l in content.splitlines()[:4]]
-    title = lines[0].lstrip("# ") if lines else fname
-    date_s = lines[1].strip("*") if len(lines) > 1 else fname[:10]
-    mod_line = lines[2].strip("*") if len(lines) > 2 else ""
+    lines = [l.strip() for l in content.splitlines()[:10]]
+    # Title: first non-empty line starting with #
+    title = fname.replace(".html", "")
+    for l in lines:
+        if l.startswith("# "):
+            title = l.lstrip("# ")
+            break
+    # Date: first *..* line that looks like a date
+    date_s = fname[:10]
+    for l in lines:
+        stripped = l.strip("*").strip()
+        if stripped and any(m in stripped for m in ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]):
+            date_s = stripped
+            break
+    # Module id: first *Module X.X — ...* line
     mod_id = None
-    if mod_line.startswith("Module "):
-        mod_id = mod_line.split(" — ")[0].replace("Module ", "").strip()
-    # Extract additional learning section
+    for l in lines:
+        stripped = l.strip("*").strip()
+        if stripped.startswith("Module "):
+            parts = stripped.split(" — ", 1)
+            mod_id = parts[0].replace("Module ", "").strip()
+            break
+    # Additional learning section
     additional = None
     m = re.search(r'##\s+🔍 Additional Learning[:\s]+(.+?)\n([\s\S]+?)(?=\n##|\Z)', content)
     if m:
