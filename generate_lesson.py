@@ -406,13 +406,6 @@ with open("index.html", "w", encoding="utf-8") as f:
 {pre_html}
 </body>
 </html>""")
-<body>
-  <h1>📚 Daily Semiconductor Learning</h1>
-  <div class="sub">HBM Testing · Senior Engineer Level</div>
-  <div class="nav-links"><a href="curriculum.html">📋 Curriculum</a></div>
-  {sections_html_idx}
-</body>
-</html>""")
 
 # ── Rebuild index (combined curriculum + all lessons) ────────────────────────
 import importlib.util, sys as _sys
