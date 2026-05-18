@@ -82,6 +82,12 @@ for fname in sorted(os.listdir(lesson_dir)):
 pre_curriculum = sorted(pre_curriculum_map.values(), key=lambda x: x[0])
 additional_items.sort(key=lambda x: x[0])
 
+# Count additional items per module (used in section links)
+al_by_module = {}
+for date_s, topic_title, mod_id, al in additional_items:
+    key = mod_id.split(".")[0] if mod_id else "pre"
+    al_by_module.setdefault(key, []).append((date_s, topic_title, al))
+
 total_topics = sum(len(m["topics"]) for m in curriculum["modules"])
 done_topics = sum(1 for m in curriculum["modules"] for t in m["topics"] if t["done"])
 
@@ -112,6 +118,9 @@ for m in curriculum["modules"]:
                 f'<li class="upcoming"><span class="status">&#x25CB;</span>'
                 f'<span class="topic-info"><span class="topic-title dim">{short}</span></span></li>\n'
             )
+    al_count = len(al_by_module.get(str(m['id']), []))
+    al_link = (f'<a class="al-link" href="additional-learning.html#module-{m["id"]}">'
+               f'&#x1F50D; Additional Learning ({al_count})</a>') if al_count else ""
     modules_sections_html += f"""
 <div class="module" id="module-{m['id']}">
   <div class="module-head">
@@ -123,6 +132,7 @@ for m in curriculum["modules"]:
   </div>
   <div class="progress-bar"><div class="progress-fill" style="width:{pct}%"></div></div>
   <ul class="topic-list">{topics_html}</ul>
+  {al_link}
 </div>"""
 
 # ── Pre-curriculum (folded, deduplicated) ─────────────────────────────────────
@@ -147,7 +157,6 @@ if pre_curriculum:
 </details>"""
 
 overall_pct = int(done_topics / total_topics * 100) if total_topics else 0
-al_link = f'<a href="additional-learning.html">&#x1F50D; Additional Learning ({len(additional_items)})</a>' if additional_items else ""
 
 # ── Write index.html ──────────────────────────────────────────────────────────
 with open("index.html", "w", encoding="utf-8") as f:
@@ -163,6 +172,7 @@ with open("index.html", "w", encoding="utf-8") as f:
   .overall-bar {{ height: 4px; background: #1e2330; border-radius: 2px; margin-bottom: 6px; }}
   .overall-bar-fill {{ height: 4px; background: #22c55e; border-radius: 2px; }}
   .nav-links {{ font-size: 0.85rem; margin-bottom: 20px; }}
+  .al-link {{ display: inline-block; margin-top: 10px; font-size: 0.78rem; color: #a78bfa; }}
   .module {{ background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }}
   .module-head {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }}
   details.module summary {{ list-style: none; cursor: pointer; margin-bottom: 0; }}
@@ -195,7 +205,7 @@ with open("index.html", "w", encoding="utf-8") as f:
   <div class="sub">Senior Test Engineer &middot; 6 Modules &middot; {total_topics} Topics</div>
   <div class="overall-prog">Overall progress: {done_topics}/{total_topics} topics completed</div>
   <div class="overall-bar"><div class="overall-bar-fill" style="width:{overall_pct}%"></div></div>
-  <div class="nav-links">{al_link}</div>
+  <div class="nav-links"></div>
 </header>
 {modules_sections_html}
 {pre_html}
@@ -206,19 +216,30 @@ print("index.html rebuilt.")
 
 # ── Write additional-learning.html ────────────────────────────────────────────
 if additional_items:
-    items_html = ""
+    # Build module name lookup
+    mod_names = {str(m["id"]): m["name"] for m in curriculum["modules"]}
+
+    # Group by module number
+    grouped_al = {}
     for date_s, topic_title, mod_id, al in additional_items:
-        mod_label = f"Module {mod_id}" if mod_id else "Pre-Curriculum"
-        items_html += f"""
+        key = mod_id.split(".")[0] if mod_id else "pre"
+        grouped_al.setdefault(key, []).append((date_s, topic_title, al))
+
+    items_html = ""
+    for key in sorted(grouped_al.keys(), key=lambda x: (0 if x == "pre" else int(x))):
+        label = f"Module {key} — {mod_names.get(key, '')}" if key != "pre" else "Pre-Curriculum"
+        entries_html = ""
+        for date_s, topic_title, al in grouped_al[key]:
+            entries_html += f"""
 <div class="entry">
   <div class="entry-meta">
-    <span class="badge">{mod_label}</span>
     <span class="date">{date_s}</span>
     <span class="lesson-title">{topic_title}</span>
   </div>
   <h3>{al['title']}</h3>
   <p>{al['content']}</p>
 </div>"""
+        items_html += f'<div class="module-group" id="module-{key}"><h2>{label}</h2>{entries_html}</div>'
 
     with open("additional-learning.html", "w", encoding="utf-8") as f:
         f.write(f"""<!DOCTYPE html>
@@ -230,10 +251,11 @@ if additional_items:
 <style>
   {BASE_CSS}
   .nav {{ margin-bottom: 20px; font-size: 0.85rem; }}
-  .entry {{ background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }}
+  .module-group {{ margin-bottom: 28px; }}
+  .module-group h2 {{ font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+                      letter-spacing: .06em; color: #64748b; margin-bottom: 12px; }}
+  .entry {{ background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 10px; }}
   .entry-meta {{ display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }}
-  .badge {{ background: #1a2e1a; color: #86efac; font-size: 0.72rem; font-weight: 700;
-            padding: 2px 8px; border-radius: 4px; }}
   .date {{ font-size: 0.75rem; color: #475569; }}
   .lesson-title {{ font-size: 0.8rem; color: #64748b; font-style: italic; }}
   h3 {{ font-size: 1rem; font-weight: 700; color: #c4b5fd; margin-bottom: 8px; }}
