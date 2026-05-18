@@ -440,7 +440,6 @@ if tg_token and tg_chat_id:
         f"📊 Progress: {progress_bar}\n\n"
         f"[Read Lesson]({base_url}/daily-lessons/{base_name}.html)  ·  "
         f"[Curriculum]({base_url}/index.html#module-{module['id']})"
-        + (f"\n\n🔍 *Additional Learning*\n_{additional['title']}_\n{additional['content']}" if additional else "")
     )
     payload = json.dumps({"chat_id": tg_chat_id, "text": msg, "parse_mode": "Markdown"}).encode()
     req = urllib.request.Request(
