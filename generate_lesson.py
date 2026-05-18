@@ -368,7 +368,7 @@ if pre_curriculum:
         f'<span class="topic-date">{d}</span></span></li>\n'
         for d, t, fn in sorted(pre_curriculum)
     )
-    pre_html = f'<div class="module" id="pre-curriculum"><div class="module-head"><div class="module-meta"><span class="module-num dim">PRE</span><span class="module-name">Pre-Curriculum</span></div></div><ul class="topic-list">{items}</ul></div>'
+    pre_html = f'<details class="module pre-curriculum" id="pre-curriculum"><summary class="module-head"><div class="module-meta"><span class="module-num dim">PRE</span><span class="module-name">Pre-Curriculum</span><span class="module-prog">{len(pre_curriculum)} lessons</span></div></summary><ul class="topic-list">{items}</ul></details>'
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(f"""<!DOCTYPE html>
@@ -389,6 +389,11 @@ with open("index.html", "w", encoding="utf-8") as f:
   .overall-bar-fill {{ height: 4px; background: #22c55e; border-radius: 2px; }}
   .module {{ background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }}
   .module-head {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }}
+  details.module summary {{ list-style: none; cursor: pointer; margin-bottom: 0; }}
+  details.module summary::-webkit-details-marker {{ display: none; }}
+  details.module[open] summary {{ margin-bottom: 10px; }}
+  details.module summary .module-meta::before {{ content: "▶"; font-size: 0.65rem; color: #475569; margin-right: 4px; }}
+  details.module[open] summary .module-meta::before {{ content: "▼"; }}
   .module-meta {{ display: flex; align-items: center; gap: 10px; }}
   .module-num {{ background: #1e3a5f; color: #60a5fa; font-size: 0.72rem; font-weight: 700;
                  padding: 2px 8px; border-radius: 4px; }}

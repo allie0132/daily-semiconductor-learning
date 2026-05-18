@@ -16,6 +16,11 @@
   .overall-bar-fill { height: 4px; background: #22c55e; border-radius: 2px; }
   .module { background: #1e2330; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
   .module-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  details.module summary { list-style: none; cursor: pointer; margin-bottom: 0; }
+  details.module summary::-webkit-details-marker { display: none; }
+  details.module[open] summary { margin-bottom: 10px; }
+  details.module summary .module-meta::before { content: "▶"; font-size: 0.65rem; color: #475569; margin-right: 4px; }
+  details.module[open] summary .module-meta::before { content: "▼"; }
   .module-meta { display: flex; align-items: center; gap: 10px; }
   .module-num { background: #1e3a5f; color: #60a5fa; font-size: 0.72rem; font-weight: 700;
                  padding: 2px 8px; border-radius: 4px; }
@@ -168,13 +173,14 @@
 </ul>
 </div>
 
-<div class="module" id="pre-curriculum">
-  <div class="module-head">
+<details class="module pre-curriculum" id="pre-curriculum">
+  <summary class="module-head">
     <div class="module-meta">
       <span class="module-num dim">PRE</span>
       <span class="module-name">Pre-Curriculum</span>
+      <span class="module-prog">22 lessons</span>
     </div>
-  </div>
+  </summary>
   <ul class="topic-list"><li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-30-dynamic-power-down-sequencing-for-hbm3.html">Dynamic Power‑Down Sequencing for HBM3</a><span class="topic-date"></span></span></li>
 <li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-07-dynamic-voltage-scaling-for-hbm3-stress-characterization.html">Dynamic Voltage Scaling for HBM3 Stress Characterization</a><span class="topic-date"></span></span></li>
 <li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-08-eye-diagram-margin-analysis-for-hbm3-channels.html">Eye‑Diagram Margin Analysis for HBM3 Channels</a><span class="topic-date"></span></span></li>
@@ -198,6 +204,6 @@
 <li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-04-26-temperature-aware-parametric-testing-for-hbm.html">Temperature‑Aware Parametric Testing for HBM</a><span class="topic-date"></span></span></li>
 <li class="done"><span class="status">&#x1F4C4;</span><span class="topic-info"><a href="daily-lessons/2026-05-06-thermal-aware-calibration-of-hbm3-tsv-parasitics.html">Thermal‑Aware Calibration of HBM3 TSV Parasitics</a><span class="topic-date"></span></span></li>
 </ul>
-</div>
+</details>
 </body>
 </html>
