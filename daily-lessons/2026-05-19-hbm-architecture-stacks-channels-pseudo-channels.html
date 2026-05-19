@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM Architecture: Stacks, Channels & Pseudo‑Channels</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M1.1 Foundations</span></div>
+  <h1>HBM Architecture: Stacks, Channels & Pseudo‑Channels</h1>
+  <div class="meta">Tuesday, May 19 2026 · Lesson 1 of 56</div>
+</header>
+<div class="section"><h2>Physical Stack Overview</h2><p>HBM memory consists of multiple silicon dies bonded in a vertical stack using micro‑bump TSVs. A typical HBM2‑E device contains 8‑16 DRAM dies plus a separate logic die (IO and command decoder). The stack is encapsulated in an interposer or silicon bridge that routes high‑speed signals to the host processor.</p><ul><li><strong>Die count:</strong> 8, 12, or 16 DRAM dies (each 1 Gb‑2 Gb) plus a 1 Gb logic die.</li><li><strong>TSV pitch:</strong> 2.5 µm (typical) with 128‑256 TSVs per die for power/ground and 1024‑2048 data TSVs.</li><li><strong>Interposer:</strong> Si‑interposer (e.g., 10 µm pitch) carries the <code>DVDD</code>, <code>VDDQ</code>, and high‑speed differential pairs.</li></ul></div>
+<div class="section"><h2>Channel Architecture</h2><p>Each HBM stack is divided into independent <strong>channels</strong>. A channel is a 128‑bit (16‑byte) wide data path that operates at up to 3.2 GT/s per pin (HBM2‑E). The channel consists of:</p><ul><li>16 data lanes (8‑bit per lane) per direction.</li><li>2 address lanes and 2 command lanes (CK/CK#). </li><li>Separate VREF and ODT control.</li></ul><p>HBM2‑E typically provides 8 channels per stack, delivering up to 8 × 256 GB/s = 2 TB/s aggregate bandwidth.</p></div>
+<div class="section"><h2>Pseudo‑Channel Concept</h2><p>To simplify host controller design, the JEDEC spec defines <strong>pseudo‑channels</strong> as logical groupings of two physical channels that share a common command/address bus. This reduces the number of CA pins from 2 × 8 = 16 to 8, while maintaining independent data lanes.</p><ul><li>Each pseudo‑channel still provides 256‑bit effective data width (two 128‑bit channels).</li><li>Timing parameters (tRCD, tRP, tRC) are applied per physical channel; pseudo‑channel alignment must be verified in test.</li><li>Memory controllers may interleave accesses across the two physical channels to balance load and improve eye‑diagram margin.</li></ul></div>
+<div class="section"><h2>Signal Integrity & Timing Considerations</h2><p>High‑speed operation across the interposer requires careful control of loss and jitter:</p><ul><li><code>tCK</code> for HBM2‑E is as low as 0.78 ns (1.28 GHz). </li><li>Eye‑width specifications: 70 % UI aperture, 30 % UI jitter tolerance (JESD235C §4.3).</li><li>Impedance control: 50 Ω differential pair, ±5 % tolerance.</li><li>Termination: On‑die termination (ODT) programmable per channel; must be calibrated during BIST.</li></ul></div>
+<div class="section"><h2>Testing Implications</h2><p>From a test engineer perspective, the stack‑level architecture dictates test flow:</p><ul><li>Per‑die BIST (March, MARCH‑C) runs on each DRAM die before stack integration.</li><li>Channel‑level stress tests (e.g., BLISS, per‑channel pattern) validate timing margins.</li><li>Pseudo‑channel validation requires coordinated CA sequencing across the paired channels; mismatch is a common failure mode.</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>HBM stacks are composed of multiple DRAM dies plus a logic die bonded via TSVs on an interposer.</li><li>Each physical channel is a 128‑bit wide data path; up to 8 channels give multi‑TB/s bandwidth.</li><li>Pseudo‑channels logically merge two physical channels to reduce CA pins while preserving data width.</li><li>Signal integrity (impedance, ODT, jitter) must be validated per channel and per pseudo‑channel.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C – HBM2E Specification</div><div class="ref-detail">Section 4.2‑4.5, 2022</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD79-4 – HBM2 Specification</div><div class="ref-detail">Rev. 1.0, 2015</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">M. Sharf et al., "HBM2E Stack Design and Testing," IEEE Transactions on Components, Packaging and Manufacturing Technology, vol. 13, no. 4, 2023.</div><div class="ref-detail">doi:10.1109/TCPMT.2023.3290145</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Micron HBM2E 8‑Gb/s 1.2 V DDR Memory Datasheet</div><div class="ref-detail">MT53E256M32D2NL‑1G, Rev B, 2023</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">AMD Infinity Fabric and HBM Integration Guide</div><div class="ref-detail">https://developer.amd.com/hbm‑integration‑guide</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-1">HBM3 Pseudo‑Channel Enhancements</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
