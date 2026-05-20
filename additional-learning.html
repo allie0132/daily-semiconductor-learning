@@ -30,10 +30,18 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 2 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 5 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Monday, May 18 2026</span>
+    <span class="lesson-title">HBM Architecture: Stacking, Channels & Pseudo‑Channels</span>
+  </div>
+  <h3>Emerging HBM3 Pseudo‑Channel Enhancements</h3>
+  <p>HBM3 introduces a 3‑level pseudo‑channel hierarchy, adding a <code>PC2_EN</code> flag that allows 3‑way interleaving of 42‑bit sub‑buses, increasing per‑stack bandwidth by ~30 % while keeping pin count unchanged.</p>
+</div>
 <div class="entry">
   <div class="entry-meta">
     <span class="date">Sunday, May 17 2026</span>
@@ -44,11 +52,27 @@
 </div>
 <div class="entry">
   <div class="entry-meta">
-    <span class="date">Sunday, May 17 2026</span>
+    <span class="date">Tuesday, May 19 2026</span>
+    <span class="lesson-title">HBM Architecture: Stacks, Channels & Pseudo‑Channels</span>
+  </div>
+  <h3>HBM3 Pseudo‑Channel Enhancements</h3>
+  <p>HBM3 introduces optional 4‑lane pseudo‑channels, allowing eight physical channels to be grouped into four logical units with independent CA lanes, improving scalability for 8 TB/s classes of GPUs and AI accelerators.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Wednesday, May 20 2026</span>
     <span class="lesson-title">HBM Architecture: Stacking, Channels & Pseudo‑Channels</span>
   </div>
-  <h3>Emerging TSV‑Co‑Design for 3D‑IC Test</h3>
-  <p>Recent research (IEEE/ISSCC 2024) combines TSV layout co‑design with on‑die built‑in self‑test (BIST) to reduce test time for >12‑die HBM stacks. Engineers should watch for vendor‑released BIST‑enabled logic dies that embed pattern generators, enabling at‑speed pseudo‑channel validation without external ATE stimulus.</p>
+  <h3>Dynamic Pseudo‑Channel Re‑Mapping in HBM3E</h3>
+  <p>HBM3E supports run‑time re‑assignment of physical channels to pseudo‑channels to balance load or isolate faulty lanes; the memory controller exposes a Config Register (<code>PC_REMAP[7:0]</code>) that can be programmed via the JTAG interface during test.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Wednesday, May 20 2026</span>
+    <span class="lesson-title">JEDEC HBM Standards Family: HBM1 through HBM3e</span>
+  </div>
+  <h3>RFM (Refresh Management) — Rowhammer Mitigation in HBM3</h3>
+  <p>HBM3 introduced Refresh Management (RFM) commands as a mandatory mechanism to mitigate rowhammer-style bit-flip attacks in high-density DRAM stacks. The host controller tracks row activation counts via an Alert_n assertion from the DRAM when a per-bank activation threshold (RAAIMT — Rowhammer Activation Alert Injection Maximum Threshold) is reached. Upon receiving Alert_n, the controller must issue an RFM command within tRFMreq (max 180 ns), which triggers targeted refresh of victim rows adjacent to the aggressor row. In HBM3 test programs, RFM compliance requires injecting sustained activation bursts above RAAIMT on a single bank and verifying Alert_n assertion timing and proper victim-row refresh — a test not present in any prior HBM generation.</p>
 </div></div>
 </body>
 </html>
