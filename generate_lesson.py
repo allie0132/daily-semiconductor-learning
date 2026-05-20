@@ -443,6 +443,8 @@ print(f"Lesson saved: {html_path} — {topic}")
 # ── Mark curriculum done ──────────────────────────────────────────────────────
 mark_done(topic_id)
 print(f"Curriculum progress: {done_count + 1}/{total_count}")
+import subprocess as _sp
+_sp.run(["git", "add", "curriculum.json"], cwd=str(curriculum_path.parent.resolve()), check=False)
 
 # ── Telegram ──────────────────────────────────────────────────────────────────
 tg_token = os.environ.get("TELEGRAM_TOKEN")
