@@ -104,8 +104,8 @@
 </div>
 
 <div class="additional">
-  <h2>🔍 Additional Learning</h2>
-  <p><strong>RFM (Refresh Management) — Rowhammer Mitigation in HBM3:</strong> HBM3 introduced RFM commands as a mandatory mechanism to mitigate rowhammer-style bit-flip attacks. The host controller tracks row activation counts via an <code>Alert_n</code> assertion from the DRAM when a per-bank activation threshold (RAAIMT) is reached. Upon receiving <code>Alert_n</code>, the controller must issue an RFM command within <code>tRFMreq</code> (max 180 ns), triggering targeted refresh of victim rows adjacent to the aggressor row. In HBM3 test programs, RFM compliance requires injecting sustained activation bursts above RAAIMT on a single bank and verifying <code>Alert_n</code> assertion timing and proper victim-row refresh — a test not present in any prior HBM generation.</p>
+  <h2>&#x1F50D; Additional Learning</h2>
+  <a href="../additional-learning.html#module-1">RFM (Refresh Management) — Rowhammer Mitigation in HBM3</a>
 </div>
 
 <div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
