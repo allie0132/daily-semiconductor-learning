@@ -37,7 +37,7 @@
         {
           "id": "1.7",
           "title": "HBM Power Architecture — VDD domains, VDDQ, power gating schemes",
-          "done": false
+          "done": true
         },
         {
           "id": "1.8",
