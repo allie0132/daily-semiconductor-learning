@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 7 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 8 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -49,6 +49,14 @@
   </div>
   <h3>Emerging HBM3 Pseudo‑Channel Enhancements</h3>
   <p>HBM3 introduces a 3‑level pseudo‑channel hierarchy, adding a <code>PC2_EN</code> flag that allows 3‑way interleaving of 42‑bit sub‑buses, increasing per‑stack bandwidth by ~30 % while keeping pin count unchanged.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Monday, May 25 2026</span>
+    <span class="lesson-title">HBM Capacity and Density Evolution: HBM1 to HBM3E</span>
+  </div>
+  <h3>Pseudo-Channel Architecture and Its ATE Test Implications</h3>
+  <p>HBM3 introduced pseudo-channels (PC) where each 64-bit physical channel is divided into two 32-bit pseudo-channels that share address/command buses but maintain independent data paths, CRC engines, and error status. This means a test program must independently exercise all 32 PCs per stack for march algorithms, BIST, and CRC verification — a single physical channel failure can appear as either one or two PC failures depending on whether the fault is in the shared address decoder or in an independent data path. On ATE, pattern time nearly doubles versus HBM2E for equivalent coverage, and per-PC training (tDQSCK, ODT, ZQ) must be serialized, adding significant test-time overhead that vendors manage through concurrent multi-stack testing on high-pin-count testers such as the Advantest T2000 HBM.</p>
 </div>
 <div class="entry">
   <div class="entry-meta">
