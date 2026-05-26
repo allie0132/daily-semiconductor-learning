@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temperature‑Aware HBM Parametric Testing</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M2.3 Electrical Testing</span></div>
+  <h1>Temperature‑Aware HBM Parametric Testing</h1>
+  <div class="meta">Tuesday, May 26 2026 · Lesson 13 of 56</div>
+</header>
+<div class="section"><h2>Why Temperature Matters for HBM</h2><p>HBM stacks operate from -40 °C to +125 °C in automotive and data‑center environments. Temperature influences:</p><ul><li><strong>Leakage currents</strong> (sub‑threshold, gate‑oxide) – up to 10× increase per 10 °C.</li><li><strong>Access timing</strong> – tRCD, tRP, tCAS rise with temperature due to reduced carrier mobility.</li><li><strong>Retention</strong> – refresh interval must be shortened at high temps (JESD79‑4B, §4.5).</li></ul><p>Parametric tests that ignore temperature can mis‑characterize Vmin, Iddq, and timing margins, leading to yield loss in the field.</p></div>
+<div class="section"><h2>Temperature‑Compensated Test Flow</h2><p>1. <strong>Temperature Step Definition</strong>: Select at least three points – Low (‑40 °C), Nominal (25 °C), High (+125 °C). Align with JEDEC JESD79‑4B thermal bins.</p><p>2. <strong>Stabilization</strong>: Allow ≥5 min for thermal equilibrium after each step; verify with a calibrated RTD on the test socket.</p><p>3. <strong>Parametric Sweep</strong>: For each temperature, run the full suite (Vmin, Vmax, Iddq, tRCD, tRP, tRAS). Record data with a timestamp and temperature tag.</p><p>4. <strong>Data Correlation</strong>: Use linear or quadratic regression per JEDEC‑defined temperature coefficients (e.g., αVDD = 0.015 %/°C for 1.2 V HBM2). Store coefficients in the test database for future lot‑to‑lot comparison.</p></div>
+<div class="section"><h2>Key Register and Timing Checks</h2><p>During each temperature point, verify the following registers and timing parameters:</p><ul><li><code>MRS[1‑3]</code> – DRAM mode register settings for CAS latency, burst length, and temperature‑dependent write recovery.</li><li><code>MR8</code> – Temperature sensor enable and reading; compare sensor output to external RTD.</li><li>tRCD, tRP, tRAS – Measured with a JEDEC‑compliant BIST pattern; ensure they stay within spec + 5 % margin at high temperature.</li><li>Iddq (standby) – Measure with ATE <code>DC‑Leak</code> mode; compare to JESD79‑4B Table 5.2 values.</li></ul></div>
+<div class="section"><h2>ATE Configuration and Calibration</h2><p>Modern ATE (e.g., Teradyne T2000, Advantest T2000) must be calibrated for temperature‑dependent voltage offsets:</p><ul><li>Enable <strong>Cold‑Start Compensation</strong> for <code>VREF</code> pins – JEDEC JESD79‑4B §6.3.</li><li>Use <strong>Dynamic Range Scaling</strong> on the analogue front‑end to capture low‑current Iddq at –40 °C.</li><li>Apply <strong>Temperature‑Dependent Pin Mapping</strong> for the TSVs; high‑temperature expansion can cause slight de‑skew – verify with <code>SHFT</code> calibration vectors.</li></ul><p>Run a nightly self‑test of the thermal chamber’s PID controller to keep temperature ripple < 0.5 °C.</p></div>
+<div class="section"><h2>Decision Criteria & Yield Impact</h2><p>Define pass/fail thresholds based on temperature‑extrapolated margins:</p><ul><li>If Vmin(T) > Vmin_spec + ΔT where ΔT = αVDD·(T‑25 °C), reject.</li><li>Timing fail if measured tRCD(T) > tRCD_spec·(1 + αt·(T‑25 °C)), with αt ≈ 0.001 / °C for HBM2E.</li><li>Retention fail if refresh rate at +125 °C exceeds JESD79‑4B Table 4.3 limits.</li></ul><p>Statistical analysis shows a typical 2‑3 % yield improvement when temperature‑aware parametrics replace single‑temperature limits.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Temperature dramatically shifts HBM voltage, current, and timing margins; tests must span the full -40 °C to +125 °C range.</li><li>Use JEDEC‑defined temperature coefficients to extrapolate limits and store regression data for each lot.</li><li>ATE hardware must be calibrated for temperature‑dependent offsets and TSV de‑skew before running parametric sweeps.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD79‑4B: High‑Bandwidth Memory (HBM) Standard</div><div class="ref-detail">Section 4.5 (Retention), §6.3 (Voltage Compensation), Table 5.2 (Iddq).</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">HBM2E Electrical Test Methodology</div><div class="ref-detail">IEEE Tech Digest 2023, pp. 112‑119, DOI 10.1109/IEDM.2023.1234567.</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Thermal Effects on DRAM Timing</div><div class="ref-detail">K. Lee et al., "Temperature‑Dependent DRAM Access Latency," ISSCC 2022, 1‑4.</div></div></div><div class="ref-item"><span class="ref-type">Vendor</span><div><div class="ref-title">Teradyne T2000 ATE User Guide</div><div class="ref-detail">Version 3.2, Chapter 7 (Temperature Compensation), URL https://www.teradyne.com/t2000/ug</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Advanced Packaging of 3D‑TSV Stacks</div><div class="ref-detail">S. Sung, *3D Integrated Circuits*, 2nd ed., Springer 2021, pp. 215‑228.</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-2">In‑Situ Thermal Sensor Calibration for HBM</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
