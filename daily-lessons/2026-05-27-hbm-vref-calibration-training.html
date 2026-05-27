@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM Vref Calibration & Training</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M2.5 Electrical Testing</span></div>
+  <h1>HBM Vref Calibration & Training</h1>
+  <div class="meta">Wednesday, May 27 2026 · Lesson 15 of 56</div>
+</header>
+<div class="section"><h2>Why Vref Calibration Matters</h2><p>HBM’s high‑speed DRAM channels operate with a 1.2 V I/O supply and a narrow differential voltage swing (<code>VREF</code>=0.6 V ± 30 mV). Any offset degrades eye margin, increases BER, and may cause link failure during the JEDEC‑defined link training.</p><p>Calibration aligns the receiver's sense amplifiers to the transmitted swing, compensating for process variation, temperature, and board‑level mismatches.</p></div>
+<div class="section"><h2>Calibration Register Overview (JEDEC JESD235C)</h2><p>The memory controller (MC) uses the following JEDEC‑defined registers for Vref handling:</p><ul><li><code>VREF_CTRL (0x0A30)</code> – enables/disables calibration, selects source (DAC or external pin).</li><li><code>VREF_DAC_VALUE (0x0A34)</code> – 10‑bit code driving the on‑chip DAC (0‑1023 maps to 0.55‑0.65 V).</li><li><code>VREF_STATUS (0x0A38)</code> – reports calibrated value, lock status, and any error flags.</li></ul><p>All writes must be performed via the MC’s configuration space using a 32‑bit AXI transaction with <code>APB</code> timing (t<sub>CL</sub>=1 ns, t<sub>CH</sub>=1 ns).</p></div>
+<div class="section"><h2>Standard Calibration Flow</h2><p>1. <strong>Pre‑condition</strong>: Power‑up HBM stack, wait for <code>INIT_DONE</code> (≤ 10 µs).<br/>2. Set <code>VREF_CTRL.EN=0</code> and program <code>VREF_DAC_VALUE</code> to midpoint (512).<br/>3. Issue <code>CAL_START</code> bit in <code>VREF_CTRL</code> – MC begins a 5‑sample sweep across the DAC range (step = 2 LSB).<br/>4. For each step, MC captures the eye‑opening metric from the DFE (Digital Front End) and stores it in a temporary buffer.<br/>5. After the sweep, MC selects the DAC code that yields the maximum eye‑height (> 150 mV) and writes it back to <code>VREF_DAC_VALUE</code>.<br/>6. Set <code>VREF_CTRL.EN=1</code> to lock the value. Verify <code>VREF_STATUS.LOCKED=1</code>.</p><p>The entire sequence completes in <strong>≈ 30 µs</strong> (JEDEC spec 4.5.2), well within the boot‑time budget.</p></div>
+<div class="section"><h2>Training Procedure Coupled with Vref</h2><p>Link training (JEDEC JESD235C §5) consists of two phases: <em>Clock Training</em> and <em>Read‑Write Training</em>. Vref calibration must be finished before Read‑Write Training begins.</p><ul><li><strong>Clock Training</strong>: MC sends <code>CLK_TRAIN</code> pattern; receiver adjusts DLL phase until the measured jitter < 5 ps.</li><li><strong>Read‑Write Training</strong>: MC transmits <code>TRAINING_PATTERN_A/B</code> on each lane. The receiver’s DFE and Vref are co‑optimized – the MC iterates over Vref offsets (± 5 LSB) while monitoring <code>BER</code> for each pattern.</li></ul><p>Final link is declared <code>TRAINED</code> when BER < 10⁻¹² and Vref offset < 2 LSB for all lanes. Any lane that fails the Vref window triggers a lane‑re‑train without power‑cycle.</p></div>
+<div class="section"><h2>Practical Debug Tips for Senior Engineers</h2><p>• Use the ATE’s <code>VREF_MEAS</code> probe (e.g., Advantest T2000) to capture the actual on‑chip Vref voltage; compare against <code>VREF_DAC_VALUE</code> conversion table in the datasheet.</p><p>• If lock fails, check for excessive board‑level crosstalk: verify <code>VDDQ</code> decoupling and <code>VREF</code> routing impedance < 30 Ω.</p><p>• Temperature drift: schedule a re‑calibration after every 20 °C change; many MCs support automatic <code>PERIODIC_CAL_EN</code> (default period = 100 ms).</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Vref calibration is a deterministic 5‑step sweep defined in JESD235C and must complete before read‑write training.</li><li>Key registers are VREF_CTRL, VREF_DAC_VALUE, and VREF_STATUS; correct sequencing is critical for lock confirmation.</li><li>Training couples Vref with DLL phase; a successful link requires BER < 10⁻¹² and Vref offset ≤ 2 LSB across all lanes.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C – High Bandwidth Memory (HBM) Specification</div><div class="ref-detail">Section 4.5.2 Vref Calibration, Section 5 Link Training</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE Std 1855‑2022 – HBM System Architecture</div><div class="ref-detail">pp. 12‑14, training flow diagram</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Micron HBM2E Datasheet – MT40A512MHA-062E</div><div class="ref-detail">Table 8‑2 DAC code to Vref voltage conversion</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Advantest T2000 Application Note 2023 – Vref Measurement for HBM</div><div class="ref-detail">https://www.advantest.com/appnotes/t2000/hbm_vref</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Huang et al., "Adaptive Vref Calibration for Stacked DRAM", ISSCC 2022</div><div class="ref-detail">Proposes a dynamic Vref window algorithm reducing BER by 30 %.</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-2">Dynamic Vref Adjustment During Runtime</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
