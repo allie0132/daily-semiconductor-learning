@@ -1,11 +1,12 @@
 """
-Inject a pre-generated lesson into the generate_lesson pipeline.
-Runs all post-generation steps: file saving, index rebuild, curriculum update, Telegram.
+Generates today's lesson for topic 2.6 using inline content (no external API),
+then runs the rest of the generate_lesson.py pipeline.
 """
-import json, os, re, subprocess, urllib.request
+import json, os, re, subprocess
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
+import importlib.util, sys
 
 today = date.today().isoformat()
 now_et = datetime.now(ZoneInfo("America/New_York"))
@@ -13,6 +14,7 @@ date_str = now_et.strftime("%A, %b %d %Y")
 lesson_dir = "daily-lessons"
 os.makedirs(lesson_dir, exist_ok=True)
 
+# ── Curriculum ────────────────────────────────────────────────────────────────
 curriculum_path = Path("curriculum.json")
 with open(curriculum_path, encoding="utf-8") as f:
     curriculum = json.load(f)
@@ -34,13 +36,13 @@ def mark_done(topic_id):
 
 def curriculum_progress():
     total = sum(len(m["topics"]) for m in curriculum["modules"])
-    done = sum(1 for m in curriculum["modules"] for t in m["topics"] if t["done"])
+    done  = sum(1 for m in curriculum["modules"] for t in m["topics"] if t["done"])
     return done, total
 
 module, topic_item = next_topic()
 if topic_item is None:
     print("Curriculum complete!")
-    exit(0)
+    sys.exit(0)
 
 topic_title  = topic_item["title"]
 module_name  = module["name"]
@@ -48,85 +50,86 @@ topic_id     = topic_item["id"]
 done_count, total_count = curriculum_progress()
 print(f"Module {topic_id}: {topic_title}")
 
-# ── Pre-generated lesson content ──────────────────────────────────────────────
+# ── Inline lesson content ─────────────────────────────────────────────────────
 lesson = {
-  "topic": "HBM vs DDR5 and GDDR6: Bandwidth, Power, and Density Tradeoffs",
-  "summary": "HBM delivers 10-20× the bandwidth of DDR5 at a fraction of the energy-per-bit, achieved through wide parallel buses on silicon interposers rather than fast serial links.",
+  "topic": "Read/Write Leveling and Skew Compensation Testing",
+  "summary": "HBM read/write leveling aligns multi-channel DQ/DQS timing across the silicon interposer to meet JESD235C skew budgets under process, voltage, and temperature variation.",
   "sections": [
     {
-      "title": "Interface Architecture: Wide-and-Slow vs Narrow-and-Fast",
-      "content": "<p>The fundamental architectural divide between HBM and conventional DRAM is the signaling philosophy. HBM (JESD238/JESD238A) uses a <strong>1024-bit-wide pseudo-channel bus</strong> running at 3.6 Gbps per pin for HBM3, while DDR5 (JESD79-5B) uses a <strong>64-bit bus</strong> running at up to 6400 MT/s per channel. GDDR6 (JESD250D) sits between the two: 32 bits per channel at up to 18 Gbps, arranged in 8–16 independent channels per device.</p><p>HBM achieves its wide bus through <strong>Through-Silicon Vias (TSVs)</strong> and placement on a silicon interposer, keeping trace lengths under 1 mm. This dramatically relaxes signal integrity constraints — no DLL, DFE, or complex ODT schemes are required at the DRAM interface. DDR5 and GDDR6 by contrast must combat ISI, stub reflections, and cross-talk over PCB traces of 50–100 mm, requiring complex equalization and multi-Gbps SerDes-like signaling.</p><p>The practical consequence for test engineers: HBM requires <strong>functional testing through the ATE TSV probe</strong> or via the host SoC, while DDR5/GDDR6 are tested as standalone packages with standard boundary-scan and JEDEC SHMOO patterns.</p>"
+      "title": "Why Leveling Is Critical in HBM",
+      "content": "<p>HBM connects the GPU/CPU die to stacked DRAM through thousands of microbumps on a 2.5D silicon interposer. Each of the 8 independent pseudo-channels carries 128-bit data bursts at up to 6.4 GT/s (HBM3E). Unlike DDR5, there is no on-die termination negotiation — the controller must compensate for all skew sources in the bump/RDL/TSV path.</p><p>Skew sources include: <strong>microbump-to-microbump pitch variation</strong> (~±5 ps per 40 µm pitch change), <strong>RDL trace length mismatch</strong> on the interposer, <strong>TSV delay spread</strong> inside the HBM stack (&lt;5 µm diameter vias at 55 µm pitch), and <strong>on-die clock distribution jitter</strong> within each DRAM die. JESD235C Table 10 specifies a maximum AC input setup/hold window (tDQSS) of ±0.27 UI at the HBM3 data rate, leaving very little margin for uncorrected skew.</p>"
     },
     {
-      "title": "Bandwidth Comparison: Specs and Real-World Numbers",
-      "content": "<p>Peak bandwidth figures from current-generation devices:</p><ul><li><strong>HBM3e (JESD238A):</strong> 1024-bit bus × 3.6 Gbps/pin = ~461 GB/s per stack; 2-stack configs (e.g., H100 SXM5) reach ~3.35 TB/s aggregate</li><li><strong>HBM3 (JESD238):</strong> 819 GB/s per stack at 3.2 Gbps/pin</li><li><strong>HBM2e (JESD235B):</strong> up to 460 GB/s per stack at 3.6 Gbps/pin (Samsung Flashbolt)</li><li><strong>GDDR6X (PAM4, NVIDIA A100/H100 PCIe):</strong> 21 Gbps × 384-bit bus = ~1.008 TB/s (RTX 4090)</li><li><strong>GDDR6 (JESD250D):</strong> 16 Gbps × 384-bit = ~768 GB/s on high-end GPUs</li><li><strong>DDR5-6400 (JESD79-5B):</strong> 51.2 GB/s per channel; dual-channel = 102.4 GB/s</li></ul><p>Key insight: a <strong>4-stack HBM3e system</strong> delivers roughly <strong>32× the bandwidth</strong> of a dual-channel DDR5 platform. Even a single HBM stack outperforms all but the widest GDDR6 configurations, while consuming substantially less board area.</p>"
+      "title": "Write Leveling: DQS-to-CK Alignment",
+      "content": "<p>Write leveling adjusts the phase of each pseudo-channel's DQS strobe relative to the CK clock received at the DRAM. The controller sweeps the DQS launch edge in fine-grained steps (typically 1/64 or 1/128 UI resolution in the PHY) and observes the DRAM's write leveling feedback register (Mode Register MR4[2:0] in JESD235C).</p><ul><li><strong>Procedure:</strong> Enter write leveling mode via MPC command; drive DQS pulses while CK runs; read back the DRAM's edge-detect output; binary-search for the 0→1 transition; set PHY DQS delay to center of passing window.</li><li><strong>ATE implementation:</strong> On a Teradyne UltraFLEX or Advantest T2000, the per-pin timing hardware steps DQS in &lt;1 ps increments. The training loop runs in-system via the controller's firmware or via tester pattern injection using the MBIST engine.</li><li><strong>Pass criterion:</strong> All pseudo-channels must converge to DQS centering within ±0.15 UI of nominal (JESD235C §6.4). Channels that do not converge flag a marginal bump or TSV open.</li></ul>"
     },
     {
-      "title": "Power and Energy-Per-Bit Analysis",
-      "content": "<p>Power efficiency is HBM's most decisive advantage at scale. The metric of interest is <strong>energy-per-bit (pJ/bit)</strong>, which normalizes for data rate:</p><ul><li><strong>HBM3:</strong> ~1.0–1.2 pJ/bit (0.9V core I/O, short traces, no equalization overhead)</li><li><strong>GDDR6X:</strong> ~3.5–4.0 pJ/bit (PAM4 signaling adds CDR and DFE power; 1.35V VDDQ)</li><li><strong>GDDR6:</strong> ~2.8–3.2 pJ/bit</li><li><strong>DDR5:</strong> ~10–15 pJ/bit (long PCB traces, ODT termination losses, 1.1V VDDQ but high-frequency SSO current)</li></ul><p>At AI training workloads requiring sustained 1 TB/s of memory bandwidth, the difference between HBM3 and DDR5 translates to <strong>tens of watts of memory I/O power alone</strong>. HBM's low-voltage, short-trace interface also benefits from reduced EMI and the elimination of on-board decoupling capacitor arrays needed for DDR5 simultaneous switching noise (SSN).</p><p>For test engineers: HBM IDD testing (JESD238 Section 5) specifies VDD=1.05V and VDDQ=1.05V rails, significantly lower than DDR5's VDDQ=1.1V and VPP=1.8V, simplifying ATE power supply requirements per stack.</p>"
+      "title": "Read Leveling: DQ-to-DQS Capture Window",
+      "content": "<p>Read leveling centers the DQ bits within the DQS preamble window as seen at the controller PHY input. Because each DQ bit traverses a slightly different path length through the interposer RDL, per-bit deskew is required in addition to per-channel DQS phase adjustment.</p><p>The standard two-step sequence is:</p><ul><li><strong>Step 1 — Gate training:</strong> Find the DQS preamble rising edge by issuing back-to-back READ commands and sweeping the DQS gate enable delay until the first valid edge is captured. The PHY measures the gate-open window (tDQSCK from JESD235C Table 7) which must span ≥0.5 UI.</li><li><strong>Step 2 — Per-bit deskew:</strong> Write a fixed PRBS7 or checkerboard pattern, then sweep each DQ lane's delay independently; identify center of the bit's eye using a bit-error-rate scan or single-edge comparison. On HBM3E at 6.4 GT/s the UI is 156 ps, so per-bit delays must be resolved to &lt;5 ps (≈1/32 UI).</li></ul><p>ATE testers using an on-chip BIST engine can run per-bit deskew in parallel across all 8 pseudo-channels simultaneously, reducing test time by 8× vs. sequential scanning.</p>"
     },
     {
-      "title": "Memory Density and Capacity Comparison",
-      "content": "<p>Memory technology density is measured in both <strong>die area efficiency (Gb/mm²)</strong> and <strong>system-level capacity</strong>:</p><ul><li><strong>HBM3e:</strong> Up to 64 GB per stack (12-Hi × 24 Gb dies + base die); stacks typically 30 mm² footprint on interposer</li><li><strong>HBM3:</strong> Up to 24 GB per stack (8-Hi × 24 Gb), 9.6 mm × 7.7 mm stack footprint</li><li><strong>GDDR6:</strong> 16 Gb per die standard; 24 Gb dies emerging; packages are 14 mm × 10 mm BGA</li><li><strong>DDR5 DIMM:</strong> Up to 128 GB per DIMM using 3DS or monolithic 32 Gb dies; LRDIMMs extend to 256 GB</li></ul><p>GDDR6 and DDR5 benefit from <strong>independent package form factors</strong> — they can be soldered directly on PCB without interposer infrastructure, enabling simpler system integration at lower cost. HBM requires a <strong>silicon or organic interposer</strong> (Intel EMIB, TSMC CoWoS, Samsung X-Cube), adding $300–$1000 per package to substrate cost. This is the primary reason AI accelerators are expensive: a single CoWoS-L reticle substrate for an H100 exceeds the silicon cost.</p>"
+      "title": "Skew Compensation Testing on ATE",
+      "content": "<p>After leveling, a residual skew characterization sweep verifies that the trained delays hold across the full operating envelope:</p><ul><li><strong>PVT corners:</strong> Repeat leveling at (fast-fast, 0.95V, 0°C) and (slow-slow, 1.05V, 85°C) to confirm the PHY delay range covers all corners without saturating the delay line.</li><li><strong>Shmoo plots:</strong> 2D frequency vs. voltage shmoos at the leveled state reveal the yield cliff; a cliff slope steeper than 50 mV/100 MHz typically indicates residual skew rather than a bulk timing margin problem.</li><li><strong>Eye-diagram correlation:</strong> For engineering characterization, a high-bandwidth oscilloscope (≥25 GHz) probed on interposer test pads confirms that the trained eye center matches the PHY's calculated optimum. Discrepancies &gt;0.05 UI indicate a model error in the skew budget.</li><li><strong>Stressed retrain:</strong> After 1000 thermal cycles (−40°C to +125°C per JEDEC JESD22-A104), rerun leveling and measure the delta in trained delay values. Delta &gt;0.05 UI signals bump fatigue or TSV void growth.</li></ul>"
     },
     {
-      "title": "Application Selection Matrix and Test Implications",
-      "content": "<p>Choosing the right memory type involves balancing bandwidth, power, capacity, cost, and testability:</p><ul><li><strong>HBM:</strong> AI/ML accelerators, HPC GPU, networking ASICs (bandwidth-critical, power-constrained, cost-insensitive)</li><li><strong>GDDR6/6X:</strong> Consumer and prosumer GPUs, automotive vision SoCs (high bandwidth, moderate power, cost-sensitive, no interposer)</li><li><strong>DDR5:</strong> CPU main memory, storage controllers, general-purpose compute (capacity-critical, latency-sensitive, cost-optimized)</li></ul><p>For ATE test strategy, each type requires different infrastructure: HBM demands <strong>high pin-count probe cards</strong> (2000+ pins for a 4-stack device), GDDR6 uses standard BGA contactors with 50-ohm transmission line calibration, and DDR5 requires <strong>DFT-aware LPDDR5/DDR5 protocol-aware ATE channels</strong> with ≥6.4 Gbps timing accuracy.</p><p>HBM cannot be tested in isolation post-assembly — the JEDEC JESD235/238 burn-in and characterization tests must occur either at the DRAM level (pre-stack) or through the host SoC's memory controller, making co-design of test access mechanisms (TAM) and BIST critical for yield learning.</p>"
+      "title": "Common Failure Signatures and Debug",
+      "content": "<p>Leveling failures fall into three diagnostic categories:</p><ul><li><strong>No convergence (all DQS delay steps fail):</strong> Indicates an open microbump, a shorted TSV pair, or a dead PHY lane. Isolate with a continuity test (DCR &lt;2 Ω expected) followed by a TSV chain resistance measurement from the BIST diagnostic register.</li><li><strong>Narrow passing window (&lt;0.2 UI):</strong> Excessive crosstalk from adjacent power/ground bump inductance, or a marginal via stack with higher-than-spec resistance. Check PDN impedance at 1–3 GHz range; resonances above 100 mΩ correlate with narrow leveling windows.</li><li><strong>Channel-to-channel skew mismatch (&gt;0.1 UI spread across 8 channels):</strong> RDL routing asymmetry on the interposer. Cross-reference the interposer layout GDS to measure trace length delta; each 1 mm of RDL at εr = 3.7 adds ~5.5 ps of delay.</li></ul><p>Systematic logging of trained delay values across a production lot in SPC charts allows early detection of process drift in interposer RDL patterning before yield falls.</p>"
     }
   ],
   "key_takeaways": [
-    "HBM's 1024-bit wide bus at low per-pin data rate delivers 5–30× more bandwidth than DDR5 with ~10× better energy-per-bit efficiency, at the cost of silicon interposer integration.",
-    "GDDR6/6X occupies a practical middle ground — higher bandwidth than DDR5 with PCB-level integration, but 3–4× worse energy-per-bit than HBM and limited to GPU-style workloads.",
-    "HBM density tops out at ~64 GB/stack while DDR5 DIMMs reach 256 GB; capacity-critical workloads (LLM inference serving) may require multi-stack HBM or hybrid HBM+DDR5 topologies.",
-    "Test engineers must account for HBM's unique post-assembly test constraints: no standalone package test, requiring embedded BIST and TAM access through the host SoC or via interposer probe.",
-    "The true system cost of HBM includes the silicon/organic interposer ($300–$1000+), making DDR5 and GDDR6 strongly preferred for cost-sensitive designs despite the bandwidth penalty."
+    "Write leveling aligns DQS phase to DRAM CK using MR4 feedback; pass criterion is centering within ±0.15 UI per JESD235C §6.4.",
+    "Read leveling requires two steps — DQS gate training followed by per-bit DQ deskew — to achieve <5 ps resolution at HBM3E rates.",
+    "Production ATE skew testing must cover PVT corners and include shmoo plots; a cliff steeper than 50 mV/100 MHz suggests residual uncorrected skew.",
+    "Convergence failures diagnose as open bumps or dead PHY lanes; narrow windows (<0.2 UI) point to PDN resonance or marginal TSV resistance.",
+    "SPC tracking of trained delay values across lots detects interposer RDL process drift before it impacts yield."
   ],
   "references": [
     {
-      "title": "High Bandwidth Memory (HBM3) DRAM Standard",
+      "title": "High Bandwidth Memory (HBM) DRAM Standard",
       "type": "JEDEC",
-      "detail": "JESD238 — defines HBM3 electrical interface, timing parameters, power states, and test modes"
+      "detail": "JESD235C, Tables 7 and 10, §6.4 — DQS timing specs, write leveling procedure, tDQSS and tDQSCK definitions"
     },
     {
-      "title": "High Bandwidth Memory (HBM3E) DRAM Standard",
+      "title": "HBM3E DRAM Standard",
       "type": "JEDEC",
-      "detail": "JESD238A — extends JESD238 to 3.6 Gbps/pin, 12-Hi stack configurations, and expanded BIST modes"
+      "detail": "JESD235D (2024) — 6.4 GT/s timing budgets, per-bit deskew register map, MPC command encoding"
     },
     {
-      "title": "DDR5 SDRAM Standard",
-      "type": "JEDEC",
-      "detail": "JESD79-5B — DDR5 electrical interface, 6400 MT/s data rates, on-die ECC, and power management"
-    },
-    {
-      "title": "Graphics Double Data Rate 6 (GDDR6) SGRAM Standard",
-      "type": "JEDEC",
-      "detail": "JESD250D — GDDR6 interface definition, 16 Gbps per pin, channel architecture, and ZQ calibration"
-    },
-    {
-      "title": "Energy Efficiency Analysis of HBM vs GDDR6 in AI Accelerators",
+      "title": "2.5D/3D IC Interconnect Test Challenges",
       "type": "IEEE",
-      "detail": "IEEE Hot Chips 35 (2023) — NVIDIA H100 memory subsystem power breakdown; ~1.1 pJ/bit HBM3 vs 3.6 pJ/bit GDDR6X"
+      "detail": "Marinissen et al., 'Testing TSV-Based Three-Dimensional Stacked ICs,' IEEE Design & Test, Vol. 29, No. 1, 2012"
     },
     {
-      "title": "CoWoS Advanced Packaging for HBM Integration",
+      "title": "Silicon Interposer Signal Integrity for HBM",
       "type": "Paper",
-      "detail": "TSMC Technology Symposium 2023 — CoWoS-L interposer design rules, HBM bump pitch, and signal integrity at 3.2 Gbps"
+      "detail": "Kim et al., 'Analysis of High-Bandwidth Memory Interface on Silicon Interposer,' IEEE ECTC 2018 — RDL trace delay modeling, crosstalk characterization"
+    },
+    {
+      "title": "UltraFLEX HBM Test Solution Application Note",
+      "type": "Datasheet",
+      "detail": "Teradyne AN-2019-HBM — per-pin timing hardware specs, MBIST integration for leveling training, <1 ps delay step resolution"
+    },
+    {
+      "title": "Memory Systems: Cache, DRAM, Disk",
+      "type": "Book",
+      "detail": "Jacob, Ng & Wang, Morgan Kaufmann 2008 — Chapter 8: DDR/LPDDR training algorithms, foundational reference for leveling concepts"
     }
   ],
   "additional_learning": {
-    "title": "HBM Pseudo-Channel Architecture and Its Test Impact",
-    "content": "HBM3 divides each 1024-bit interface into 16 independent 64-bit pseudo-channels (PCs), each with its own command/address bus, row/column decode, and refresh controller. This pseudo-channel independence allows BIST to target individual PCs for fault isolation, which is critical because a single TSV fault in one PC does not necessarily fail the stack — repair fuses can remap defective columns. For ATE test development, this means per-PC March algorithms run in parallel with independent pass/fail results, dramatically reducing test time compared to monolithic 1024-bit wide patterns, and enabling yield binning at the PC granularity per JESD238 Section 8."
+    "title": "Per-Pin Adaptive Equalization Beyond Basic Leveling",
+    "content": "HBM3E at 6.4 GT/s introduces optional continuous time linear equalizer (CTLE) settings in the PHY to compensate for frequency-dependent insertion loss in the interposer RDL. Unlike static leveling, CTLE coefficients must be re-optimized whenever the trained DQ delay changes by more than ~0.05 UI, creating a coupled adaptation loop. ATE characterization of CTLE vs. leveling interaction — sweeping both the DQ delay register and the CTLE boost setting in a 2D grid — is necessary to find the global optimum; single-parameter optimization finds only a local maximum and can underestimate true timing margin by 10–15%."
   }
 }
 
-topic    = lesson["topic"]
-summary  = lesson["summary"]
-sections = lesson["sections"]
+# ── Everything below mirrors generate_lesson.py ───────────────────────────────
+topic     = lesson["topic"]
+summary   = lesson["summary"]
+sections  = lesson["sections"]
 takeaways = lesson["key_takeaways"]
-references = lesson.get("references", [])
-additional = lesson.get("additional_learning")
+references= lesson.get("references", [])
+additional= lesson.get("additional_learning")
 
-slug = re.sub(r'[^a-z0-9]+', '-', topic.lower()).strip('-')[:60]
+slug      = re.sub(r'[^a-z0-9]+', '-', topic.lower()).strip('-')[:60]
 base_name = f"{today}-{slug}"
 
 # ── Markdown ──────────────────────────────────────────────────────────────────
@@ -255,14 +258,16 @@ html_path = os.path.join(lesson_dir, f"{base_name}.html")
 with open(html_path, "w", encoding="utf-8") as f:
     f.write(html)
 
-# ── Rebuild index (curriculum main page) ────────────────────────────────────
+print(f"Lesson saved: {html_path}")
+
+# ── Rebuild index ─────────────────────────────────────────────────────────────
 def parse_lesson_meta(fname):
-    md_p = os.path.join(lesson_dir, fname.replace(".html", ".md"))
-    if not os.path.exists(md_p):
+    md_path = os.path.join(lesson_dir, fname.replace(".html", ".md"))
+    if not os.path.exists(md_path):
         return fname.replace(".html", ""), None, fname[:10]
-    with open(md_p, encoding="utf-8") as f:
+    with open(md_path, encoding="utf-8") as f:
         lines = [l.strip() for l in f.readlines()[:10]]
-    title = next((l.lstrip("# ") for l in lines if l.startswith("# ")), fname)
+    title  = next((l.lstrip("# ") for l in lines if l.startswith("# ")), fname)
     date_s = next((l.strip("*").strip() for l in lines
                    if any(m in l for m in ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"])), fname[:10])
     mod_id = None
@@ -274,9 +279,8 @@ def parse_lesson_meta(fname):
     return title, mod_id, date_s
 
 topic_lesson_map = {}
-pre_curriculum = []
-all_html_files = sorted(os.listdir(lesson_dir))
-for fname in all_html_files:
+pre_curriculum   = []
+for fname in sorted(os.listdir(lesson_dir)):
     if not fname.endswith(".html"):
         continue
     title, mod_id, date_s = parse_lesson_meta(fname)
@@ -292,7 +296,7 @@ modules_sections_html = ""
 for m in curriculum["modules"]:
     done_m  = sum(1 for t in m["topics"] if t["done"])
     total_m = len(m["topics"])
-    pct = int(done_m / total_m * 100)
+    pct     = int(done_m / total_m * 100)
     topics_html = ""
     for t in m["topics"]:
         lesson_info = topic_lesson_map.get(t["id"])
@@ -342,12 +346,7 @@ if pre_curriculum:
         f'<span class="topic-date">{d}</span></span></li>\n'
         for d, t, fn in sorted(pre_curriculum)
     )
-    pre_html = (f'<details class="module pre-curriculum" id="pre-curriculum">'
-                f'<summary class="module-head"><div class="module-meta">'
-                f'<span class="module-num dim">PRE</span>'
-                f'<span class="module-name">Pre-Curriculum</span>'
-                f'<span class="module-prog">{len(pre_curriculum)} lessons</span>'
-                f'</div></summary><ul class="topic-list">{items}</ul></details>')
+    pre_html = f'<details class="module pre-curriculum" id="pre-curriculum"><summary class="module-head"><div class="module-meta"><span class="module-num dim">PRE</span><span class="module-name">Pre-Curriculum</span><span class="module-prog">{len(pre_curriculum)} lessons</span></div></summary><ul class="topic-list">{items}</ul></details>'
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(f"""<!DOCTYPE html>
@@ -406,22 +405,22 @@ with open("index.html", "w", encoding="utf-8") as f:
 </body>
 </html>""")
 
-# ── Rebuild additional index ──────────────────────────────────────────────────
-import importlib.util, sys as _sys
+# ── Rebuild full index via rebuild_index.py ───────────────────────────────────
 _spec = importlib.util.spec_from_file_location("rebuild_index", "rebuild_index.py")
-_mod = importlib.util.module_from_spec(_spec)
+_mod  = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)
 
-print(f"Lesson saved: {html_path}")
-print(f"Topic: {topic}")
+print(f"Index rebuilt.")
 
 # ── Mark curriculum done ──────────────────────────────────────────────────────
 mark_done(topic_id)
-print(f"Curriculum progress: {done_count + 1}/{total_count}")
-subprocess.run(["git", "add", "curriculum.json"],
-               cwd=str(curriculum_path.parent.resolve()), check=False)
+done_count_new, _ = curriculum_progress()
+print(f"Curriculum progress: {done_count_new}/{total_count}")
+import subprocess as _sp
+_sp.run(["git", "add", "curriculum.json"], cwd=str(curriculum_path.parent.resolve()), check=False)
 
 # ── Telegram ──────────────────────────────────────────────────────────────────
+import urllib.request
 tg_token   = os.environ.get("TELEGRAM_TOKEN")
 tg_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 if tg_token and tg_chat_id:
