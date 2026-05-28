@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Read/Write Leveling and Skew Compensation Testing</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M2.6 Electrical Testing</span></div>
+  <h1>Read/Write Leveling and Skew Compensation Testing</h1>
+  <div class="meta">Thursday, May 28 2026 · Lesson 16 of 56</div>
+</header>
+<div class="section"><h2>Why Leveling Is Critical in HBM</h2><p>HBM connects the GPU/CPU die to stacked DRAM through thousands of microbumps on a 2.5D silicon interposer. Each of the 8 independent pseudo-channels carries 128-bit data bursts at up to 6.4 GT/s (HBM3E). Unlike DDR5, there is no on-die termination negotiation — the controller must compensate for all skew sources in the bump/RDL/TSV path.</p><p>Skew sources include: <strong>microbump-to-microbump pitch variation</strong> (~±5 ps per 40 µm pitch change), <strong>RDL trace length mismatch</strong> on the interposer, <strong>TSV delay spread</strong> inside the HBM stack (&lt;5 µm diameter vias at 55 µm pitch), and <strong>on-die clock distribution jitter</strong> within each DRAM die. JESD235C Table 10 specifies a maximum AC input setup/hold window (tDQSS) of ±0.27 UI at the HBM3 data rate, leaving very little margin for uncorrected skew.</p></div>
+<div class="section"><h2>Write Leveling: DQS-to-CK Alignment</h2><p>Write leveling adjusts the phase of each pseudo-channel's DQS strobe relative to the CK clock received at the DRAM. The controller sweeps the DQS launch edge in fine-grained steps (typically 1/64 or 1/128 UI resolution in the PHY) and observes the DRAM's write leveling feedback register (Mode Register MR4[2:0] in JESD235C).</p><ul><li><strong>Procedure:</strong> Enter write leveling mode via MPC command; drive DQS pulses while CK runs; read back the DRAM's edge-detect output; binary-search for the 0→1 transition; set PHY DQS delay to center of passing window.</li><li><strong>ATE implementation:</strong> On a Teradyne UltraFLEX or Advantest T2000, the per-pin timing hardware steps DQS in &lt;1 ps increments. The training loop runs in-system via the controller's firmware or via tester pattern injection using the MBIST engine.</li><li><strong>Pass criterion:</strong> All pseudo-channels must converge to DQS centering within ±0.15 UI of nominal (JESD235C §6.4). Channels that do not converge flag a marginal bump or TSV open.</li></ul></div>
+<div class="section"><h2>Read Leveling: DQ-to-DQS Capture Window</h2><p>Read leveling centers the DQ bits within the DQS preamble window as seen at the controller PHY input. Because each DQ bit traverses a slightly different path length through the interposer RDL, per-bit deskew is required in addition to per-channel DQS phase adjustment.</p><p>The standard two-step sequence is:</p><ul><li><strong>Step 1 — Gate training:</strong> Find the DQS preamble rising edge by issuing back-to-back READ commands and sweeping the DQS gate enable delay until the first valid edge is captured. The PHY measures the gate-open window (tDQSCK from JESD235C Table 7) which must span ≥0.5 UI.</li><li><strong>Step 2 — Per-bit deskew:</strong> Write a fixed PRBS7 or checkerboard pattern, then sweep each DQ lane's delay independently; identify center of the bit's eye using a bit-error-rate scan or single-edge comparison. On HBM3E at 6.4 GT/s the UI is 156 ps, so per-bit delays must be resolved to &lt;5 ps (≈1/32 UI).</li></ul><p>ATE testers using an on-chip BIST engine can run per-bit deskew in parallel across all 8 pseudo-channels simultaneously, reducing test time by 8× vs. sequential scanning.</p></div>
+<div class="section"><h2>Skew Compensation Testing on ATE</h2><p>After leveling, a residual skew characterization sweep verifies that the trained delays hold across the full operating envelope:</p><ul><li><strong>PVT corners:</strong> Repeat leveling at (fast-fast, 0.95V, 0°C) and (slow-slow, 1.05V, 85°C) to confirm the PHY delay range covers all corners without saturating the delay line.</li><li><strong>Shmoo plots:</strong> 2D frequency vs. voltage shmoos at the leveled state reveal the yield cliff; a cliff slope steeper than 50 mV/100 MHz typically indicates residual skew rather than a bulk timing margin problem.</li><li><strong>Eye-diagram correlation:</strong> For engineering characterization, a high-bandwidth oscilloscope (≥25 GHz) probed on interposer test pads confirms that the trained eye center matches the PHY's calculated optimum. Discrepancies &gt;0.05 UI indicate a model error in the skew budget.</li><li><strong>Stressed retrain:</strong> After 1000 thermal cycles (−40°C to +125°C per JEDEC JESD22-A104), rerun leveling and measure the delta in trained delay values. Delta &gt;0.05 UI signals bump fatigue or TSV void growth.</li></ul></div>
+<div class="section"><h2>Common Failure Signatures and Debug</h2><p>Leveling failures fall into three diagnostic categories:</p><ul><li><strong>No convergence (all DQS delay steps fail):</strong> Indicates an open microbump, a shorted TSV pair, or a dead PHY lane. Isolate with a continuity test (DCR &lt;2 Ω expected) followed by a TSV chain resistance measurement from the BIST diagnostic register.</li><li><strong>Narrow passing window (&lt;0.2 UI):</strong> Excessive crosstalk from adjacent power/ground bump inductance, or a marginal via stack with higher-than-spec resistance. Check PDN impedance at 1–3 GHz range; resonances above 100 mΩ correlate with narrow leveling windows.</li><li><strong>Channel-to-channel skew mismatch (&gt;0.1 UI spread across 8 channels):</strong> RDL routing asymmetry on the interposer. Cross-reference the interposer layout GDS to measure trace length delta; each 1 mm of RDL at εr = 3.7 adds ~5.5 ps of delay.</li></ul><p>Systematic logging of trained delay values across a production lot in SPC charts allows early detection of process drift in interposer RDL patterning before yield falls.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Write leveling aligns DQS phase to DRAM CK using MR4 feedback; pass criterion is centering within ±0.15 UI per JESD235C §6.4.</li><li>Read leveling requires two steps — DQS gate training followed by per-bit DQ deskew — to achieve <5 ps resolution at HBM3E rates.</li><li>Production ATE skew testing must cover PVT corners and include shmoo plots; a cliff steeper than 50 mV/100 MHz suggests residual uncorrected skew.</li><li>Convergence failures diagnose as open bumps or dead PHY lanes; narrow windows (<0.2 UI) point to PDN resonance or marginal TSV resistance.</li><li>SPC tracking of trained delay values across lots detects interposer RDL process drift before it impacts yield.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">High Bandwidth Memory (HBM) DRAM Standard</div><div class="ref-detail">JESD235C, Tables 7 and 10, §6.4 — DQS timing specs, write leveling procedure, tDQSS and tDQSCK definitions</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">HBM3E DRAM Standard</div><div class="ref-detail">JESD235D (2024) — 6.4 GT/s timing budgets, per-bit deskew register map, MPC command encoding</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">2.5D/3D IC Interconnect Test Challenges</div><div class="ref-detail">Marinissen et al., 'Testing TSV-Based Three-Dimensional Stacked ICs,' IEEE Design & Test, Vol. 29, No. 1, 2012</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Silicon Interposer Signal Integrity for HBM</div><div class="ref-detail">Kim et al., 'Analysis of High-Bandwidth Memory Interface on Silicon Interposer,' IEEE ECTC 2018 — RDL trace delay modeling, crosstalk characterization</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">UltraFLEX HBM Test Solution Application Note</div><div class="ref-detail">Teradyne AN-2019-HBM — per-pin timing hardware specs, MBIST integration for leveling training, <1 ps delay step resolution</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Memory Systems: Cache, DRAM, Disk</div><div class="ref-detail">Jacob, Ng & Wang, Morgan Kaufmann 2008 — Chapter 8: DDR/LPDDR training algorithms, foundational reference for leveling concepts</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-2">Per-Pin Adaptive Equalization Beyond Basic Leveling</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
