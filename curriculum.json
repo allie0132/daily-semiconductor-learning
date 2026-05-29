@@ -103,7 +103,7 @@
         {
           "id": "2.9",
           "title": "HBM DRAM Cell Retention Testing — tREFI, refresh timing verification",
-          "done": false
+          "done": true
         },
         {
           "id": "2.10",
