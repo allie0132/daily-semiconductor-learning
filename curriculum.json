@@ -98,7 +98,7 @@
         {
           "id": "2.8",
           "title": "HBM Power Delivery Network Testing — PDN, decap, VDD/VDDQ margins",
-          "done": false
+          "done": true
         },
         {
           "id": "2.9",
