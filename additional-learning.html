@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 12 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 14 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -100,11 +100,27 @@
 </div></div><div class="module-group" id="module-2"><h2>Module 2 — Electrical Testing</h2>
 <div class="entry">
   <div class="entry-meta">
+    <span class="date">Friday, May 29 2026</span>
+    <span class="lesson-title">HBM DRAM Cell Retention & tREFI Verification</span>
+  </div>
+  <h3>Dynamic Refresh Rate Scaling (DRRS) in HBM</h3>
+  <p>Modern HBM controllers can lower tREFI during low‑activity periods to save power (DRRS). Verify DRRS by programming the controller’s <code>REFI_CTRL</code> register, then repeating the retention sweep to ensure the reduced interval still meets error‑free operation.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
     <span class="date">Monday, May 25 2026</span>
     <span class="lesson-title">HBM PHY Interface Testing Strategies</span>
   </div>
   <h3>Eye‑Mask Testing with Adaptive BIST</h3>
   <p>Recent HBM2E releases support an Adaptive BIST that dynamically generates an eye‑mask based on real‑time jitter measurements, allowing on‑chip pass/fail decisions without external ATE eye capture. Integrating this feature reduces test time by up to 30 % while still meeting JESD235C mask specifications.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Saturday, May 30 2026</span>
+    <span class="lesson-title">Cattrip & Thermal Shutdown Verification in HBM</span>
+  </div>
+  <h3>CATTRIP Wired-OR Topology in Multi-Stack Systems</h3>
+  <p>When multiple HBM stacks share a single CATTRIP net (wired-OR), any one asserting device pulls the line HIGH. Test programs must distinguish per-stack CATTRIP from system-level CATTRIP by reading each stack's MR4 individually after a shared-line assertion — this per-device isolation step is essential for field RMA root-cause analysis and is commonly missed in first-pass test program development.</p>
 </div>
 <div class="entry">
   <div class="entry-meta">
