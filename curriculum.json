@@ -124,7 +124,7 @@
         {
           "id": "3.2",
           "title": "HBM3 Power-Down & Retention Mode Verification",
-          "done": false
+          "done": true
         },
         {
           "id": "3.3",

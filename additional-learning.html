@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 14 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 15 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -145,6 +145,14 @@
   </div>
   <h3>Dynamic Vref Adjustment During Runtime</h3>
   <p>Modern MCs can vary Vref in 1 LSB steps while the link is active, using real‑time eye‑monitoring to compensate for temperature or voltage droop, eliminating the need for a full re‑train after a thermal event.</p>
+</div></div><div class="module-group" id="module-3"><h2>Module 3 — Protocol & Compliance</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Monday, Jun 01 2026</span>
+    <span class="lesson-title">HBM3 Power-Down & Retention Mode Verification</span>
+  </div>
+  <h3>Bitline Capacitance & Leakage Scaling in 5nm HBM3 Nodes</h3>
+  <p>Modern HBM3 at 5nm and below exhibits exponential leakage scaling due to reduced V<sub>th</sub> and increased subthreshold swing variability. Bitline capacitance shrinks to 30–50 fF per cell; combined with 10–100 pA per-transistor off-state current, retention time at minimum voltage (−200 mV) can drop to &lt; 100 ms in worst-case process corners. Advanced ATE must employ in-situ leakage binning during voltage sweep: measure dI<sub>DD</sub>/dV slope; steep slope (&gt; 50 µA/V) flags bitcell degradation and predicts field retention failures. Correlate Weibull shape parameters from acceleration testing to predict failure rates; shape factor &lt; 1.5 indicates random defects rather than wearout, guiding screening strategy.</p>
 </div></div>
 </body>
 </html>
