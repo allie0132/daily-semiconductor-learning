@@ -144,7 +144,7 @@
         {
           "id": "3.6",
           "title": "HBM Mode Registers & Configuration Testing — MR0–MR15 coverage",
-          "done": false
+          "done": true
         },
         {
           "id": "3.7",

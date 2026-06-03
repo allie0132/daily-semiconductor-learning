@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 16 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 18 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -161,6 +161,22 @@
   </div>
   <h3>Bitline Capacitance & Leakage Scaling in 5nm HBM3 Nodes</h3>
   <p>Modern HBM3 at 5nm and below exhibits exponential leakage scaling due to reduced V<sub>th</sub> and increased subthreshold swing variability. Bitline capacitance shrinks to 30–50 fF per cell; combined with 10–100 pA per-transistor off-state current, retention time at minimum voltage (−200 mV) can drop to &lt; 100 ms in worst-case process corners. Advanced ATE must employ in-situ leakage binning during voltage sweep: measure dI<sub>DD</sub>/dV slope; steep slope (&gt; 50 µA/V) flags bitcell degradation and predicts field retention failures. Correlate Weibull shape parameters from acceleration testing to predict failure rates; shape factor &lt; 1.5 indicates random defects rather than wearout, guiding screening strategy.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Tuesday, Jun 02 2026</span>
+    <span class="lesson-title">Pseudo-Channel Mode Test Patterns</span>
+  </div>
+  <h3>Dynamic PCM Re‑Training During Stress Tests</h3>
+  <p>Recent revisions of JESD235C (2025 amendment) allow on‑the‑fly re‑training of a pseudo‑channel while other channels continue normal traffic, enabling accelerated aging tests that combine temperature cycling with periodic PCM eye‑margin checks.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Wednesday, Jun 03 2026</span>
+    <span class="lesson-title">HBM Mode Registers & Configuration Testing: MR0-MR15</span>
+  </div>
+  <h3>HBM3e MR Extensions: New Registers in JESD235D</h3>
+  <p>HBM3e (JESD235D) adds new mode register definitions extending coverage beyond JESD235C, including enhanced refresh management registers and per-channel RFM (Refresh Management) control bits. HBM3e also expands PHY training status readback registers (MR11-MR13) to expose per-pseudo-channel read/write DQ training results, enabling ATE to diagnose marginal PHY calibration without oscilloscope captures. Test engineers targeting HBM3e must update MR test suites to include these extended registers and validate that HBM3 legacy mode correctly masks or ignores HBM3e-exclusive MR fields.</p>
 </div></div>
 </body>
 </html>
