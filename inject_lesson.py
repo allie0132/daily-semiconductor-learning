@@ -1,5 +1,5 @@
 """
-Generates today's lesson for topic 2.6 using inline content (no external API),
+Generates today's lesson for topic 3.6 using inline content (no external API),
 then runs the rest of the generate_lesson.py pipeline.
 """
 import json, os, re, subprocess
@@ -52,72 +52,72 @@ print(f"Module {topic_id}: {topic_title}")
 
 # ── Inline lesson content ─────────────────────────────────────────────────────
 lesson = {
-  "topic": "Read/Write Leveling and Skew Compensation Testing",
-  "summary": "HBM read/write leveling aligns multi-channel DQ/DQS timing across the silicon interposer to meet JESD235C skew budgets under process, voltage, and temperature variation.",
+  "topic": "HBM Mode Registers & Configuration Testing: MR0-MR15",
+  "summary": "Systematic testing of HBM MR0-MR15 via MRS write and MRR readback, covering boundary values, reserved bits, and JESD235C compliance verification.",
   "sections": [
     {
-      "title": "Why Leveling Is Critical in HBM",
-      "content": "<p>HBM connects the GPU/CPU die to stacked DRAM through thousands of microbumps on a 2.5D silicon interposer. Each of the 8 independent pseudo-channels carries 128-bit data bursts at up to 6.4 GT/s (HBM3E). Unlike DDR5, there is no on-die termination negotiation — the controller must compensate for all skew sources in the bump/RDL/TSV path.</p><p>Skew sources include: <strong>microbump-to-microbump pitch variation</strong> (~±5 ps per 40 µm pitch change), <strong>RDL trace length mismatch</strong> on the interposer, <strong>TSV delay spread</strong> inside the HBM stack (&lt;5 µm diameter vias at 55 µm pitch), and <strong>on-die clock distribution jitter</strong> within each DRAM die. JESD235C Table 10 specifies a maximum AC input setup/hold window (tDQSS) of ±0.27 UI at the HBM3 data rate, leaving very little margin for uncorrected skew.</p>"
+      "title": "Mode Register Architecture and Access Protocol",
+      "content": "<p>HBM mode registers (MRs) are accessed via the <strong>Mode Register Set (MRS)</strong> command on the command/address (CA) bus. In HBM3 (JESD235C), the MRS command drives a 3-bit register address on CA[2:0] and an 8-bit data payload on CA[10:3], targeting a specific pseudo-channel. The <strong>Mode Register Read (MRR)</strong> command returns the current register value on the DQ bus during the subsequent read latency window.</p><p>Registers MR0-MR15 are individually addressable. HBM3 uses <strong>per-channel</strong> mode registers - each of the 8 channels (16 pseudo-channels) maintains an independent MR state, requiring full coverage testing across all pseudo-channels. The MRS command must comply with <strong>tMRD</strong> (minimum 4 nCK between successive MRS commands) to prevent register metastability.</p><ul><li>MRS command takes effect after tMRD (4 nCK in HBM3)</li><li>MRR data appears on DQ after tMRR read latency offset</li><li>All MRS/MRR must occur with <strong>CKE HIGH</strong> and device in idle state</li></ul>"
     },
     {
-      "title": "Write Leveling: DQS-to-CK Alignment",
-      "content": "<p>Write leveling adjusts the phase of each pseudo-channel's DQS strobe relative to the CK clock received at the DRAM. The controller sweeps the DQS launch edge in fine-grained steps (typically 1/64 or 1/128 UI resolution in the PHY) and observes the DRAM's write leveling feedback register (Mode Register MR4[2:0] in JESD235C).</p><ul><li><strong>Procedure:</strong> Enter write leveling mode via MPC command; drive DQS pulses while CK runs; read back the DRAM's edge-detect output; binary-search for the 0→1 transition; set PHY DQS delay to center of passing window.</li><li><strong>ATE implementation:</strong> On a Teradyne UltraFLEX or Advantest T2000, the per-pin timing hardware steps DQS in &lt;1 ps increments. The training loop runs in-system via the controller's firmware or via tester pattern injection using the MBIST engine.</li><li><strong>Pass criterion:</strong> All pseudo-channels must converge to DQS centering within ±0.15 UI of nominal (JESD235C §6.4). Channels that do not converge flag a marginal bump or TSV open.</li></ul>"
+      "title": "MR0-MR5: Core Timing, Latency, and Data Path Configuration",
+      "content": "<p><strong>MR0</strong> is the most critical register, controlling <strong>Burst Length (BL)</strong> and <strong>CAS Latency (CL)</strong>. In HBM3, BL is fixed at 4 (MR0[1:0]=00), and CL is encoded in MR0[5:2] with valid values from CL=6 to CL=17 depending on operating frequency. An incorrect CL setting causes systematic read failures - commonly seen as a fixed-offset alignment error in captured eye diagrams.</p><p><strong>MR1</strong> configures <strong>Write Latency (WL)</strong> and <strong>Additive Latency (AL)</strong>. WL must match the PHY write-path delay; mismatches appear as DQS-to-DQ alignment errors in ATE timing closure reports. <strong>MR2</strong> and <strong>MR3</strong> control read/write preamble and postamble lengths - critical for eye margin at data rates above 3.2 Gbps/pin.</p><ul><li><strong>MR4</strong>: DBI-WR enable (bit 3) and DBI-RD enable (bit 2) - Data Bus Inversion reduces simultaneous switching noise</li><li><strong>MR5</strong>: ODT impedance settings - affects signal integrity margin testing</li></ul>"
     },
     {
-      "title": "Read Leveling: DQ-to-DQS Capture Window",
-      "content": "<p>Read leveling centers the DQ bits within the DQS preamble window as seen at the controller PHY input. Because each DQ bit traverses a slightly different path length through the interposer RDL, per-bit deskew is required in addition to per-channel DQS phase adjustment.</p><p>The standard two-step sequence is:</p><ul><li><strong>Step 1 — Gate training:</strong> Find the DQS preamble rising edge by issuing back-to-back READ commands and sweeping the DQS gate enable delay until the first valid edge is captured. The PHY measures the gate-open window (tDQSCK from JESD235C Table 7) which must span ≥0.5 UI.</li><li><strong>Step 2 — Per-bit deskew:</strong> Write a fixed PRBS7 or checkerboard pattern, then sweep each DQ lane's delay independently; identify center of the bit's eye using a bit-error-rate scan or single-edge comparison. On HBM3E at 6.4 GT/s the UI is 156 ps, so per-bit delays must be resolved to &lt;5 ps (≈1/32 UI).</li></ul><p>ATE testers using an on-chip BIST engine can run per-bit deskew in parallel across all 8 pseudo-channels simultaneously, reducing test time by 8× vs. sequential scanning.</p>"
+      "title": "MR6-MR10: ECC, Temperature Sensor, and RAS Feature Control",
+      "content": "<p><strong>MR8</strong> is the ECC control register in HBM3. Bit 0 enables/disables SECDED ECC; bit 1 enables the <strong>ECC error log</strong>, which accumulates correctable error counts accessible via MRR. Test strategy: write MR8[0]=1, inject single-bit errors via deliberate data inversion during write, then verify ECC correction via MRR readback of error log registers MR14 and MR15.</p><p><strong>MR6</strong> holds the temperature sensor output in read-only mode - MRR of MR6 returns the on-die thermal sensor reading with 1 degree C LSB resolution. Cross-correlate against chuck temperature at ATE: a deviation greater than 5 degrees C flags a sensor calibration failure. <strong>MR7</strong> controls CATTRIP threshold programming in applicable HBM implementations - writing above the thermal limit triggers CATTRIP pin assertion, which ATE must capture as a forced test interrupt.</p><ul><li><strong>MR9</strong>: Refresh rate control (1x, 2x, 4x) - test at all three settings to verify tREFI compliance</li><li><strong>MR10</strong>: CRC enable - enables per-burst CRC on the read data path per JESD235C Section 6.3</li></ul>"
     },
     {
-      "title": "Skew Compensation Testing on ATE",
-      "content": "<p>After leveling, a residual skew characterization sweep verifies that the trained delays hold across the full operating envelope:</p><ul><li><strong>PVT corners:</strong> Repeat leveling at (fast-fast, 0.95V, 0°C) and (slow-slow, 1.05V, 85°C) to confirm the PHY delay range covers all corners without saturating the delay line.</li><li><strong>Shmoo plots:</strong> 2D frequency vs. voltage shmoos at the leveled state reveal the yield cliff; a cliff slope steeper than 50 mV/100 MHz typically indicates residual skew rather than a bulk timing margin problem.</li><li><strong>Eye-diagram correlation:</strong> For engineering characterization, a high-bandwidth oscilloscope (≥25 GHz) probed on interposer test pads confirms that the trained eye center matches the PHY's calculated optimum. Discrepancies &gt;0.05 UI indicate a model error in the skew budget.</li><li><strong>Stressed retrain:</strong> After 1000 thermal cycles (−40°C to +125°C per JEDEC JESD22-A104), rerun leveling and measure the delta in trained delay values. Delta &gt;0.05 UI signals bump fatigue or TSV void growth.</li></ul>"
+      "title": "MR11-MR15: HBM3 Extensions, Error Logs, and Reserved Fields",
+      "content": "<p><strong>MR14 and MR15</strong> are read-only <strong>ECC error log registers</strong> in HBM3. MR14[7:0] reports correctable (single-bit) error counts; MR15[7:0] reports uncorrectable (double-bit) detection events. After each DRAM stress pattern, MRR of MR14/MR15 validates error injection and ECC hardware function. Error log counters are <strong>sticky</strong> - they persist across refresh cycles until explicitly cleared via MR8[3]=1.</p><p><strong>Reserved bit testing</strong> is a JEDEC compliance requirement: JESD235C mandates that RFU-labeled bits must return 0 on MRR regardless of what was written via MRS. ATE patterns must write 0xFF to registers containing reserved fields, then perform MRR and mask-compare against the defined bit pattern. Any non-zero return on an RFU bit is a compliance failure.</p><ul><li>MR11-MR13: Vendor-specific or HBM3e-extended features (PHY training status, vendor ID)</li><li>Boundary-value testing: write 0x00 and 0xFF to each MR; verify defined bits behave per spec</li></ul>"
     },
     {
-      "title": "Common Failure Signatures and Debug",
-      "content": "<p>Leveling failures fall into three diagnostic categories:</p><ul><li><strong>No convergence (all DQS delay steps fail):</strong> Indicates an open microbump, a shorted TSV pair, or a dead PHY lane. Isolate with a continuity test (DCR &lt;2 Ω expected) followed by a TSV chain resistance measurement from the BIST diagnostic register.</li><li><strong>Narrow passing window (&lt;0.2 UI):</strong> Excessive crosstalk from adjacent power/ground bump inductance, or a marginal via stack with higher-than-spec resistance. Check PDN impedance at 1–3 GHz range; resonances above 100 mΩ correlate with narrow leveling windows.</li><li><strong>Channel-to-channel skew mismatch (&gt;0.1 UI spread across 8 channels):</strong> RDL routing asymmetry on the interposer. Cross-reference the interposer layout GDS to measure trace length delta; each 1 mm of RDL at εr = 3.7 adds ~5.5 ps of delay.</li></ul><p>Systematic logging of trained delay values across a production lot in SPC charts allows early detection of process drift in interposer RDL patterning before yield falls.</p>"
+      "title": "ATE Mode Register Test Implementation and Coverage Strategy",
+      "content": "<p>A complete MR test suite on Advantest V93000 or Teradyne UltraFLEX requires three layers: <strong>(1) Walk test</strong> - write each valid value to each MR and verify via MRR, covering all defined bits. <strong>(2) Interaction test</strong> - stress timing interactions with CL+WL combinations near min/max valid pairs. <strong>(3) Retention test</strong> - verify MR values survive a self-refresh entry/exit cycle (tPD hold) unchanged.</p><p>MRR data is captured as a <strong>functional read</strong> on ATE - the DQ return is compared against expected bit patterns using per-bit expect (PBE) masks. A critical pitfall: MRR data appears on DQ at the CAS Latency offset from the MRR command, so ATE strobe timing must align to the CL programmed in MR0. Misaligned strobe captures are the #1 debug failure mode during first-silicon MR test bring-up.</p><ul><li>Test all 16 pseudo-channels independently - channel-to-channel MR isolation is a common RTL bug</li><li>Verify <strong>reset-state</strong>: after power-on-reset or ZQCal init, all MRs must match JEDEC-defined reset values</li><li>Automate MR sweep via parametric loops in the ATE test program; avoid hardcoded single-value tests</li></ul>"
     }
   ],
   "key_takeaways": [
-    "Write leveling aligns DQS phase to DRAM CK using MR4 feedback; pass criterion is centering within ±0.15 UI per JESD235C §6.4.",
-    "Read leveling requires two steps — DQS gate training followed by per-bit DQ deskew — to achieve <5 ps resolution at HBM3E rates.",
-    "Production ATE skew testing must cover PVT corners and include shmoo plots; a cliff steeper than 50 mV/100 MHz suggests residual uncorrected skew.",
-    "Convergence failures diagnose as open bumps or dead PHY lanes; narrow windows (<0.2 UI) point to PDN resonance or marginal TSV resistance.",
-    "SPC tracking of trained delay values across lots detects interposer RDL process drift before it impacts yield."
+    "MR0 (CAS Latency, Burst Length) and MR1 (Write Latency) are the highest-impact registers - incorrect values cause systematic functional failures that mimic electrical defects",
+    "Reserved/RFU bits must return 0 on MRR regardless of MRS write value; any non-zero RFU readback is a JEDEC JESD235C compliance failure",
+    "ECC control (MR8) and error log (MR14/MR15) testing requires deliberate error injection to validate end-to-end SECDED hardware function",
+    "All 16 pseudo-channels must be tested independently for MR state isolation - shared register state bugs are common in first-silicon HBM controller integration",
+    "ATE MRR capture requires strobe alignment to the CL programmed in MR0; strobe timing mismatch is the #1 bring-up failure mode for mode register testing"
   ],
   "references": [
     {
-      "title": "High Bandwidth Memory (HBM) DRAM Standard",
+      "title": "High Bandwidth Memory (HBM) DRAM - JESD235C",
       "type": "JEDEC",
-      "detail": "JESD235C, Tables 7 and 10, §6.4 — DQS timing specs, write leveling procedure, tDQSS and tDQSCK definitions"
+      "detail": "JEDEC Standard JESD235C, Section 4 (Mode Registers), Table 4-1 through Table 4-15; Section 6.3 (CRC)"
     },
     {
-      "title": "HBM3E DRAM Standard",
+      "title": "HBM2 Standard - JESD235A Mode Register Definitions",
       "type": "JEDEC",
-      "detail": "JESD235D (2024) — 6.4 GT/s timing budgets, per-bit deskew register map, MPC command encoding"
+      "detail": "JEDEC JESD235A, Section 4.4 - MR0-MR8 definitions and power-on reset values"
     },
     {
-      "title": "2.5D/3D IC Interconnect Test Challenges",
-      "type": "IEEE",
-      "detail": "Marinissen et al., 'Testing TSV-Based Three-Dimensional Stacked ICs,' IEEE Design & Test, Vol. 29, No. 1, 2012"
-    },
-    {
-      "title": "Silicon Interposer Signal Integrity for HBM",
-      "type": "Paper",
-      "detail": "Kim et al., 'Analysis of High-Bandwidth Memory Interface on Silicon Interposer,' IEEE ECTC 2018 — RDL trace delay modeling, crosstalk characterization"
-    },
-    {
-      "title": "UltraFLEX HBM Test Solution Application Note",
+      "title": "SK Hynix HBM3 HBMC Series Datasheet",
       "type": "Datasheet",
-      "detail": "Teradyne AN-2019-HBM — per-pin timing hardware specs, MBIST integration for leveling training, <1 ps delay step resolution"
+      "detail": "Mode Register Map section; MRS/MRR timing diagrams; tMRD specification (Rev 1.0)"
     },
     {
-      "title": "Memory Systems: Cache, DRAM, Disk",
-      "type": "Book",
-      "detail": "Jacob, Ng & Wang, Morgan Kaufmann 2008 — Chapter 8: DDR/LPDDR training algorithms, foundational reference for leveling concepts"
+      "title": "Micron HBM2e Mode Register Programming Technical Note TN-HBM-01",
+      "type": "Datasheet",
+      "detail": "Programming sequences, boundary conditions, and ATE implementation guidance for MR0-MR10"
+    },
+    {
+      "title": "Advantest V93000 HBM Test Library Application Note AN-V93K-HBM-003",
+      "type": "Web",
+      "detail": "MRR capture alignment, PBE mask programming, and pseudo-channel parallel MR sweep patterns"
+    },
+    {
+      "title": "JEDEC JESD79-4B DDR4 Specification",
+      "type": "JEDEC",
+      "detail": "Section 3.5 - MRS/MRR protocol heritage shared with HBM command bus; cross-reference for tMRD timing"
     }
   ],
   "additional_learning": {
-    "title": "Per-Pin Adaptive Equalization Beyond Basic Leveling",
-    "content": "HBM3E at 6.4 GT/s introduces optional continuous time linear equalizer (CTLE) settings in the PHY to compensate for frequency-dependent insertion loss in the interposer RDL. Unlike static leveling, CTLE coefficients must be re-optimized whenever the trained DQ delay changes by more than ~0.05 UI, creating a coupled adaptation loop. ATE characterization of CTLE vs. leveling interaction — sweeping both the DQ delay register and the CTLE boost setting in a 2D grid — is necessary to find the global optimum; single-parameter optimization finds only a local maximum and can underestimate true timing margin by 10–15%."
+    "title": "HBM3e MR Extensions: New Registers in JESD235D",
+    "content": "HBM3e (JESD235D) adds new mode register definitions extending coverage beyond JESD235C, including enhanced refresh management registers and per-channel RFM (Refresh Management) control bits. HBM3e also expands PHY training status readback registers (MR11-MR13) to expose per-pseudo-channel read/write DQ training results, enabling ATE to diagnose marginal PHY calibration without oscilloscope captures. Test engineers targeting HBM3e must update MR test suites to include these extended registers and validate that HBM3 legacy mode correctly masks or ignores HBM3e-exclusive MR fields."
   }
 }
 
@@ -151,7 +151,7 @@ if references:
     for i, r in enumerate(references, 1):
         md_lines.append(f"{i}. **[{r['type']}]** {r['title']} — {r['detail']}")
 if additional:
-    md_lines.append(f"\n## Additional Learning: {additional['title']}\n")
+    md_lines.append(f"\n## \U0001f50d Additional Learning: {additional['title']}\n")
     md_lines.append(additional["content"])
 
 md_path = os.path.join(lesson_dir, f"{base_name}.md")
