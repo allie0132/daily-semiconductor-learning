@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM Command Truth Table & Illegal Command Testing</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M3.7 Protocol & Compliance</span></div>
+  <h1>HBM Command Truth Table & Illegal Command Testing</h1>
+  <div class="meta">Thursday, Jun 04 2026 · Lesson 27 of 56</div>
+</header>
+<div class="section"><h2>HBM Command Bus Architecture and CA Encoding</h2><p>HBM uses a <strong>command/address (CA)</strong> bus that is 10-bits wide (CA[9:0]) per pseudo-channel, clocked on both rising and falling edges of CK (DDR command bus). Each command is defined by a specific encoding of <code>CA[9:0]</code> sampled at the rising edge, with select commands using a two-cycle encoding sequence called <strong>CMD0/CMD1</strong>. The <strong>command truth table</strong> (JESD235C Table 5-1) specifies valid CA[9:0] values for every DRAM command: ACTIVATE, READ, WRITE, PRECHARGE, REFRESH, MODE REGISTER SET/READ, SELF REFRESH ENTRY/EXIT, and POWER DOWN.</p><p>Commands are grouped into four categories: <strong>bank commands</strong> (require bank address BA[3:0] and row/column address), <strong>all-bank commands</strong> (e.g., REFab applies to all banks simultaneously), <strong>per-bank commands</strong> (e.g., REFpb targets one bank), and <strong>NOP</strong>. The encoding of CA[9] serves as the command-group discriminator: CA[9]=0 selects the first command set (ACT, NOP, DES), while CA[9]=1 selects the extended set.</p><ul><li>CA[9:7] decode the primary command opcode</li><li>CA[6:0] carry bank address, row/column address, or mode register payload depending on command</li><li>Two-cycle commands latch CMD0 at rising edge, CMD1 at falling edge of the same CK cycle</li></ul></div>
+<div class="section"><h2>Valid Command Sequences and Timing Constraints</h2><p>The JESD235C command truth table defines not only the bit encodings but also the <strong>valid predecessor commands</strong>. Commands have mandatory inter-command gaps governed by timing parameters: <strong>tRCD</strong> (ACT to READ/WRITE), <strong>tRP</strong> (PRECHARGE to ACT), <strong>tRAS</strong> (minimum ACT-to-PRECHARGE), and <strong>tRC</strong> (row cycle time = tRAS + tRP). Violating any of these by issuing a follow-on command too early is the definition of an <strong>illegal command sequence</strong>.</p><p>A critical distinction: an <strong>illegal command encoding</strong> (undefined CA bit pattern) differs from an <strong>illegal command sequence</strong> (valid command issued at wrong time or wrong bank state). Both must be tested, but they trigger different DRAM behaviors. JESD235C Section 11 (Command Sequencing Rules) defines the complete state machine, including which commands are valid from each bank state: <strong>Idle, Active (row open), Precharge Pending</strong>.</p><ul><li><strong>ACT to ACT same bank</strong>: requires tRC gap — violation is an illegal sequence</li><li><strong>WRITE to READ</strong>: requires Write Latency + Burst Length + tWTR gap</li><li><strong>READ to PRECHARGE</strong>: requires CAS Latency + Burst Length + tRTP</li><li>Issuing REFab while any bank is Active is an illegal sequence per JESD235C Table 11-1</li></ul></div>
+<div class="section"><h2>Illegal Command Encoding: Undefined CA Patterns</h2><p>Not all 1024 possible CA[9:0] values are assigned in the HBM command truth table. Undefined encodings are designated <strong>reserved commands (RFU)</strong>. Per JESD235C Section 5.4, a DRAM receiving a reserved command encoding must treat it as a NOP — it must neither corrupt internal state nor trigger an error flag. This is a <strong>compliance requirement</strong>, not a vendor suggestion.</p><p>ATE illegal-command-encoding tests inject each reserved CA pattern into a single pseudo-channel while the device is in a known idle state (all banks precharged, CKE HIGH). The expected response is: DQ bus remains high-Z (no spurious data output), no self-refresh entry, no mode register corruption. Verify by issuing a valid MRR immediately after the illegal encoding and confirming MR values are unchanged.</p><ul><li>Reserved CA patterns to test: all combinations not listed in JESD235C Table 5-1</li><li>Inject during bank-active state too — illegal encodings must still be absorbed as NOP when a row is open</li><li>Watch for <strong>DQS glitch</strong> on illegal command injection — a hardware bug can cause spurious DQS toggle</li><li>Use ATE per-cycle CA force capability (e.g., V93000 HBM CATC option) for single-cycle injection</li></ul></div>
+<div class="section"><h2>Illegal Sequence Testing: Timing Violations and State Machine Abuse</h2><p>Illegal sequence testing exercises the DRAM controller's input filter and state machine resilience. Three primary test categories cover the specification space:</p><p><strong>1. Timing violation sequences</strong>: Issue valid commands with inter-command gaps below the JEDEC minimums. Example: ACT to READ with tRCD-1 (one nCK short). Per JESD235C, the DRAM is not required to report an error, but must not return corrupted data on the subsequent burst. ATE captures the read data and compares to the known-good write pattern — any mismatch is a failure.</p><p><strong>2. State machine violations</strong>: Issue READ or WRITE while all banks are in Precharge state (no row open). The DRAM must absorb the command without corrupting the precharge state, verified by a subsequent ACT→READ→PRECHARGE sequence returning clean data.</p><p><strong>3. CKE violation sequences</strong>: Toggle CKE LOW during an active command sequence. JESD235C Section 4.9 defines the required CKE hold times (tCKEL, tCKEH). Violating CKE timing during a READ burst tests the robustness of the power-management state machine.</p><ul><li>All illegal sequence tests must use per-cycle ATE CA forcing — not pattern memory playback</li><li>Log ATE functional failures per pseudo-channel to isolate state machine bugs to specific banks</li></ul></div>
+<div class="section"><h2>ATE Implementation: Command Truth Table Coverage on V93000 and UltraFLEX</h2><p>Implementing a complete command truth table test on <strong>Advantest V93000</strong> requires the HBM CATC (Command/Address Test Controller) option, which provides single-cycle CA bus forcing independent of the pattern sequencer. The test flow: (1) load the CA forcing table with all valid command encodings and their expected DQ response windows, (2) add reserved-encoding injection vectors with null DQ expects, (3) run the sequence across all 16 pseudo-channels in round-robin, capturing per-cycle CA and DQ data.</p><p>On <strong>Teradyne UltraFLEX</strong>, the HBM test module's <strong>CA Forcing Mode</strong> in the digital subsystem achieves the same capability. Key ATE setup requirement: <strong>disable the command bus correctness checker</strong> during illegal command injection — the ATE hardware's own command bus monitor will flag illegal encodings as test errors before they reach the DRAM if the checker is active. Re-enable after each injection vector completes.</p><ul><li>Verify command bus setup/hold margins during illegal injection — CA metastability at the DRAM must be ruled out as a failure cause</li><li>Capture ATE event logs: correlate DRAM response to the exact CA cycle that carried the illegal encoding</li><li>Include both <strong>single-shot</strong> (one illegal command) and <strong>burst</strong> (consecutive illegal commands) test vectors</li><li>Temperature sweep at illegal-command tests: hot silicon (105°C) has slower internal state machine recovery — margin differences surface at elevated temperature</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>The HBM command truth table (JESD235C Table 5-1) defines every valid CA[9:0] encoding — all other patterns are RFU and must be absorbed as NOP without corrupting DRAM state</li><li>Illegal command types are distinct: undefined CA encodings vs. valid commands issued in violation of timing (tRCD, tRP, tRC) or bank-state (READ with no open row)</li><li>DRAM must return clean data after absorbing illegal sequences — ATE must verify post-illegal-command data integrity, not just absence of visible error flags</li><li>ATE CA forcing mode must disable the on-tester command correctness checker during illegal encoding injection, or the tester itself will block the vectors from reaching the DUT</li><li>Illegal command testing at elevated temperature (105°C) is mandatory — state machine recovery margin degrades at hot silicon conditions and is the most common first-silicon failure mode</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">High Bandwidth Memory (HBM) DRAM - JESD235C</div><div class="ref-detail">JESD235C Section 5 (Command Truth Table, Table 5-1), Section 11 (Command Sequencing Rules, Table 11-1), Section 4.9 (CKE Timing)</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235B HBM2 Command Encoding Specification</div><div class="ref-detail">Table 5-1 and Table 5-2 — two-cycle command encoding (CMD0/CMD1), bank address mapping, and reserved encoding definitions</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">SK Hynix HBM3 Product Datasheet</div><div class="ref-detail">Section 6 (Command Truth Table); timing parameter definitions for tRCD, tRP, tRAS, tRC, tWTR, tRTP (Rev 1.1)</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Advantest V93000 HBM Application Note AN-V93K-HBM-005</div><div class="ref-detail">HBM CATC option: single-cycle CA forcing, illegal command injection, and per-pseudo-channel event logging</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">Jedec JESD79-4C DDR4 SDRAM Command Truth Table</div><div class="ref-detail">Section 4.5 — DDR4 command encoding heritage and illegal command handling rules; cross-reference for HBM CA bus lineage</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">Lee et al., 'High Bandwidth Memory PHY and Controller Design for AI Accelerators,' IEEE JSSC 2023</div><div class="ref-detail">Section IV: command bus filtering and illegal command absorption in HBM3 controller RTL; doi:10.1109/JSSC.2023.3240012</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-3">HBM3e LFSR-Based Command Bus Scrambling and Its Impact on Illegal Command Coverage</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>

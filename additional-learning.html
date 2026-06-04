@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 18 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 19 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -161,6 +161,14 @@
   </div>
   <h3>Bitline Capacitance & Leakage Scaling in 5nm HBM3 Nodes</h3>
   <p>Modern HBM3 at 5nm and below exhibits exponential leakage scaling due to reduced V<sub>th</sub> and increased subthreshold swing variability. Bitline capacitance shrinks to 30–50 fF per cell; combined with 10–100 pA per-transistor off-state current, retention time at minimum voltage (−200 mV) can drop to &lt; 100 ms in worst-case process corners. Advanced ATE must employ in-situ leakage binning during voltage sweep: measure dI<sub>DD</sub>/dV slope; steep slope (&gt; 50 µA/V) flags bitcell degradation and predicts field retention failures. Correlate Weibull shape parameters from acceleration testing to predict failure rates; shape factor &lt; 1.5 indicates random defects rather than wearout, guiding screening strategy.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Thursday, Jun 04 2026</span>
+    <span class="lesson-title">HBM Command Truth Table & Illegal Command Testing</span>
+  </div>
+  <h3>HBM3e LFSR-Based Command Bus Scrambling and Its Impact on Illegal Command Coverage</h3>
+  <p>HBM3e introduces optional command bus scrambling using a per-channel LFSR to reduce EMI from repetitive CA patterns during high-bandwidth streaming. When scrambling is enabled, the physical CA[9:0] values observed on the bus are XOR-masked with the LFSR output, meaning that a logically valid command appears as an apparently-illegal encoding at the physical layer. ATE illegal command test suites must account for this: tests must either disable scrambling via MR configuration before running physical-layer CA injection, or apply the same LFSR sequence to deskramble the injected patterns. Failure to handle scrambling causes false-positive illegal command failures during bring-up of HBM3e devices.</p>
 </div>
 <div class="entry">
   <div class="entry-meta">
