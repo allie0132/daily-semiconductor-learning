@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 19 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 21 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -148,6 +148,14 @@
 </div></div><div class="module-group" id="module-3"><h2>Module 3 — Protocol & Compliance</h2>
 <div class="entry">
   <div class="entry-meta">
+    <span class="date">Friday, Jun 05 2026</span>
+    <span class="lesson-title">HBM ECC Testing — SECDED Implementation</span>
+  </div>
+  <h3>Runtime ECC Error Thresholding & Predictive Margin Analysis</h3>
+  <p>Production HBM devices increasingly employ firmware-level error thresholds where the memory controller monitors syndrome activity over sliding time windows (e.g., error count per 1M memory accesses). When correctable error rate exceeds a threshold (e.g., >100 errors/hour), the system throttles memory frequency or voltage to extend device life. ATE test correlation here is crucial: devices exhibiting high-margin SECDED timing or elevated syndrome noise under elevated-temperature test often hit firmware thresholds earlier in the field, enabling predictive binning strategies that separate marginal from robust parts.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
     <span class="date">Monday, Jun 01 2026</span>
     <span class="lesson-title">HBM Init & Training Sequence Testing</span>
   </div>
@@ -169,6 +177,14 @@
   </div>
   <h3>HBM3e LFSR-Based Command Bus Scrambling and Its Impact on Illegal Command Coverage</h3>
   <p>HBM3e introduces optional command bus scrambling using a per-channel LFSR to reduce EMI from repetitive CA patterns during high-bandwidth streaming. When scrambling is enabled, the physical CA[9:0] values observed on the bus are XOR-masked with the LFSR output, meaning that a logically valid command appears as an apparently-illegal encoding at the physical layer. ATE illegal command test suites must account for this: tests must either disable scrambling via MR configuration before running physical-layer CA injection, or apply the same LFSR sequence to deskramble the injected patterns. Failure to handle scrambling causes false-positive illegal command failures during bring-up of HBM3e devices.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Thursday, Jun 04 2026</span>
+    <span class="lesson-title">HBM3 Read/Write Command Protocol Verification</span>
+  </div>
+  <h3>Dynamic Command Rate Adjustment (DCRA) in HBM3</h3>
+  <p>Recent revisions of JESD235C introduce DCRA, allowing the memory controller to switch between 2‑t and 3‑t command spacing on‑the‑fly based on thermal throttling. Verify DCRA by programming the <code>R0x0040.DCRA_EN</code> bit and measuring tCMD variations under controlled temperature ramps.</p>
 </div>
 <div class="entry">
   <div class="entry-meta">
