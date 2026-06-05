@@ -164,7 +164,7 @@
         {
           "id": "3.10",
           "title": "HBM CRC and Parity Error Injection Testing",
-          "done": false
+          "done": true
         }
       ]
     },
