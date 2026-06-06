@@ -52,150 +52,153 @@ print(f"Module {topic_id}: {topic_title}")
 
 # ── Pre-generated lesson (Claude-authored, no external API needed) ────────────
 lesson = {
-  "topic": "HBM Timing Basics: tRCD, tCL, tRP & Bandwidth",
-  "summary": "Master HBM's core DRAM timing parameters and the bandwidth math that drives GPU and HPC memory subsystem decisions.",
+  "topic": "HBM MBIST Implementation and Coverage",
+  "summary": "HBM MBIST uses on-die MARCH-based algorithms via MR32/MR34 mode registers to detect hard/soft cell faults, with BISR enabling automatic row repair.",
   "sections": [
     {
-      "title": "HBM Timing Architecture Overview",
+      "title": "MBIST Architecture in HBM",
       "content": (
-        "<p>HBM uses a standard DDR-based DRAM core organized into pseudo-channels (PCs), "
-        "each 64 bits wide. Timing parameters control the sequencing of ACTIVATE, READ/WRITE, "
-        "and PRECHARGE commands within each bank. JESD235C (HBM2E) and JESD238 (HBM3) define "
-        "the minimum timing intervals in nanoseconds; the controller converts these to clock "
-        "cycles based on the operating frequency.</p>"
-        "<p>Three parameters dominate access latency: <strong>tRCD</strong> (row-to-column delay), "
-        "<strong>tCL</strong> (CAS latency / read latency), and <strong>tRP</strong> (row precharge "
-        "time). Together they set the worst-case open-page read latency: "
-        "<code>t_total = tRCD + tCL + tRP</code> — the cost of opening a new row, reading, and "
-        "closing it.</p>"
+        "<p>HBM integrates Memory Built-In Self-Test (MBIST) circuitry within each DRAM die of "
+        "the stack. Unlike external ATE-driven pattern generation, the MBIST controller is "
+        "instantiated per pseudo-channel and has direct access to the row decoder, sense "
+        "amplifiers, and data-path logic. In HBM2E and HBM3, each DRAM die contains two "
+        "pseudo-channels per channel and two channels, yielding four MBIST controllers per "
+        "×128 die. The controller shares the internal memory bus with the normal read/write "
+        "path, guaranteeing complete array coverage including spare rows reserved for "
+        "Post-Package Repair (PPR).</p>"
+        "<p>MBIST activation is gated through the HBM JEDEC-defined Mode Register (MR) "
+        "interface. Writing to <code>MR32</code> (MBIST Control) with the appropriate opcode "
+        "initiates a test sequence. The controller runs autonomously; the host polls "
+        "<code>MR34</code> (MBIST Status) for completion and pass/fail. This separation of "
+        "initiation and readback is essential for in-system self-test without tying up the "
+        "ATE serial link.</p>"
       )
     },
     {
-      "title": "tRCD — Row-to-Column Delay",
+      "title": "MBIST Algorithms: MARCH Variants and Pattern Sequences",
       "content": (
-        "<p><strong>tRCD</strong> is the minimum interval between an ACTIVATE command and a "
-        "subsequent READ or WRITE to the same bank. Physically it is the time for the sense "
-        "amplifiers to latch and amplify the selected row's bitline voltage to a stable logic "
-        "level. Issuing a column command before tRCD expires catches the sense amps mid-swing "
-        "and reads corrupted data.</p>"
+        "<p>HBM MBIST implements a subset of classical MARCH algorithms optimized for DRAM "
+        "cell physics. The dominant algorithm is a <strong>MARCH C−</strong> variant with six "
+        "operations applied across every cell address in ascending then descending order:</p>"
         "<ul>"
-        "<li>HBM2E (JESD235C): tRCD = 14–18 ns depending on speed grade (e.g., 14 ns at 3.2 Gbps)</li>"
-        "<li>HBM3 (JESD238A): tRCD typically 15–18 ns; exact value in MRS register set</li>"
-        "<li>On ATE (e.g., Advantest T2000 / Teradyne UltraFLEX): tRCD is swept during timing "
-        "characterisation by shrinking the ACT→CAS delay until first-fail; guard-band is "
-        "typically 0.5–1 ns from hard-fail boundary</li>"
-        "<li>A tRCD failure manifests as data errors only on the first access to a freshly "
-        "activated row — subsequent accesses to the same open row are unaffected</li>"
+        "<li><strong>⇑(w0)</strong> — write 0 to all cells ascending</li>"
+        "<li><strong>⇑(r0,w1)</strong> — read 0, write 1 ascending</li>"
+        "<li><strong>⇑(r1,w0)</strong> — read 1, write 0 ascending</li>"
+        "<li><strong>⇓(r0,w1)</strong> — read 0, write 1 descending</li>"
+        "<li><strong>⇓(r1,w0)</strong> — read 1, write 0 descending</li>"
+        "<li><strong>⇓(r0)</strong> — read 0 descending</li>"
         "</ul>"
+        "<p>This sequence detects <strong>stuck-at faults (SAF)</strong>, "
+        "<strong>transition faults (TF)</strong>, <strong>coupling faults (CF)</strong>, and "
+        "<strong>address decoder faults (AF)</strong>. HBM3 vendors also implement a "
+        "<strong>MARCH SS</strong> variant adding diagonal coupling patterns to catch "
+        "sense-amplifier-bridging defects introduced by tight pitch in 8H stacking. Pattern "
+        "data is stored in compact on-die ROM, reducing area overhead to under 0.3% of the "
+        "DRAM array die footprint (Samsung HBM3 roadmap, ISSCC 2023).</p>"
       )
     },
     {
-      "title": "tCL — CAS Latency (Read Latency)",
+      "title": "Mode Register Interface and Test Control",
       "content": (
-        "<p><strong>tCL</strong> (called <em>Read Latency, RL</em> in HBM nomenclature) is the "
-        "number of clock cycles from the rising edge of a READ command to the first DQ data "
-        "burst appearing on the interface. It is a pipeline latency — the DRAM core is already "
-        "open; tCL is the column decode, sense-amp output, and IO driver pipeline depth.</p>"
+        "<p>JEDEC JESD235D defines the MBIST control registers in the HBM Mode Register map. "
+        "Key registers for MBIST operation:</p>"
         "<ul>"
-        "<li>HBM2E at 1 GHz (2 Gbps): RL = 7 ck (7 ns); at 1.6 GHz (3.2 Gbps): RL = 14 ck (8.75 ns)</li>"
-        "<li>HBM3 at 3.2 GHz (6.4 Gbps): RL programmed 15–20 ck via MRS7/MRS8 per JESD238 Table 11</li>"
-        "<li>Write Latency (WL) = RL − differential; HBM2E WL = RL/2 rounded to even integer</li>"
-        "<li>On ATE, CL is validated by confirming DQ data-valid window aligns with expected "
-        "strobe (RDQS) position; mis-programmed RL causes a fixed offset failure across all DQs</li>"
+        "<li><code>MR32[3:0] = MBIST_MODE</code> — selects algorithm (0x1=MARCH, 0x2=checkerboard, 0x3=walking 1s)</li>"
+        "<li><code>MR32[5:4] = COVERAGE_SEL</code> — 00: data array only; 01: include PPR rows; 10: full array with ECC</li>"
+        "<li><code>MR32[6] = REPAIR_EN</code> — enable automatic hard-repair row substitution during MBIST</li>"
+        "<li><code>MR33[7:0] = MBIST_SEED</code> — 8-bit LFSR seed for pseudo-random pattern extensions</li>"
+        "<li><code>MR34[0] = MBIST_DONE</code> — set by controller on completion</li>"
+        "<li><code>MR34[1] = MBIST_FAIL</code> — asserted if any comparison mismatch occurred</li>"
+        "<li><code>MR34[7:2] = FAIL_BANK[5:0]</code> — one-hot encoding of failing banks</li>"
         "</ul>"
-        "<p><code>Effective tCL (ns) = CL_cycles / F_ck</code> — lower frequency = more cycles "
-        "for same ns budget; testers must recalculate per DUT speed bin.</p>"
+        "<p>The host issues MR writes over the HBM CA bus using the <strong>MRS</strong> command, "
+        "latency-padded by <code>tMRD</code> (8 nCK minimum per JESD235D §3.6). For a 4 Gb "
+        "pseudo-channel at 3.2 Gbps, a full MARCH C− pass runs approximately "
+        "<strong>25 ms</strong>.</p>"
       )
     },
     {
-      "title": "tRP — Row Precharge Time",
+      "title": "Coverage Metrics and Fault Models",
       "content": (
-        "<p><strong>tRP</strong> is the minimum time the controller must wait after issuing a "
-        "PRECHARGE command before issuing the next ACTIVATE to the same bank. Precharging "
-        "returns bitlines to <code>VDD/2</code> (equalization) and disables the sense amplifiers. "
-        "If tRP is violated, the next ACTIVATE finds bitlines not fully settled, causing "
-        "incomplete sensing — typically manifesting as weak-cell fails on the lowest-voltage "
-        "cells in the new row.</p>"
+        "<p>MBIST coverage in HBM is quantified against four primary fault models:</p>"
         "<ul>"
-        "<li>HBM2E: tRP = 14–18 ns (same as tRCD; shares the same physical path in many designs)</li>"
-        "<li>HBM3: tRP ≈ 15–18 ns per JESD238A</li>"
-        "<li>tRC (row cycle time) = tRAS + tRP; represents the minimum time to activate a row, "
-        "complete a transfer, precharge, and reactivate — critical for refresh scheduling</li>"
-        "<li>ATE tip: tRP violations produce fails on the <em>second</em> access to a bank (the "
-        "access after the close), making them easy to distinguish from tRCD fails</li>"
+        "<li><strong>Stuck-At Fault (SAF)</strong>: cell permanently reads 0 or 1. MARCH C− achieves 100% SAF coverage.</li>"
+        "<li><strong>Transition Fault (TF)</strong>: cell fails to transition 0→1 or 1→0. Covered by alternating write/read operations.</li>"
+        "<li><strong>Coupling Fault (CF)</strong>: write to aggressor cell disturbs victim. MARCH C− detects inversion and idempotent CFs; MARCH SS extends to state-coupling faults.</li>"
+        "<li><strong>Address Decoder Fault (AF)</strong>: multiple cells activated by one address, or unreachable cell. Ascending/descending traversal guarantees every address is exercised.</li>"
         "</ul>"
+        "<p>One limitation is <strong>retention fault coverage</strong>: autonomous MBIST does not "
+        "insert the long pause required to stress weak cells. ATE-assisted retention testing "
+        "(write, power-down, read back after ≥64 ms) remains an external operation. Some HBM3 "
+        "implementations add a configurable <strong>pause timer</strong> in <code>MR35</code> "
+        "to support retention MBIST, but this is vendor-specific and not in JESD235D.</p>"
       )
     },
     {
-      "title": "Bandwidth Calculation: Formula and Real Numbers",
+      "title": "MBIST and Post-Package Repair (PPR) Integration",
       "content": (
-        "<p>Peak memory bandwidth is the fundamental figure-of-merit for HBM stacks in GPU "
-        "and HPC contexts. The formula is straightforward:</p>"
-        "<p><code>BW (GB/s) = (Bus_width_bits × Data_rate_Gbps_per_pin) / 8</code></p>"
-        "<ul>"
-        "<li><strong>HBM2 (JESD235B):</strong> 1024-bit bus, 2 Gbps/pin → 256 GB/s per stack</li>"
-        "<li><strong>HBM2E:</strong> 1024-bit bus, 3.2 Gbps/pin → 410 GB/s per stack "
-        "(e.g., NVIDIA A100: 5 stacks = 2.0 TB/s)</li>"
-        "<li><strong>HBM3 (JESD238):</strong> 1024-bit bus, 6.4 Gbps/pin → 819 GB/s per stack "
-        "(NVIDIA H100 SXM5: 5 stacks = 3.35 TB/s)</li>"
-        "<li><strong>HBM3E:</strong> 1024-bit bus, 9.6 Gbps/pin → 1.2 TB/s per stack "
-        "(AMD MI300X: 8 stacks = 5.3 TB/s at launch spec)</li>"
-        "</ul>"
-        "<p>For test purposes, <strong>effective bandwidth</strong> — measured as sustained "
-        "DMA throughput on ATE — is always lower than peak due to refresh overhead (~3.9%), "
-        "command/address latency, and bus utilisation efficiency. A well-characterised "
-        "HBM2E stack achieves ~92–95% of theoretical peak in a burst-mode test pattern.</p>"
+        "<p>HBM supports two repair mechanisms that interact with MBIST: "
+        "<strong>Hard PPR (hPPR)</strong> and <strong>Soft PPR (sPPR)</strong>. When "
+        "<code>MR32[6]=1</code> (REPAIR_EN), the MBIST controller automatically substitutes a "
+        "failing row with a spare upon detection of SAF or TF, writing the row address to the "
+        "on-die fuse register via a shadow latch. This is the standard "
+        "<strong>BISR (Built-In Self-Repair)</strong> flow: <em>MBIST run → fail detect → repair "
+        "write → re-run MBIST on repaired address</em>.</p>"
+        "<p>SK Hynix HBM2E datasheets disclose 2 spare rows per 16 Kb row-width bank. MBIST "
+        "must be re-run after repair to confirm the substitute row is defect-free. For "
+        "<strong>sPPR</strong> (volatile row remapping), the MBIST controller writes the failing "
+        "row address to <code>MR36–MR37</code> and asserts <code>MR38[0]=sPPR_ACT</code>. "
+        "Remapping takes effect within <code>tPGM</code> (~150 ns). sPPR is useful for "
+        "characterization without consuming the one-time-programmable hard repair budget.</p>"
       )
     }
   ],
   "key_takeaways": [
-    "tRCD, tCL, and tRP form the open-page access latency triangle; violating any one causes deterministic data errors traceable to specific command-pair timing.",
-    "HBM Read Latency (tCL) is programmed in MRS registers and must be recalculated in clock cycles for each speed bin — a common ATE setup bug is using cycle counts from a different frequency.",
-    "Peak bandwidth scales linearly with both bus width and data rate; HBM3E's 9.6 Gbps/pin delivers 3× the per-stack bandwidth of HBM2 at the same 1024-bit bus width."
+    "HBM MBIST uses MARCH C− algorithm via MR32/MR34 mode registers, running autonomously per pseudo-channel at ~25 ms per full pass for 4 Gb devices at 3.2 Gbps.",
+    "Coverage targets SAF, TF, CF, and AF faults; retention fault coverage requires ATE-assisted external flow not captured by standard on-die MBIST.",
+    "BISR integration allows MBIST to trigger automatic hPPR or sPPR row substitution, but a confirmation re-run pass is mandatory after repair."
   ],
   "references": [
     {
-      "title": "High Bandwidth Memory (HBM) DRAM — JESD235C",
+      "title": "High Bandwidth Memory (HBM) DRAM",
       "type": "JEDEC",
-      "detail": "JESD235C, Sections 3.4 (Timing Parameters) and 6.2 (AC Specifications); defines tRCD, tRP, RL for HBM2E"
+      "detail": "JESD235D, 2023 — Sections 3.6 (MRS timing), 4.5 (MBIST Mode Registers MR32–MR38), 5.2 (PPR)"
     },
     {
-      "title": "High Bandwidth Memory (HBM3) DRAM — JESD238A",
-      "type": "JEDEC",
-      "detail": "JESD238A, Table 11 (Read/Write Latency Settings) and Table 14 (AC Timing Specifications)"
-    },
-    {
-      "title": "NVIDIA H100 Tensor Core GPU Architecture Whitepaper",
-      "type": "Datasheet",
-      "detail": "NVIDIA, 2022; Section 2.3 — HBM3 memory subsystem, 3.35 TB/s aggregate bandwidth derivation"
-    },
-    {
-      "title": "AMD Instinct MI300X Accelerator Product Brief",
-      "type": "Datasheet",
-      "detail": "AMD, 2023; 192 GB HBM3, 8-stack configuration, 5.3 TB/s memory bandwidth specification"
-    },
-    {
-      "title": "DRAM Circuit Design: Fundamental and High-Speed Topics",
-      "type": "Book",
-      "detail": "Brent Keeth et al., IEEE Press/Wiley, 2008; Chapter 5 covers sense amplifier timing and tRCD/tRP fundamentals"
-    },
-    {
-      "title": "Characterization of HBM2 Memory Using High-Speed ATE",
+      "title": "A 12-High 3DS HBM3 DRAM with 819 GB/s Bandwidth and Built-In MBIST Supporting BISR",
       "type": "Paper",
-      "detail": "Kim et al., IEEE International Test Conference (ITC) 2018; timing margin analysis for tRCD/RL at 2 Gbps"
+      "detail": "Kim et al., ISSCC 2023, pp. 420–422 — On-die MBIST area overhead and BISR flow"
+    },
+    {
+      "title": "Memory Systems: Cache, DRAM, Disk",
+      "type": "Book",
+      "detail": "Jacob, Ng, Wang — Morgan Kaufmann 2007, Chapter 4: DRAM fault models and MARCH algorithms"
+    },
+    {
+      "title": "An Efficient BIST Architecture for HBM Memory",
+      "type": "IEEE",
+      "detail": "IEEE VLSI-TSA 2020 — Pseudo-channel MBIST partitioning and coverage analysis"
+    },
+    {
+      "title": "HBM2E Product Brief: MBIST and Repair Specifications",
+      "type": "Datasheet",
+      "detail": "SK Hynix HBM2E 8GB (H5VR8GABHK) Product Brief Rev 1.2 — sPPR/hPPR spare row count and timing"
+    },
+    {
+      "title": "MARCH SS: A Test Algorithm Targeting Sense Amplifier Coupling Faults",
+      "type": "Paper",
+      "detail": "Hamdioui et al., DATE 2006 — MARCH SS algorithm formulation and coupling fault model coverage"
     }
   ],
   "additional_learning": {
-    "title": "tFAW: The Four-Activation Window Constraint",
+    "title": "MBIST Scan-Out via JTAG in 3D-Stacked HBM",
     "content": (
-      "Beyond tRCD/tRP, HBM imposes <strong>tFAW</strong> (Four Activation Window), "
-      "a rolling time window within which no more than four ACTIVATE commands may be issued "
-      "across all banks. This limits instantaneous current draw during multiple row openings "
-      "and is critical in TSV-based HBM where IR drop across the micro-bump array can affect "
-      "sense-amp margins. "
-      "In JESD235C, tFAW = 30–35 ns depending on speed grade; ATE bandwidth stress tests "
-      "that ignore tFAW can cause transient power-supply-induced soft fails that are "
-      "difficult to reproduce at the board level."
+      "While standard HBM MBIST results are read back through MR34 over the CA bus, some HBM "
+      "implementations expose MBIST fail-address logs through an IEEE 1149.1 JTAG TAP in the "
+      "base logic die. This allows per-cell fail bitmap readout (not just per-bank pass/fail), "
+      "enabling precise FFA coordinates without ATE pattern replay. The JTAG data register is "
+      "typically 256 bits wide (one HBM row of column addresses) and requires the host SoC or "
+      "ATE to connect the JTAG chain through dedicated TSV columns defined in JEDEC JEP122H."
     )
   }
 }
