@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 22 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 21 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -148,22 +148,6 @@
 </div></div><div class="module-group" id="module-3"><h2>Module 3 — Protocol & Compliance</h2>
 <div class="entry">
   <div class="entry-meta">
-    <span class="date">Friday, Jun 05 2026</span>
-    <span class="lesson-title">HBM CRC & Parity Error Injection Testing</span>
-  </div>
-  <h3>Dynamic CRC Rerun for Fault Isolation</h3>
-  <p>Recent HBM 3.0 controllers support a ‘CRC rerun’ command (JESD235 §6.2) that recomputes the CRC on a stored burst without a full read, enabling fast isolation of transient vs. permanent faults.</p>
-</div>
-<div class="entry">
-  <div class="entry-meta">
-    <span class="date">Friday, Jun 05 2026</span>
-    <span class="lesson-title">HBM ECC Testing — SECDED Implementation</span>
-  </div>
-  <h3>Runtime ECC Error Thresholding & Predictive Margin Analysis</h3>
-  <p>Production HBM devices increasingly employ firmware-level error thresholds where the memory controller monitors syndrome activity over sliding time windows (e.g., error count per 1M memory accesses). When correctable error rate exceeds a threshold (e.g., >100 errors/hour), the system throttles memory frequency or voltage to extend device life. ATE test correlation here is crucial: devices exhibiting high-margin SECDED timing or elevated syndrome noise under elevated-temperature test often hit firmware thresholds earlier in the field, enabling predictive binning strategies that separate marginal from robust parts.</p>
-</div>
-<div class="entry">
-  <div class="entry-meta">
     <span class="date">Monday, Jun 01 2026</span>
     <span class="lesson-title">HBM Init & Training Sequence Testing</span>
   </div>
@@ -209,6 +193,14 @@
   </div>
   <h3>HBM3e MR Extensions: New Registers in JESD235D</h3>
   <p>HBM3e (JESD235D) adds new mode register definitions extending coverage beyond JESD235C, including enhanced refresh management registers and per-channel RFM (Refresh Management) control bits. HBM3e also expands PHY training status readback registers (MR11-MR13) to expose per-pseudo-channel read/write DQ training results, enabling ATE to diagnose marginal PHY calibration without oscilloscope captures. Test engineers targeting HBM3e must update MR test suites to include these extended registers and validate that HBM3 legacy mode correctly masks or ignores HBM3e-exclusive MR fields.</p>
+</div></div><div class="module-group" id="module-4"><h2>Module 4 — DFT & Built-In Test</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Tuesday, Jun 09 2026</span>
+    <span class="lesson-title">Column Repair vs Row Repair Strategy and Fuse Allocation</span>
+  </div>
+  <h3>Shared Spare Columns and Bank-Group Repair Sharing</h3>
+  <p>Some HBM3 designs implement <em>shared spare columns</em> that can be assigned to any of several banks within a bank group, rather than being dedicated to a single bank. This reduces total fuse count (one set of address fuses serves multiple potential defect locations) at the cost of a more complex arbitration circuit that must resolve which bank's column the spare is covering. The repair algorithm must track which shared spare has been committed and to which bank, preventing double-assignment. Shared spares improve area efficiency by roughly 30–50% in spare array overhead while reducing the peak repairability per bank — a deliberate trade-off tuned to the expected within-bank-group defect correlation from process data.</p>
 </div></div>
 </body>
 </html>

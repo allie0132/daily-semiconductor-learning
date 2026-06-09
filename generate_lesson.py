@@ -64,6 +64,10 @@ print(f"Module {topic_id}: {topic_title}")
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.environ.get("OPENROUTER_API_KEY"),
+    default_headers={
+        "HTTP-Referer": "https://allie0132.github.io/daily-semiconductor-learning",
+        "X-Title": "Daily Semiconductor Learning",
+    },
 )
 
 prompt = f"""You are an expert semiconductor test engineer with 20+ years of experience in HBM testing, ATE systems, and advanced packaging. Write a daily technical lesson for senior test engineers.
