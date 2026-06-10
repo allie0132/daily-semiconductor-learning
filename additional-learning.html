@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 21 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 26 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -148,6 +148,22 @@
 </div></div><div class="module-group" id="module-3"><h2>Module 3 — Protocol & Compliance</h2>
 <div class="entry">
   <div class="entry-meta">
+    <span class="date">Friday, Jun 05 2026</span>
+    <span class="lesson-title">HBM CRC & Parity Error Injection Testing</span>
+  </div>
+  <h3>Dynamic CRC Rerun for Fault Isolation</h3>
+  <p>Recent HBM 3.0 controllers support a ‘CRC rerun’ command (JESD235 §6.2) that recomputes the CRC on a stored burst without a full read, enabling fast isolation of transient vs. permanent faults.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Friday, Jun 05 2026</span>
+    <span class="lesson-title">HBM ECC Testing — SECDED Implementation</span>
+  </div>
+  <h3>Runtime ECC Error Thresholding & Predictive Margin Analysis</h3>
+  <p>Production HBM devices increasingly employ firmware-level error thresholds where the memory controller monitors syndrome activity over sliding time windows (e.g., error count per 1M memory accesses). When correctable error rate exceeds a threshold (e.g., >100 errors/hour), the system throttles memory frequency or voltage to extend device life. ATE test correlation here is crucial: devices exhibiting high-margin SECDED timing or elevated syndrome noise under elevated-temperature test often hit firmware thresholds earlier in the field, enabling predictive binning strategies that separate marginal from robust parts.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
     <span class="date">Monday, Jun 01 2026</span>
     <span class="lesson-title">HBM Init & Training Sequence Testing</span>
   </div>
@@ -196,11 +212,35 @@
 </div></div><div class="module-group" id="module-4"><h2>Module 4 — DFT & Built-In Test</h2>
 <div class="entry">
   <div class="entry-meta">
+    <span class="date"># BIST Pattern Algorithms for DRAM (March, Checkerboard, GALPAT)</span>
+    <span class="lesson-title">BIST Pattern Algorithms for DRAM (March, Checkerboard, GALPAT)</span>
+  </div>
+  <h3>Dynamic BIST Pattern Switching for Temperature‑Accelerated Stress</h3>
+  <p>Recent HBM test suites introduce temperature‑aware BIST where the pattern type (e.g., GALPAT seed) is switched on‑the‑fly as the device is ramped from −40 °C to 125 °C, exposing thermally‑induced coupling faults that static patterns miss.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
     <span class="date">Tuesday, Jun 09 2026</span>
     <span class="lesson-title">Column Repair vs Row Repair Strategy and Fuse Allocation</span>
   </div>
   <h3>Shared Spare Columns and Bank-Group Repair Sharing</h3>
   <p>Some HBM3 designs implement <em>shared spare columns</em> that can be assigned to any of several banks within a bank group, rather than being dedicated to a single bank. This reduces total fuse count (one set of address fuses serves multiple potential defect locations) at the cost of a more complex arbitration circuit that must resolve which bank's column the spare is covering. The repair algorithm must track which shared spare has been committed and to which bank, preventing double-assignment. Shared spares improve area efficiency by roughly 30–50% in spare array overhead while reducing the peak repairability per bank — a deliberate trade-off tuned to the expected within-bank-group defect correlation from process data.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Tuesday, Jun 09 2026</span>
+    <span class="lesson-title">HBM Fuse Programming & Trim Verification</span>
+  </div>
+  <h3>In‑Field Fuse Re‑Programming via Firmware</h3>
+  <p>Newer HBM generations support limited in‑field re‑programming of non‑volatile trim bits through a secure firmware API, allowing post‑silicon margin tuning without returning the device to the wafer‑sort line.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Wednesday, Jun 10 2026</span>
+    <span class="lesson-title">Scan Chain Testing for HBM PHY & Controller Logic</span>
+  </div>
+  <h3>Cell-Aware Test for Advanced-Node HBM Base Die Logic</h3>
+  <p>Standard stuck-at and transition fault models only target a cell's primary input/output pins, missing realistic defects — resistive bridges and opens — buried inside the transistor-level cell layout, which become more probable at the 5-7 nm nodes now used for HBM4-class base dies. Cell-aware ATPG runs SPICE-level fault simulation on each library cell to generate extra patterns targeting these intra-cell defects; this typically adds only 1-3% to overall fault coverage but catches defect classes that conventional scan test escapes and that would otherwise surface as latent field failures.</p>
 </div></div>
 </body>
 </html>

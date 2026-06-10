@@ -205,7 +205,7 @@
         {
           "id": "4.7",
           "title": "Scan Chain Testing for HBM PHY and Controller Logic",
-          "done": false
+          "done": true
         },
         {
           "id": "4.8",
