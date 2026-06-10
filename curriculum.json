@@ -210,7 +210,7 @@
         {
           "id": "4.8",
           "title": "Logic BIST for HBM Controller and PHY",
-          "done": false
+          "done": true
         },
         {
           "id": "4.9",
