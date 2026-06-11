@@ -215,7 +215,7 @@
         {
           "id": "4.9",
           "title": "IEEE 1149.1 JTAG Boundary Scan for HBM Integration",
-          "done": false
+          "done": true
         },
         {
           "id": "4.10",
