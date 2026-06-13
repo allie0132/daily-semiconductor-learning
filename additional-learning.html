@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 26 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 30 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -220,6 +220,22 @@
 </div>
 <div class="entry">
   <div class="entry-meta">
+    <span class="date">Friday, Jun 12 2026</span>
+    <span class="lesson-title">Post‑Repair Yield Analysis & Redundancy Allocation Optimization</span>
+  </div>
+  <h3>Machine‑Learning‑Based Failure Prediction for Redundancy Planning</h3>
+  <p>Recent work (IEEE TCAD 2024) demonstrates a gradient‑boosted model trained on post‑repair datasets that predicts the optimal spare distribution with <2 % error compared to Monte‑Carlo, enabling near‑real‑time allocation adjustments during wafer sort.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Thursday, Jun 11 2026</span>
+    <span class="lesson-title">JTAG Boundary Scan for HBM Integration</span>
+  </div>
+  <h3>IEEE 1687 (IJTAG) for HBM On‑Die Test</h3>
+  <p>IEEE 1687 extends JTAG with an internal scan network (IJTAG) that can address each DRAM macro individually. Recent silicon releases embed an IJTAG controller in the HBM die, enabling on‑die self‑test and firmware download without external TAP access. Evaluate whether your ATE supports IJTAG to reduce scan‑chain length and improve test time.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
     <span class="date">Tuesday, Jun 09 2026</span>
     <span class="lesson-title">Column Repair vs Row Repair Strategy and Fuse Allocation</span>
   </div>
@@ -237,10 +253,26 @@
 <div class="entry">
   <div class="entry-meta">
     <span class="date">Wednesday, Jun 10 2026</span>
+    <span class="lesson-title">Logic BIST for HBM Controller & PHY</span>
+  </div>
+  <h3>On‑Chip Adaptive BIST for Run‑Time Health Monitoring</h3>
+  <p>Recent HBM3 revisions embed an Adaptive BIST engine that continuously samples lane eye‑margin during normal operation and raises a hot‑spot flag when margins dip below 0.6 UI, enabling proactive fail‑over without external test.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Wednesday, Jun 10 2026</span>
     <span class="lesson-title">Scan Chain Testing for HBM PHY & Controller Logic</span>
   </div>
   <h3>Cell-Aware Test for Advanced-Node HBM Base Die Logic</h3>
   <p>Standard stuck-at and transition fault models only target a cell's primary input/output pins, missing realistic defects — resistive bridges and opens — buried inside the transistor-level cell layout, which become more probable at the 5-7 nm nodes now used for HBM4-class base dies. Cell-aware ATPG runs SPICE-level fault simulation on each library cell to generate extra patterns targeting these intra-cell defects; this typically adds only 1-3% to overall fault coverage but catches defect classes that conventional scan test escapes and that would otherwise surface as latent field failures.</p>
+</div></div><div class="module-group" id="module-5"><h2>Module 5 — ATE & Production</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Saturday, Jun 13 2026</span>
+    <span class="lesson-title">ATE Platform Setup for HBM Production Test</span>
+  </div>
+  <h3>BIST Offload Is Shrinking the ATE Pin Budget</h3>
+  <p>As HBM4 pushes toward a 2048-bit interface, driving every data pin from the tester becomes impractical even with the densest HSD/HSDIO cards. The industry trend is to offload array testing to on-die MBIST/Logic BIST controlled via a slim JTAG/serial interface, so the ATE only needs to handle power sequencing, BIST kickoff, and a reduced set of 'golden' AC pins for SI verification — turning future HBM test cells into lighter-weight, JTAG-centric setups.</p>
 </div></div>
 </body>
 </html>
