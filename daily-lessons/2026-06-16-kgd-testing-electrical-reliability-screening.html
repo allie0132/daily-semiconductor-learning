@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KGD Testing: Electrical & Reliability Screening</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M5.4 ATE & Production</span></div>
+  <h1>KGD Testing: Electrical & Reliability Screening</h1>
+  <div class="meta">Tuesday, Jun 16 2026 · Lesson 44 of 56</div>
+</header>
+<div class="section"><h2>KGD Definition & Test Strategy Framework</h2><p><strong>Known Good Die (KGD)</strong> is a die that has passed comprehensive electrical and reliability qualification before packaging, eliminating defects at wafer level and reducing assembly yield loss. Unlike standard wafer-level testing (WLT), KGD requires <strong>functional pattern coverage >95%</strong>, <strong>parametric screening</strong>, and <strong>reliability stress qualification</strong>.</p><p>The KGD test strategy consists of three pillars:</p><ul><li><strong>Electrical screening:</strong> DC parametrics (Vth, leakage, power supply current), functional vectors (>90% ATPG coverage), and AC timing margins at process corners</li><li><strong>Reliability screening:</strong> Burn-in (48–168 hrs at elevated T/V), HTOL, ESD robustness (HBM per JESD22-A114), and thermal cycling to precipitate latent defects</li><li><strong>Traceability & data binning:</strong> Lot-level mapping, defect density trending, and wafer-level root cause correlation</li></ul></div>
+<div class="section"><h2>Electrical Screening: Parametric & Functional Protocols</h2><p><strong>Parametric Testing (DC characterization):</strong></p><ul><li><strong>Supply current (IDD):</strong> Measure static and dynamic leakage at VDD, GND, and intermediate rails across temperature (-40°C to 125°C). Flag <code>IDD > 3σ median</code> as potential oxide defects or latch-up risk</li><li><strong>Threshold voltage (Vth):</strong> Extract via IDVG ramp on dedicated test structures; correlate with poly-silicon depletion and channel-length modulation to predict AC timing closure</li><li><strong>Leakage current (Ileak):</strong> Measure IOFF at nominal and worst-case bias; use <code>Vth screening margin ±50 mV</code> to catch early-failure modes (gate-induced drain leakage, GIDL)</li></ul><p><strong>Functional Testing (AC vector screening):</strong></p><ul><li>Apply <strong>ATPG-generated vectors</strong> with >90% stuck-at coverage; add at-speed patterns at <code>fMAX – 10%</code> guard band to catch delay defects</li><li>Measure <strong>timing margin:</strong> Use embedded delay-line circuits or ring oscillators to verify setup/hold slack and propagation delay across <code>3σ process variation</code></li><li>Stress with <strong>multiple VDD corners</strong> (VDD_nom ± 10%) and temperature sweep to identify voltage/thermal sensitivity</li></ul></div>
+<div class="section"><h2>Reliability Screening: Burn-In, HTOL & ESD Protocols</h2><p><strong>Burn-In (BI) – Defect Precipitation:</strong></p><ul><li>Conduct <strong>Dynamic Burn-In (DBI)</strong> at 125°C, VDD = 1.2V nominal + 5% (stress corner), with <strong>80–100% toggle rate</strong> on core logic for 48–168 hours</li><li>Monitor <strong>Idq growth</strong> every 4–8 hours; reject dies with >3× baseline leakage or sudden jumps (signature of latent short or wearout initiation)</li><li>Combine with <strong>Temperature Cycling (TC)</strong> sub-profile: -40°C to +125°C, 15 min dwell, 10–20 cycles to stress bond wires, solder joints, and metallization thermal mismatch</li></ul><p><strong>High-Temperature Operating Life (HTOL) – Wearout Screening:</strong></p><ul><li>Run <strong>1000 hours at 125°C, 1.3V (VDD overstress)</strong> on sample population (typically 30–50 dies per lot) to accelerate time-dependent dielectric breakdown (TDDB) and electromigration (EM)</li><li>Record <strong>leakage and timing drift</strong> at T=0h, 168h, 500h, 1000h; fit to Arrhenius or power law to project field MTBF</li><li>Acceptance criterion: <strong>Zero parametric failures</strong> and <code>timing shift < 5% nominal</code></li></ul><p><strong>HBM ESD Stress (JESD22-A114):</strong></p><ul><li>Apply ±2 kV HBM discharge to all I/O pads; verify no latch-up and leakage increase <code>< 10% post-stress</code></li><li>Link ESD results to on-die ESD clamp sizing and substrate biasing; use <strong>transmission line pulse (TLP)</strong> characterization to confirm second-breakdown immunity</li></ul></div>
+<div class="section"><h2>ATE Platform Implementation & Data Management</h2><p><strong>ATE Configuration for KGD:</strong></p><ul><li>Deploy <strong>parallel test stations</strong> (e.g., Teradyne UltraFLEX, LTX-Credence Xtra) with <strong>SMU (Source Measurement Unit)</strong> channels for accurate low-leakage measurement (<code>pA-level resolution</code>) and <strong>real-time temperature control</strong> (±0.5°C stability in thermal chamber)</li><li>Integrate <strong>wafer-level probe cards</strong> with <code>fine-pitch contacts (20–30 μm)</code> and <strong>impedance-matched interconnect</strong> to minimize reflections at multi-GHz test frequencies</li><li>Implement <strong>DC calibration routines</strong> every shift (source offset <code>< ±10 mV</code>, measure offset <code>< ±5 mV</code>) and <strong>AC timing calibration</strong> using on-board oscillators (phase-locked to reference clock)</li></ul><p><strong>Data Binning & Yield Analytics:</strong></p><ul><li>Bin dies into <strong>Grade A (KGD prime)</strong>, <strong>Grade B (marginal, for cost-down)</strong>, and <strong>Reject</strong> based on multi-dimensional yield limits: IDD, Vth, Ileak, fMAX margin, and ESD post-stress leakage</li><li>Create <strong>wafer heat maps</strong> correlating defect locations with metallization layout, device density, and implant regions to feed back design-for-test (DFT) and process improvement</li><li>Track <strong>lot DPPM (defects per million)</strong> and <strong>cumulative failure curves</strong> during 12-month field deployment to validate screening effectiveness</li></ul></div>
+<div class="section"><h2>Common Pitfalls & Best Practices</h2><p><strong>Pitfalls:</strong></p><ul><li><strong>Over-aggressive parametric limits:</strong> Setting Ileak spec too tight (e.g., <code>< 1 nA @ 125°C</code>) can reject good dies due to temperature sensor offset or SMU calibration drift; use <code>3σ + guard band approach</code> instead</li><li><strong>Insufficient functional coverage:</strong> Relying on DC-only screening misses logic path delay defects; enforce <strong>≥95% ATPG stuck-at + >80% transition coverage</strong></li><li><strong>Burn-in recipe mismatch:</strong> Using static BI instead of dynamic BI reduces defect precipitation by ~40%; <strong>toggle rate must be >75%</strong> to stress interconnect RC delays and gate oxide</li><li><strong>ESD timing artifacts:</strong> Running HBM stress immediately before parametric re-test can give false leakage blooming; observe <strong>24-hour recovery window</strong> before re-characterization</li></ul><p><strong>Best Practices:</strong></p><ul><li>Correlate <strong>wafer-level KGD results with packaged device field data</strong> on a quarterly basis; flag any systematic KGD pass that later fails in reliability to trigger ATE recipe audit</li><li>Implement <strong>inline SPC (Statistical Process Control)</strong> on key parameters (Ileak trend, Vth distribution); set <strong>control limits at ±2σ</strong> to trigger wafer-level process investigation before yield collapse</li><li>Validate <strong>test program every 50 wafers</strong> using golden reference dies to catch SMU drift, probe card wear, or thermal lag</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>KGD testing combines electrical screening (parametric + functional, >90% coverage) and reliability stress (48–168 hr BI, HTOL, HBM ESD) to precipitate latent defects before packaging.</li><li>Parametric screening must include IDD (static/dynamic), Vth extraction, and Ileak trending; use 3σ + guard band binning to balance yield loss vs. field reliability risk.</li><li>Burn-in effectiveness depends on dynamic toggle (>75% switching activity) and temperature cycling; static BI misses interconnect RC defects. Monitor Idq growth for signature latent shorts.</li><li>ATE platform requires SMU-based measurement (<pA resolution), wafer-level probe cards (fine-pitch, impedance-matched), and rigorous DC/AC calibration every shift for reproducibility.</li><li>Correlate KGD data with packaged device field MTBF and use wafer heat maps to drive DFT and process improvement; quarterly validation closes the loop between wafer test and customer reliability.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JESD22-A114: HBM ESD Stress Test</div><div class="ref-detail">Standard test method for HBM ESD protection validation; 2 kV typical for advanced nodes</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JESD47: Methodology for Impact of Residual Moisture on Microelectronics</div><div class="ref-detail">Guidance on thermal cycle stress correlation with packaging; relevant for post-BI reliability assessment</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JESD22-A108: High-Temperature Operating Life (HTOL) Test Method</div><div class="ref-detail">HTOL protocol definition; 1000 h @ 125°C, 1.3V standard for advanced CMOS wearout screening</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE 1149.1: JTAG Boundary Scan & Test Data Register (TDR)</div><div class="ref-detail">On-chip test access for parametric monitoring and voltage/temperature stress observation during ATE execution</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Sematech KGD Guidelines for 0.18 μm & Below</div><div class="ref-detail">Historical but foundational reference on KGD binning strategy and defect density correlation; still used for process node scaling decisions</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Teradyne UltraFLEX DC/AC Test Module Application Notes</div><div class="ref-detail">Real-world ATE configuration for <pA leakage measurement and multi-site parallel testing at wafer level</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-5">Idq Signature Analysis: Latent Short Detection via Dynamic Profiling</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
