@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM Burn‑In & HTOL Reliability Screening</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M5.7 ATE & Production</span></div>
+  <h1>HBM Burn‑In & HTOL Reliability Screening</h1>
+  <div class="meta">Wednesday, Jun 17 2026 · Lesson 47 of 56</div>
+</header>
+<div class="section"><h2>Why Burn‑In & HTOL for HBM?</h2><p>HBM stacks contain multiple DRAM dies, TSVs, microbumps, and an interposer. Early‑life failures (infant mortality) often stem from dielectric breakdown, micro‑cracks in TSVs, or solder joint fatigue. Burn‑in and High‑Temperature Operating Life (HTOL) accelerate these mechanisms to screen out weak parts before shipment.</p><p><strong>Key failure mechanisms:</strong></p><ul><li>Electromigration (EM) in TSV copper pillars</li><li>Time‑Dependent Dielectric Breakdown (TDDB) in low‑k dielectrics</li><li>Solder joint creep and micro‑crack propagation</li><li>Stress‑induced leakage current (SILC) in gate oxides of peripheral logic</li></ul></div>
+<div class="section"><h2>Burn‑In Test Flow on Modern ATE</h2><p>Typical flow on a Teradyne UltraFLEX or Advantest T2000:</p><ul><li><code>Pre‑test</code>: Apply 0.9 V to VDDQ, run a full memory test (March‑C, BIST) for 10 s to verify functionality.</li><li><code>Stress phase</code>: Ramp VDDQ to 1.15× nominal (≈1.15 V for DDR5‑HBM2E) and temperature to 125 °C (or 130 °C for low‑k). Keep active refresh cycles (e.g., 64 ms refresh) and a mixed read/write pattern (70 % read, 30 % write) for 48 h.</li><li><code>Post‑stress</code>: Return to room temperature, repeat full memory test. Log any address failures, ECC error count, and eye‑diagram drift on the command/address bus.</li></ul><p>Note: For HBM2E, JEDEC JESD235C recommends a minimum 72 h burn‑in at 150 °C for stacked dies, but many fabs use 48 h at 125 °C to balance throughput.</p></div>
+<div class="section"><h2>HTOL Stress Conditions Specific to HBM</h2><p>HTOL differs from burn‑in by extending time and adding voltage overstress. Recommended conditions (per JEDEC JESD236B):</p><ul><li><strong>Voltage:</strong> 1.3× VDDQ for DRAM cores; 1.2× VDD for logic and PHY.</li><li><strong>Temperature:</strong> 150 °C ±5 °C for >1 000 h (typical 1 020 h) on a temperature‑controlled oven.</li><li><strong>Pattern:</strong> Pseudo‑random read/write with periodic full‑array refresh; include 2‑ns toggling on DQ pins to stress I/O drivers.</li><li><strong>Power cycling:</strong> 10 % duty‑cycle power‑off/on every 12 h to accelerate thermal‑mechanical fatigue.</li></ul><p>Data collection includes retention failure count, DRAM band‑width degradation, and on‑die temperature sensor (TSENSOR) drift.</p></div>
+<div class="section"><h2>Data Analysis & Acceptance Criteria</h2><p>Use Weibull analysis on time‑to‑failure (TTF) data. For HBM, the industry target is a 10‑year MTBF at 85 °C/85 % RH, which translates to a Weibull slope (β) > 1.5 and a characteristic life (η) > 5 000 h under HTOL conditions.</p><ul><li>Calculate acceleration factor (AF) via Arrhenius model: <code>AF = exp[(E_a/k)(1/T_use - 1/T_stress)]</code>, with activation energy E_a ≈ 0.7 eV for copper TSV EM.</li><li>Apply AF to convert HTOL TTF to use‑phase TTF.</li><li>Reject parts with any failure before 100 h at stress or with >0.01 % ECC error rate increase.</li></ul></div>
+<div class="section"><h2>Practical Tips for ATE Integration</h2><p>HBM test sockets must maintain <strong>≤5 mΩ</strong> contact resistance to avoid heating hot‑spots. Use compliant micro‑bump adapters with <code>Au‑Sn</code> alloy to match solder‑ball CTE. Calibrate on‑die temperature sensors against a calibrated RTD on the socket before each batch.</p><p>When programming the ATE, employ <code>SGP</code> (stress‑generation pattern) macros that stagger refresh commands across the four channels to evenly load the interposer.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Burn‑in and HTOL are complementary: burn‑in catches early surface failures, HTOL stresses long‑term mechanisms.</li><li>JEDEC JESD235C/JESD236B define voltage, temperature, and time targets; adhere to them for qualified reliability data.</li><li>Weibull analysis with proper acceleration factors converts HTOL results to field MTBF predictions.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C – HBM2E Standard, Section 6.5 Burn‑In</div><div class="ref-detail">JESD235C, 2022</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD236B – Stress Test Methodology for DRAM</div><div class="ref-detail">JESD236B, 2021</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">High‑Temperature Operating Life of 3D‑Stacked DRAM</div><div class="ref-detail">IEEE Trans. Device Mol. Syst., 2023, vol. 12, pp. 145‑152</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Thermal‑Mechanical Modeling of TSVs in HBM</div><div class="ref-detail">K. Lee et al., IEDM 2022, pp. 381‑384</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Teradyne UltraFLEX HBM Test Solution User Guide</div><div class="ref-detail">https://www.teradyne.com/ultraflex-hbm-guide.pdf</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-5">Machine‑Learning‑Based Failure Prediction for HBM HTOL</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
