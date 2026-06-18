@@ -266,7 +266,7 @@
         {
           "id": "5.8",
           "title": "Test Cost Reduction Strategies — compression, parallelism, triage",
-          "done": false
+          "done": true
         }
       ]
     },

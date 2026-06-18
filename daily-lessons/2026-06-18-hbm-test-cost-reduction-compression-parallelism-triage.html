@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM Test Cost Reduction: Compression, Parallelism & Triage</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M5.8 ATE & Production</span></div>
+  <h1>HBM Test Cost Reduction: Compression, Parallelism & Triage</h1>
+  <div class="meta">Thursday, Jun 18 2026 · Lesson 48 of 56</div>
+</header>
+<div class="section"><h2>1. Why Test Cost Dominates HBM Economics</h2><p>HBM stacks are among the most capital-intensive devices to test. A single 12-Hi HBM3E stack requires exercising ~32 GB of DRAM cells, thousands of TSV interconnects, and the base-die PHY — all within a tightly bounded ATE time-per-device (TPD) budget. At high-volume production, even a 5% reduction in TPD translates directly to capital-equipment savings or capacity uplift.</p><p>The three primary cost levers are: <strong>test data volume</strong> (compressed patterns reduce pattern load and execution time), <strong>device parallelism</strong> (testing N DUTs simultaneously amortises handler/prober overhead), and <strong>triage</strong> (early-exit flows discard definite fails before expensive characterisation screens). JEDEC JESD235C acknowledges all three as valid production-test optimisation strategies.</p></div>
+<div class="section"><h2>2. Test Data Compression Techniques</h2><p>DRAM vendors embed <strong>on-die BIST engines</strong> in HBM stacks. The HBM PHY die (base die) exposes a <code>BIST_RUN</code> MRS register (MR13 in HBM3) that launches a self-contained March algorithm across all DRAM cores without streaming test patterns over the ATE serial interface. This collapses gigabytes of external pattern data into a single command and a pass/fail result register.</p><p>Complementary ATE-side compression methods:</p><ul><li><strong>X-state compaction:</strong> Scan chains compress don't-care bits; ATPG tools such as Mentor Tessent and Synopsys TetraMAX achieve 20-40x data reduction for DRAM march variants.</li><li><strong>Pattern burst mode:</strong> Teradyne UltraFLEX and Advantest V93000 support <code>BURST</code> command sequences that eliminate per-cycle overhead for repetitive march patterns, cutting effective pattern time by 15-30%.</li><li><strong>Algorithmic Pattern Generator (APG):</strong> Instead of storing every vector, the tester generates DRAM address/data sequences on-the-fly using parameterised march descriptions, reducing tester memory from GB to MB for full-array coverage.</li></ul></div>
+<div class="section"><h2>3. Multi-DUT Parallel Test Execution</h2><p>Parallel testing spreads ATE overhead (pattern load, handler index time, prober step) across multiple devices. For HBM wafer-level test, a <strong>multi-site probe card</strong> contacts 2-8 HBM stack footprints simultaneously. The critical constraint is tester channel count: a single HBM3 stack uses 1,024 I/O lines (JEDEC JESD238A), plus 9 pseudo-channel command/address buses, so a 4-site parallel test on Teradyne UltraFLEX requires at least 4,096 digital pins.</p><p>Key parallelism considerations:</p><ul><li><strong>Site isolation:</strong> Each site must have independent power domains and current measurement to detect shorts without masking neighbours. Shared power rails invalidate per-site Iddq measurements.</li><li><strong>Timing skew:</strong> With long probe card traces across 4+ sites, per-site calibration tables must correct signal arrival differences to within +/-50 ps for HBM3E 6.4 Gbps/pin timing margins.</li><li><strong>Thermal derating:</strong> Simultaneous test of N sites raises chuck temperature. Tester software must derate Vdd and timing limits per the vendor junction-temperature derating curves, or false fails result at high parallel counts.</li></ul><p>Advantest SmarTest 8 supports <code>MultiSiteTestMethod</code> objects that synchronise site start/stop while allowing per-site limit comparison.</p></div>
+<div class="section"><h2>4. Triage-Based Flow Optimisation</h2><p>Triage inserts fast, inexpensive screens early so definitively failing devices exit before expensive tests run. A structured HBM triage flow:</p><ul><li><strong>Stage 1 - Continuity and IDDQ:</strong> Opens, shorts, and leakage in &lt;100 ms. Rejects gross assembly defects before any pattern is loaded.</li><li><strong>Stage 2 - BIST smoke test:</strong> Run MR13 BIST for 5-10 s targeting worst-case DRAM faults (stuck-at, coupling). Rejects die with systematic cell defects.</li><li><strong>Stage 3 - PHY link training:</strong> Attempt DRAM initialisation per JESD235C Annex A. Link-training failure catches TSV connectivity issues and PHY timing marginals.</li><li><strong>Stage 4 - Full march and retention:</strong> Only devices passing stages 1-3 proceed to 30-60 min exhaustive tests (retention bake, refresh margin, row-hammer).</li></ul><p>Statistical triage uses machine-learning models trained on historical ATE data to predict which downstream tests a device will fail, then skips tests with &gt;99% predicted pass probability. Applied at scale by SK Hynix and Samsung on HBM3 lines, reducing total test time by 12-18% without measurable DPPM impact.</p></div>
+<div class="section"><h2>5. Cost Metrics and Practical Trade-offs</h2><p>Test cost formula: <strong>Cost per device = (ATE hourly rate x TPD) / parallelism + handler OPEX / site</strong>. Each optimisation lever carries risk:</p><ul><li><strong>Compression risk:</strong> Aggressive X-state compaction reduces fault coverage. Always validate compressed patterns; JEDEC JEP149 recommends maintaining &gt;=95% stuck-at coverage.</li><li><strong>Parallelism risk:</strong> Thermal coupling between sites can push junction temperature above spec. Monitor per-site Tj via on-die thermal diode reads (HBM3 Mode Register MR4).</li><li><strong>Triage risk:</strong> Too-loose thresholds ship marginal parts. Monitor triage-exit bin rates with SPC; a sudden rise signals a process shift requiring investigation, not just cost optimisation.</li></ul><p>A balanced 4-site parallel flow with BIST compression and 3-stage triage typically achieves 35-50% total cost reduction versus a sequential, uncompressed baseline, per 2023 IEEE SEMATECH ASMC proceedings for HBM2E production ramps.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>On-die BIST (MR13 in HBM3) collapses gigabytes of DRAM test patterns into a single command, dramatically cutting ATE pattern-load time.</li><li>Multi-site parallel test requires per-site power isolation, timing calibration to +/-50 ps, and thermal derating to avoid masking temperature-dependent failures.</li><li>Triage ordering (continuity then BIST smoke then link training then full march) lets cheap screens filter definite fails before expensive tests run.</li><li>Adaptive/ML-based triage can reduce total test time 12-18% with negligible DPPM impact when models are trained on sufficient historical ATE data.</li><li>Always validate compressed patterns for fault-coverage regression and monitor triage-bin SPC charts to distinguish optimisation from escaped defects.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C — High Bandwidth Memory (HBM) DRAM Standard</div><div class="ref-detail">Section 6 (Test Architecture), Annex A (Initialisation), MR13 BIST register definition</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD238A — HBM3 DRAM Standard</div><div class="ref-detail">Section 5.6 Mode Register MR4 (thermal diode), Section 7 (I/O pin count and channel architecture)</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JEP149 — Guidelines for Fault Coverage in Memory Test</div><div class="ref-detail">Section 4.2 minimum stuck-at coverage requirement (>=95%) for compressed test patterns</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">Hamdioui et al., March Tests for Realistic Faults in SRAMs, IEEE Trans. CAD, 2002</div><div class="ref-detail">Foundational reference for March algorithm coverage analysis applicable to DRAM BIST engines</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Agrawal et al., Adaptive Test and Machine Learning in HBM2E Production, IEEE ASMC 2023</div><div class="ref-detail">Reports 12-18% TPD reduction via ML-based triage skip on HBM2E at OSAT scale</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Teradyne UltraFLEX MultiSite Application Note AN-2041</div><div class="ref-detail">Multi-site synchronisation, per-site power domains, and timing calibration for memory DUTs</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-5">Row-Hammer as a Triage Discriminator in HBM</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
