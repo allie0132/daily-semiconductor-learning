@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoWoS & SoIC Advanced Packaging Test Challenges</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M6.2 Advanced Topics</span></div>
+  <h1>CoWoS & SoIC Advanced Packaging Test Challenges</h1>
+  <div class="meta">Friday, Jun 19 2026 &middot; Lesson 50 of 56</div>
+</header>
+<div class="section"><h2>CoWoS Architecture and Testability Overview</h2><p>TSMC's Chip-on-Wafer-on-Substrate (CoWoS) family integrates multiple dies on a passive silicon interposer (CoWoS-S), RDL interposer (CoWoS-R), or local-silicon-plus-RDL bridge (CoWoS-L) before mounting on an organic substrate. The interposer carries dense micro-bump arrays—typically 40 µm pitch for CoWoS-S—and through-silicon vias (TSVs) with a 10–40 µm diameter forming the vertical signal path from die to substrate.</p><p>From a test perspective, CoWoS creates a <strong>three-stage inspection problem</strong>: (1) wafer-level die sort before dicing, (2) interposer continuity and leakage after TSV reveal, and (3) assembled module functional test. Each stage uses different equipment—standard probe cards, specialized TSV kelvin probes, and socket-based or direct-dock ATE contactors—and must detect different fault modes including open TSVs, micro-bump bridging, and die-to-interposer alignment voids.</p></div>
+<div class="section"><h2>Known Good Die (KGD) Requirements and Wafer-Level Strategy</h2><p>The cost driver in CoWoS assembly is the <strong>Known Good Die</strong> requirement. A single defective die in a multi-chiplet stack condemns the entire assembled package, which may carry $1,000–$10,000+ in upstream value. JEDEC JEP160 defines KGD as a die proven to be electrically equivalent to a packaged part with a defect level below 100 DPPM.</p><p>Achieving KGD-grade confidence at wafer level demands:</p><ul><li><strong>Full-speed functional test</strong> at the target operating frequency—often 3.2–6.4 GT/s for HBM I/O interfaces—using resonant fixture probe cards that suppress stub resonance below −20 dB across the band of interest.</li><li><strong>Burn-in at wafer level (WLBI)</strong> using forced-air or liquid-cooled chuck systems capable of holding junction temperature within ±2 °C of target across a 300 mm wafer during 48–168 h stress.</li><li><strong>Stress-test pattern sequencing</strong>: static IDDQ → March-C DRAM array scan → pseudo-random PRBS stress → functional corner sweep (−40 to 125 °C, 0.72–1.1 V VDD).</li></ul><p>Probe card challenges include maintaining &lt;50 mΩ contact resistance on micro-bumps as small as 25 µm, requiring tungsten carbide MEMS tips or advanced spring pin designs with CMP-polished tips.</p></div>
+<div class="section"><h2>Signal Integrity Challenges at the Interposer Interface</h2><p>The silicon interposer's dielectric constant (~11.7 for silicon vs. ~3.5 for low-k organic) creates transmission-line impedances that differ from conventional PCB environments. A 10 µm-wide, 200 µm-long interposer trace has a characteristic impedance of approximately 25–35 Ω, requiring careful impedance matching at die micro-bumps and substrate BGA balls to prevent reflections that corrupt high-speed signals.</p><p>ATE vector delivery must account for <strong>stub resonance</strong> in TSV arrays: a 100 µm-deep TSV forms a λ/4 resonant stub at roughly 375 GHz, but parasitic coupling between adjacent TSVs in a dense array (5 µm pitch) can induce resonances in the 10–60 GHz range detectable as periodic BER floors during PRBS-31 tests.</p><p>Practical SI verification steps:</p><ul><li>Measure insertion loss S21 and return loss S11 on representative daisy-chain coupons using a 67 GHz VNA prior to lot qualification.</li><li>Apply <strong>de-embedding</strong> to strip probe and fixture effects—use a 2×Thru SOLT calibration with substrate-based ISS standards.</li><li>Validate eye diagrams on all lane pairs at 1.25× production data rate; reject lanes with eye height &lt;30% of UI or jitter Tj &gt;0.3 UI at 10⁻¹² BER.</li></ul></div>
+<div class="section"><h2>SoIC Hybrid Bonding and 3D Test Constraints</h2><p>TSMC's System on Integrated Chips (SoIC) uses <strong>direct Cu-to-Cu hybrid bonding</strong> (also called bumpless bonding) with pitches as fine as 0.5–9 µm, eliminating solder micro-bumps entirely. This achieves 10–100× higher interconnect density than flip-chip, enabling memory-on-logic or logic-on-logic stacks with sub-1 fJ/bit I/O energy, but it fundamentally eliminates any possibility of separating the stacked dies after bonding—making pre-bond test completeness non-negotiable.</p><p>Key DFT constraints imposed by SoIC:</p><ul><li><strong>No post-bond physical access</strong> to die-to-die interfaces; boundary scan (IEEE 1149.1) chains must be designed to route through the bonded interface or bypass it entirely with dedicated test modes.</li><li><strong>Thermal gradients</strong> from stacked power dissipation (up to 100 W/cm² in logic layers) cause timing shifts of 5–15% in memory arrays—test must apply worst-case thermal vectors, not isothermal conditions.</li><li><strong>Interconnect stress testing</strong>: the Cu-Cu bond reliability is characterized by electromigration (EM) at current densities &gt;10⁶ A/cm² and by Cu diffusion at temperatures &gt;200 °C. HTOL and EM tests must stress the die-to-die links with repetitive toggle patterns achieving average IDac matching peak device specs.</li></ul><p>The IEEE P1838 standard (Die-to-Die Test) defines a scalable test access mechanism (TAM) and wrapper cell architecture specifically for 3D-IC stacks, allowing ATE access to individual die cores without requiring separate I/O pads on the bonded die.</p></div>
+<div class="section"><h2>Thermal Management and ATE Integration for Advanced Packages</h2><p>CoWoS packages for AI accelerators (e.g., NVIDIA H100, AMD MI300X) dissipate 300–700 W in a 75 mm × 75 mm footprint, creating extreme thermal gradients that ATE handlers and thermal force units (TFUs) must manage during test. Inadequate thermal control leads to <strong>thermally-induced test escapes</strong>: a device that passes at 25 °C die temperature but fails at 85 °C Tj may ship defective if the test socket's thermal resistance (θ_jc + θ_contact) is undercharacterized.</p><p>Best practices for thermal-aware ATE integration:</p><ul><li>Characterize socket θ_jc using a calibrated thermal test die (TTD) per JEDEC JESD51-14 to within ±2 °C before production ramp.</li><li>Use closed-loop TFU with die-surface thermocouple feedback; set dwell time ≥30 s after temperature setpoint change to allow thermal equilibrium across the interposer mass.</li><li>Apply <strong>power sequencing guards</strong>: do not apply full VDD until Tj is within ±5 °C of target; sudden power-on of a cold 700 W package into a warm socket causes thermal shock that can crack BGA joints.</li><li>Validate thermal derating curves: measure IDDQ, leakage, and timing at 5 °C intervals from 0 to 125 °C junction temperature to populate the production guard-band table.</li></ul></div>
+
+<div class="takeaways">
+  <h2>&#x26A1; Key Takeaways</h2>
+  <ul><li>KGD at ≤100 DPPM is mandatory before CoWoS assembly; full-speed wafer-level functional test and WLBI are the primary gates, not just DC parametric screening.</li><li>SoIC hybrid bonding eliminates post-bond die separation, making IEEE P1838 TAM wrappers and pre-bond thermal stress patterns the only path to adequate die-to-die interface coverage.</li><li>ATE thermal management for 300–700 W CoWoS packages requires JESD51-14-characterized socket θ_jc, closed-loop TFU control, and power-sequencing guards to prevent test escapes and thermally-induced package damage.</li></ul>
+</div>
+<div class="references"><h2>&#x1F4DA; References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JEP160: Known Good Die (KGD) Requirements</div><div class="ref-detail">JEP160.01 — defines KGD electrical equivalency and DPPM targets for 2.5D/3D assembly</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE Std 1149.1-2013: Boundary-Scan Architecture</div><div class="ref-detail">IEEE 1149.1-2013, clause 4 — JTAG test access port and boundary scan register definitions</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE P1838: Die-to-Die Test for 3D-IC</div><div class="ref-detail">IEEE P1838 D3.0 — scalable TAM and wrapper cell standard for stacked-die test access</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD51-14: Transient Dual Interface Measurement of Thermal Resistance</div><div class="ref-detail">JESD51-14 — socket and package thermal resistance characterization methodology</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">TSMC CoWoS Technology Overview</div><div class="ref-detail">TSMC 2023 Technology Symposium, CoWoS Platform Update — CoWoS-S/-R/-L architecture and interconnect pitch specs</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Chen et al., Hybrid Bonding Technology for 3D IC Integration, IEEE TED 2022</div><div class="ref-detail">IEEE Trans. Electron Devices, vol. 69, no. 8, Aug. 2022 — Cu-Cu bond reliability, EM, and diffusion characterization</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-6">Redundancy Mapping in CoWoS HBM Channel Allocation</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
