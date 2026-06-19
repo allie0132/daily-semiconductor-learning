@@ -1,12 +1,7 @@
-"""
-Generates today's lesson for topic 3.6 using inline content (no external API),
-then runs the rest of the generate_lesson.py pipeline.
-"""
-import json, os, re, subprocess
+import json, os, re, subprocess, urllib.request
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
-import importlib.util, sys
 
 today = date.today().isoformat()
 now_et = datetime.now(ZoneInfo("America/New_York"))
@@ -14,7 +9,6 @@ date_str = now_et.strftime("%A, %b %d %Y")
 lesson_dir = "daily-lessons"
 os.makedirs(lesson_dir, exist_ok=True)
 
-# ── Curriculum ────────────────────────────────────────────────────────────────
 curriculum_path = Path("curriculum.json")
 with open(curriculum_path, encoding="utf-8") as f:
     curriculum = json.load(f)
@@ -36,100 +30,97 @@ def mark_done(topic_id):
 
 def curriculum_progress():
     total = sum(len(m["topics"]) for m in curriculum["modules"])
-    done  = sum(1 for m in curriculum["modules"] for t in m["topics"] if t["done"])
+    done = sum(1 for m in curriculum["modules"] for t in m["topics"] if t["done"])
     return done, total
 
 module, topic_item = next_topic()
 if topic_item is None:
     print("Curriculum complete!")
-    sys.exit(0)
+    exit(0)
 
-topic_title  = topic_item["title"]
-module_name  = module["name"]
-topic_id     = topic_item["id"]
+topic_title = topic_item["title"]
+module_name = module["name"]
+topic_id = topic_item["id"]
 done_count, total_count = curriculum_progress()
 print(f"Module {topic_id}: {topic_title}")
 
-# ── Inline lesson content ─────────────────────────────────────────────────────
+# ── Pre-generated lesson content ──────────────────────────────────────────────
 lesson = {
-  "topic": "HBM Mode Registers & Configuration Testing: MR0-MR15",
-  "summary": "Systematic testing of HBM MR0-MR15 via MRS write and MRR readback, covering boundary values, reserved bits, and JESD235C compliance verification.",
+  "topic": "CoWoS & SoIC Advanced Packaging Test Challenges",
+  "summary": "2.5D/3D packaging demands KGD screening, hybrid-bond SI verification, and thermal-aware ATE strategies to catch defects unreachable post-stack.",
   "sections": [
     {
-      "title": "Mode Register Architecture and Access Protocol",
-      "content": "<p>HBM mode registers (MRs) are accessed via the <strong>Mode Register Set (MRS)</strong> command on the command/address (CA) bus. In HBM3 (JESD235C), the MRS command drives a 3-bit register address on CA[2:0] and an 8-bit data payload on CA[10:3], targeting a specific pseudo-channel. The <strong>Mode Register Read (MRR)</strong> command returns the current register value on the DQ bus during the subsequent read latency window.</p><p>Registers MR0-MR15 are individually addressable. HBM3 uses <strong>per-channel</strong> mode registers - each of the 8 channels (16 pseudo-channels) maintains an independent MR state, requiring full coverage testing across all pseudo-channels. The MRS command must comply with <strong>tMRD</strong> (minimum 4 nCK between successive MRS commands) to prevent register metastability.</p><ul><li>MRS command takes effect after tMRD (4 nCK in HBM3)</li><li>MRR data appears on DQ after tMRR read latency offset</li><li>All MRS/MRR must occur with <strong>CKE HIGH</strong> and device in idle state</li></ul>"
+      "title": "CoWoS Architecture and Testability Overview",
+      "content": "<p>TSMC's Chip-on-Wafer-on-Substrate (CoWoS) family integrates multiple dies on a passive silicon interposer (CoWoS-S), RDL interposer (CoWoS-R), or local-silicon-plus-RDL bridge (CoWoS-L) before mounting on an organic substrate. The interposer carries dense micro-bump arrays—typically 40 µm pitch for CoWoS-S—and through-silicon vias (TSVs) with a 10–40 µm diameter forming the vertical signal path from die to substrate.</p><p>From a test perspective, CoWoS creates a <strong>three-stage inspection problem</strong>: (1) wafer-level die sort before dicing, (2) interposer continuity and leakage after TSV reveal, and (3) assembled module functional test. Each stage uses different equipment—standard probe cards, specialized TSV kelvin probes, and socket-based or direct-dock ATE contactors—and must detect different fault modes including open TSVs, micro-bump bridging, and die-to-interposer alignment voids.</p>"
     },
     {
-      "title": "MR0-MR5: Core Timing, Latency, and Data Path Configuration",
-      "content": "<p><strong>MR0</strong> is the most critical register, controlling <strong>Burst Length (BL)</strong> and <strong>CAS Latency (CL)</strong>. In HBM3, BL is fixed at 4 (MR0[1:0]=00), and CL is encoded in MR0[5:2] with valid values from CL=6 to CL=17 depending on operating frequency. An incorrect CL setting causes systematic read failures - commonly seen as a fixed-offset alignment error in captured eye diagrams.</p><p><strong>MR1</strong> configures <strong>Write Latency (WL)</strong> and <strong>Additive Latency (AL)</strong>. WL must match the PHY write-path delay; mismatches appear as DQS-to-DQ alignment errors in ATE timing closure reports. <strong>MR2</strong> and <strong>MR3</strong> control read/write preamble and postamble lengths - critical for eye margin at data rates above 3.2 Gbps/pin.</p><ul><li><strong>MR4</strong>: DBI-WR enable (bit 3) and DBI-RD enable (bit 2) - Data Bus Inversion reduces simultaneous switching noise</li><li><strong>MR5</strong>: ODT impedance settings - affects signal integrity margin testing</li></ul>"
+      "title": "Known Good Die (KGD) Requirements and Wafer-Level Strategy",
+      "content": "<p>The cost driver in CoWoS assembly is the <strong>Known Good Die</strong> requirement. A single defective die in a multi-chiplet stack condemns the entire assembled package, which may carry $1,000–$10,000+ in upstream value. JEDEC JEP160 defines KGD as a die proven to be electrically equivalent to a packaged part with a defect level below 100 DPPM.</p><p>Achieving KGD-grade confidence at wafer level demands:</p><ul><li><strong>Full-speed functional test</strong> at the target operating frequency—often 3.2–6.4 GT/s for HBM I/O interfaces—using resonant fixture probe cards that suppress stub resonance below −20 dB across the band of interest.</li><li><strong>Burn-in at wafer level (WLBI)</strong> using forced-air or liquid-cooled chuck systems capable of holding junction temperature within ±2 °C of target across a 300 mm wafer during 48–168 h stress.</li><li><strong>Stress-test pattern sequencing</strong>: static IDDQ → March-C DRAM array scan → pseudo-random PRBS stress → functional corner sweep (−40 to 125 °C, 0.72–1.1 V VDD).</li></ul><p>Probe card challenges include maintaining &lt;50 mΩ contact resistance on micro-bumps as small as 25 µm, requiring tungsten carbide MEMS tips or advanced spring pin designs with CMP-polished tips.</p>"
     },
     {
-      "title": "MR6-MR10: ECC, Temperature Sensor, and RAS Feature Control",
-      "content": "<p><strong>MR8</strong> is the ECC control register in HBM3. Bit 0 enables/disables SECDED ECC; bit 1 enables the <strong>ECC error log</strong>, which accumulates correctable error counts accessible via MRR. Test strategy: write MR8[0]=1, inject single-bit errors via deliberate data inversion during write, then verify ECC correction via MRR readback of error log registers MR14 and MR15.</p><p><strong>MR6</strong> holds the temperature sensor output in read-only mode - MRR of MR6 returns the on-die thermal sensor reading with 1 degree C LSB resolution. Cross-correlate against chuck temperature at ATE: a deviation greater than 5 degrees C flags a sensor calibration failure. <strong>MR7</strong> controls CATTRIP threshold programming in applicable HBM implementations - writing above the thermal limit triggers CATTRIP pin assertion, which ATE must capture as a forced test interrupt.</p><ul><li><strong>MR9</strong>: Refresh rate control (1x, 2x, 4x) - test at all three settings to verify tREFI compliance</li><li><strong>MR10</strong>: CRC enable - enables per-burst CRC on the read data path per JESD235C Section 6.3</li></ul>"
+      "title": "Signal Integrity Challenges at the Interposer Interface",
+      "content": "<p>The silicon interposer's dielectric constant (~11.7 for silicon vs. ~3.5 for low-k organic) creates transmission-line impedances that differ from conventional PCB environments. A 10 µm-wide, 200 µm-long interposer trace has a characteristic impedance of approximately 25–35 Ω, requiring careful impedance matching at die micro-bumps and substrate BGA balls to prevent reflections that corrupt high-speed signals.</p><p>ATE vector delivery must account for <strong>stub resonance</strong> in TSV arrays: a 100 µm-deep TSV forms a λ/4 resonant stub at roughly 375 GHz, but parasitic coupling between adjacent TSVs in a dense array (5 µm pitch) can induce resonances in the 10–60 GHz range detectable as periodic BER floors during PRBS-31 tests.</p><p>Practical SI verification steps:</p><ul><li>Measure insertion loss S21 and return loss S11 on representative daisy-chain coupons using a 67 GHz VNA prior to lot qualification.</li><li>Apply <strong>de-embedding</strong> to strip probe and fixture effects—use a 2×Thru SOLT calibration with substrate-based ISS standards.</li><li>Validate eye diagrams on all lane pairs at 1.25× production data rate; reject lanes with eye height &lt;30% of UI or jitter Tj &gt;0.3 UI at 10⁻¹² BER.</li></ul>"
     },
     {
-      "title": "MR11-MR15: HBM3 Extensions, Error Logs, and Reserved Fields",
-      "content": "<p><strong>MR14 and MR15</strong> are read-only <strong>ECC error log registers</strong> in HBM3. MR14[7:0] reports correctable (single-bit) error counts; MR15[7:0] reports uncorrectable (double-bit) detection events. After each DRAM stress pattern, MRR of MR14/MR15 validates error injection and ECC hardware function. Error log counters are <strong>sticky</strong> - they persist across refresh cycles until explicitly cleared via MR8[3]=1.</p><p><strong>Reserved bit testing</strong> is a JEDEC compliance requirement: JESD235C mandates that RFU-labeled bits must return 0 on MRR regardless of what was written via MRS. ATE patterns must write 0xFF to registers containing reserved fields, then perform MRR and mask-compare against the defined bit pattern. Any non-zero return on an RFU bit is a compliance failure.</p><ul><li>MR11-MR13: Vendor-specific or HBM3e-extended features (PHY training status, vendor ID)</li><li>Boundary-value testing: write 0x00 and 0xFF to each MR; verify defined bits behave per spec</li></ul>"
+      "title": "SoIC Hybrid Bonding and 3D Test Constraints",
+      "content": "<p>TSMC's System on Integrated Chips (SoIC) uses <strong>direct Cu-to-Cu hybrid bonding</strong> (also called bumpless bonding) with pitches as fine as 0.5–9 µm, eliminating solder micro-bumps entirely. This achieves 10–100× higher interconnect density than flip-chip, enabling memory-on-logic or logic-on-logic stacks with sub-1 fJ/bit I/O energy, but it fundamentally eliminates any possibility of separating the stacked dies after bonding—making pre-bond test completeness non-negotiable.</p><p>Key DFT constraints imposed by SoIC:</p><ul><li><strong>No post-bond physical access</strong> to die-to-die interfaces; boundary scan (IEEE 1149.1) chains must be designed to route through the bonded interface or bypass it entirely with dedicated test modes.</li><li><strong>Thermal gradients</strong> from stacked power dissipation (up to 100 W/cm² in logic layers) cause timing shifts of 5–15% in memory arrays—test must apply worst-case thermal vectors, not isothermal conditions.</li><li><strong>Interconnect stress testing</strong>: the Cu-Cu bond reliability is characterized by electromigration (EM) at current densities &gt;10⁶ A/cm² and by Cu diffusion at temperatures &gt;200 °C. HTOL and EM tests must stress the die-to-die links with repetitive toggle patterns achieving average IDac matching peak device specs.</li></ul><p>The IEEE P1838 standard (Die-to-Die Test) defines a scalable test access mechanism (TAM) and wrapper cell architecture specifically for 3D-IC stacks, allowing ATE access to individual die cores without requiring separate I/O pads on the bonded die.</p>"
     },
     {
-      "title": "ATE Mode Register Test Implementation and Coverage Strategy",
-      "content": "<p>A complete MR test suite on Advantest V93000 or Teradyne UltraFLEX requires three layers: <strong>(1) Walk test</strong> - write each valid value to each MR and verify via MRR, covering all defined bits. <strong>(2) Interaction test</strong> - stress timing interactions with CL+WL combinations near min/max valid pairs. <strong>(3) Retention test</strong> - verify MR values survive a self-refresh entry/exit cycle (tPD hold) unchanged.</p><p>MRR data is captured as a <strong>functional read</strong> on ATE - the DQ return is compared against expected bit patterns using per-bit expect (PBE) masks. A critical pitfall: MRR data appears on DQ at the CAS Latency offset from the MRR command, so ATE strobe timing must align to the CL programmed in MR0. Misaligned strobe captures are the #1 debug failure mode during first-silicon MR test bring-up.</p><ul><li>Test all 16 pseudo-channels independently - channel-to-channel MR isolation is a common RTL bug</li><li>Verify <strong>reset-state</strong>: after power-on-reset or ZQCal init, all MRs must match JEDEC-defined reset values</li><li>Automate MR sweep via parametric loops in the ATE test program; avoid hardcoded single-value tests</li></ul>"
+      "title": "Thermal Management and ATE Integration for Advanced Packages",
+      "content": "<p>CoWoS packages for AI accelerators (e.g., NVIDIA H100, AMD MI300X) dissipate 300–700 W in a 75 mm × 75 mm footprint, creating extreme thermal gradients that ATE handlers and thermal force units (TFUs) must manage during test. Inadequate thermal control leads to <strong>thermally-induced test escapes</strong>: a device that passes at 25 °C die temperature but fails at 85 °C Tj may ship defective if the test socket's thermal resistance (θ_jc + θ_contact) is undercharacterized.</p><p>Best practices for thermal-aware ATE integration:</p><ul><li>Characterize socket θ_jc using a calibrated thermal test die (TTD) per JEDEC JESD51-14 to within ±2 °C before production ramp.</li><li>Use closed-loop TFU with die-surface thermocouple feedback; set dwell time ≥30 s after temperature setpoint change to allow thermal equilibrium across the interposer mass.</li><li>Apply <strong>power sequencing guards</strong>: do not apply full VDD until Tj is within ±5 °C of target; sudden power-on of a cold 700 W package into a warm socket causes thermal shock that can crack BGA joints.</li><li>Validate thermal derating curves: measure IDDQ, leakage, and timing at 5 °C intervals from 0 to 125 °C junction temperature to populate the production guard-band table.</li></ul>"
     }
   ],
   "key_takeaways": [
-    "MR0 (CAS Latency, Burst Length) and MR1 (Write Latency) are the highest-impact registers - incorrect values cause systematic functional failures that mimic electrical defects",
-    "Reserved/RFU bits must return 0 on MRR regardless of MRS write value; any non-zero RFU readback is a JEDEC JESD235C compliance failure",
-    "ECC control (MR8) and error log (MR14/MR15) testing requires deliberate error injection to validate end-to-end SECDED hardware function",
-    "All 16 pseudo-channels must be tested independently for MR state isolation - shared register state bugs are common in first-silicon HBM controller integration",
-    "ATE MRR capture requires strobe alignment to the CL programmed in MR0; strobe timing mismatch is the #1 bring-up failure mode for mode register testing"
+    "KGD at ≤100 DPPM is mandatory before CoWoS assembly; full-speed wafer-level functional test and WLBI are the primary gates, not just DC parametric screening.",
+    "SoIC hybrid bonding eliminates post-bond die separation, making IEEE P1838 TAM wrappers and pre-bond thermal stress patterns the only path to adequate die-to-die interface coverage.",
+    "ATE thermal management for 300–700 W CoWoS packages requires JESD51-14-characterized socket θ_jc, closed-loop TFU control, and power-sequencing guards to prevent test escapes and thermally-induced package damage."
   ],
   "references": [
     {
-      "title": "High Bandwidth Memory (HBM) DRAM - JESD235C",
+      "title": "JEDEC JEP160: Known Good Die (KGD) Requirements",
       "type": "JEDEC",
-      "detail": "JEDEC Standard JESD235C, Section 4 (Mode Registers), Table 4-1 through Table 4-15; Section 6.3 (CRC)"
+      "detail": "JEP160.01 — defines KGD electrical equivalency and DPPM targets for 2.5D/3D assembly"
     },
     {
-      "title": "HBM2 Standard - JESD235A Mode Register Definitions",
+      "title": "IEEE Std 1149.1-2013: Boundary-Scan Architecture",
+      "type": "IEEE",
+      "detail": "IEEE 1149.1-2013, clause 4 — JTAG test access port and boundary scan register definitions"
+    },
+    {
+      "title": "IEEE P1838: Die-to-Die Test for 3D-IC",
+      "type": "IEEE",
+      "detail": "IEEE P1838 D3.0 — scalable TAM and wrapper cell standard for stacked-die test access"
+    },
+    {
+      "title": "JEDEC JESD51-14: Transient Dual Interface Measurement of Thermal Resistance",
       "type": "JEDEC",
-      "detail": "JEDEC JESD235A, Section 4.4 - MR0-MR8 definitions and power-on reset values"
+      "detail": "JESD51-14 — socket and package thermal resistance characterization methodology"
     },
     {
-      "title": "SK Hynix HBM3 HBMC Series Datasheet",
-      "type": "Datasheet",
-      "detail": "Mode Register Map section; MRS/MRR timing diagrams; tMRD specification (Rev 1.0)"
-    },
-    {
-      "title": "Micron HBM2e Mode Register Programming Technical Note TN-HBM-01",
-      "type": "Datasheet",
-      "detail": "Programming sequences, boundary conditions, and ATE implementation guidance for MR0-MR10"
-    },
-    {
-      "title": "Advantest V93000 HBM Test Library Application Note AN-V93K-HBM-003",
+      "title": "TSMC CoWoS Technology Overview",
       "type": "Web",
-      "detail": "MRR capture alignment, PBE mask programming, and pseudo-channel parallel MR sweep patterns"
+      "detail": "TSMC 2023 Technology Symposium, CoWoS Platform Update — CoWoS-S/-R/-L architecture and interconnect pitch specs"
     },
     {
-      "title": "JEDEC JESD79-4B DDR4 Specification",
-      "type": "JEDEC",
-      "detail": "Section 3.5 - MRS/MRR protocol heritage shared with HBM command bus; cross-reference for tMRD timing"
+      "title": "Chen et al., Hybrid Bonding Technology for 3D IC Integration, IEEE TED 2022",
+      "type": "Paper",
+      "detail": "IEEE Trans. Electron Devices, vol. 69, no. 8, Aug. 2022 — Cu-Cu bond reliability, EM, and diffusion characterization"
     }
   ],
   "additional_learning": {
-    "title": "HBM3e MR Extensions: New Registers in JESD235D",
-    "content": "HBM3e (JESD235D) adds new mode register definitions extending coverage beyond JESD235C, including enhanced refresh management registers and per-channel RFM (Refresh Management) control bits. HBM3e also expands PHY training status readback registers (MR11-MR13) to expose per-pseudo-channel read/write DQ training results, enabling ATE to diagnose marginal PHY calibration without oscilloscope captures. Test engineers targeting HBM3e must update MR test suites to include these extended registers and validate that HBM3 legacy mode correctly masks or ignores HBM3e-exclusive MR fields."
+    "title": "Redundancy Mapping in CoWoS HBM Channel Allocation",
+    "content": "CoWoS packages integrating HBM stacks rely on post-assembly redundancy mapping to retire defective DRAM columns and rows discovered during module-level test, a step that must be completed before the package is soldered onto a PCB. The ATE writes a redundancy map into one-time-programmable (OTP) e-fuses or SRAM-backed registers on the logic die via the JTAG/1149.1 interface; the HBM PHY then masks defective lanes during normal operation. Critically, test must verify the complete redundancy allocation path—from ATE pattern injection to e-fuse programming to PHY lane masking—because a failed OTP write creates a device that passes lane-level tests but exhibits intermittent errors in the field when the masked lane is occasionally accessed."
   }
 }
 
-# ── Everything below mirrors generate_lesson.py ───────────────────────────────
-topic     = lesson["topic"]
-summary   = lesson["summary"]
-sections  = lesson["sections"]
+topic = lesson["topic"]
+summary = lesson["summary"]
+sections = lesson["sections"]
 takeaways = lesson["key_takeaways"]
-references= lesson.get("references", [])
-additional= lesson.get("additional_learning")
+references = lesson.get("references", [])
+additional = lesson.get("additional_learning")
 
-slug      = re.sub(r'[^a-z0-9]+', '-', topic.lower()).strip('-')[:60]
+slug = re.sub(r'[^a-z0-9]+', '-', topic.lower()).strip('-')[:60]
 base_name = f"{today}-{slug}"
 
 # ── Markdown ──────────────────────────────────────────────────────────────────
@@ -151,7 +142,7 @@ if references:
     for i, r in enumerate(references, 1):
         md_lines.append(f"{i}. **[{r['type']}]** {r['title']} — {r['detail']}")
 if additional:
-    md_lines.append(f"\n## \U0001f50d Additional Learning: {additional['title']}\n")
+    md_lines.append(f"\n## Additional Learning: {additional['title']}\n")
     md_lines.append(additional["content"])
 
 md_path = os.path.join(lesson_dir, f"{base_name}.md")
@@ -182,7 +173,7 @@ if references:
         f'<div class="ref-detail">{r["detail"]}</div></div></div>'
         for r in references
     )
-    references_html = f'<div class="references"><h2>📚 References</h2>{ref_items}</div>'
+    references_html = f'<div class="references"><h2>&#x1F4DA; References</h2>{ref_items}</div>'
 else:
     references_html = ""
 
@@ -241,11 +232,11 @@ html = f"""<!DOCTYPE html>
 <header>
   <div><span class="badge">HBM Testing</span><span class="badge module-badge">M{topic_id} {module_name}</span></div>
   <h1>{topic}</h1>
-  <div class="meta">{date_str} · Lesson {done_count + 1} of {total_count}</div>
+  <div class="meta">{date_str} &middot; Lesson {done_count + 1} of {total_count}</div>
 </header>
 {sections_html}
 <div class="takeaways">
-  <h2>⚡ Key Takeaways</h2>
+  <h2>&#x26A1; Key Takeaways</h2>
   <ul>{takeaways_html}</ul>
 </div>
 {references_html}
@@ -260,43 +251,50 @@ with open(html_path, "w", encoding="utf-8") as f:
 
 print(f"Lesson saved: {html_path}")
 
+# ── Mark curriculum done ──────────────────────────────────────────────────────
+mark_done(topic_id)
+print(f"Marked {topic_id} done. Progress: {done_count + 1}/{total_count}")
+
 # ── Rebuild index ─────────────────────────────────────────────────────────────
+with open(curriculum_path, encoding="utf-8") as f:
+    curriculum = json.load(f)
+
 def parse_lesson_meta(fname):
-    md_path = os.path.join(lesson_dir, fname.replace(".html", ".md"))
-    if not os.path.exists(md_path):
+    mp = os.path.join(lesson_dir, fname.replace(".html", ".md"))
+    if not os.path.exists(mp):
         return fname.replace(".html", ""), None, fname[:10]
-    with open(md_path, encoding="utf-8") as f:
+    with open(mp, encoding="utf-8") as f:
         lines = [l.strip() for l in f.readlines()[:10]]
-    title  = next((l.lstrip("# ") for l in lines if l.startswith("# ")), fname)
+    title_r = next((l.lstrip("# ") for l in lines if l.startswith("# ")), fname)
     date_s = next((l.strip("*").strip() for l in lines
-                   if any(m in l for m in ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"])), fname[:10])
+                   if any(mon in l for mon in ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"])), fname[:10])
     mod_id = None
     for l in lines:
         s = l.strip("*").strip()
         if s.startswith("Module "):
             mod_id = s.split(" — ")[0].replace("Module ", "").strip()
             break
-    return title, mod_id, date_s
+    return title_r, mod_id, date_s
 
 topic_lesson_map = {}
-pre_curriculum   = []
+pre_curriculum = []
 for fname in sorted(os.listdir(lesson_dir)):
     if not fname.endswith(".html"):
         continue
-    title, mod_id, date_s = parse_lesson_meta(fname)
-    if mod_id:
-        topic_lesson_map[mod_id] = (title, fname, date_s)
+    title_f, mod_id_f, date_s_f = parse_lesson_meta(fname)
+    if mod_id_f:
+        topic_lesson_map[mod_id_f] = (title_f, fname, date_s_f)
     else:
-        pre_curriculum.append((date_s, title, fname))
+        pre_curriculum.append((date_s_f, title_f, fname))
 
 total_topics = sum(len(m["topics"]) for m in curriculum["modules"])
-done_topics  = sum(1 for m in curriculum["modules"] for t in m["topics"] if t["done"])
+done_topics = sum(1 for m in curriculum["modules"] for t in m["topics"] if t["done"])
 
 modules_sections_html = ""
 for m in curriculum["modules"]:
-    done_m  = sum(1 for t in m["topics"] if t["done"])
+    done_m = sum(1 for t in m["topics"] if t["done"])
     total_m = len(m["topics"])
-    pct     = int(done_m / total_m * 100)
+    pct = int(done_m / total_m * 100)
     topics_html = ""
     for t in m["topics"]:
         lesson_info = topic_lesson_map.get(t["id"])
@@ -304,7 +302,7 @@ for m in curriculum["modules"]:
             l_title, l_fname, l_date = lesson_info
             topics_html += (
                 f'<li class="done">'
-                f'<span class="status">✅</span>'
+                f'<span class="status">&#x2705;</span>'
                 f'<span class="topic-info"><a href="daily-lessons/{l_fname}">{l_title}</a>'
                 f'<span class="topic-date">{l_date}</span></span>'
                 f'</li>\n'
@@ -313,7 +311,7 @@ for m in curriculum["modules"]:
             short = t["title"].split(" — ")[0]
             topics_html += (
                 f'<li class="done">'
-                f'<span class="status">✅</span>'
+                f'<span class="status">&#x2705;</span>'
                 f'<span class="topic-info"><span class="topic-title">{short}</span></span>'
                 f'</li>\n'
             )
@@ -321,7 +319,7 @@ for m in curriculum["modules"]:
             short = t["title"].split(" — ")[0]
             topics_html += (
                 f'<li class="upcoming">'
-                f'<span class="status">○</span>'
+                f'<span class="status">&#x25CB;</span>'
                 f'<span class="topic-info"><span class="topic-title dim">{short}</span></span>'
                 f'</li>\n'
             )
@@ -341,12 +339,17 @@ for m in curriculum["modules"]:
 pre_html = ""
 if pre_curriculum:
     items = "".join(
-        f'<li class="done"><span class="status">📄</span>'
+        f'<li class="done"><span class="status">&#x1F4C4;</span>'
         f'<span class="topic-info"><a href="daily-lessons/{fn}">{t}</a>'
         f'<span class="topic-date">{d}</span></span></li>\n'
         for d, t, fn in sorted(pre_curriculum)
     )
-    pre_html = f'<details class="module pre-curriculum" id="pre-curriculum"><summary class="module-head"><div class="module-meta"><span class="module-num dim">PRE</span><span class="module-name">Pre-Curriculum</span><span class="module-prog">{len(pre_curriculum)} lessons</span></div></summary><ul class="topic-list">{items}</ul></details>'
+    pre_html = (f'<details class="module pre-curriculum" id="pre-curriculum">'
+                f'<summary class="module-head"><div class="module-meta">'
+                f'<span class="module-num dim">PRE</span>'
+                f'<span class="module-name">Pre-Curriculum</span>'
+                f'<span class="module-prog">{len(pre_curriculum)} lessons</span>'
+                f'</div></summary><ul class="topic-list">{items}</ul></details>')
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(f"""<!DOCTYPE html>
@@ -354,7 +357,7 @@ with open("index.html", "w", encoding="utf-8") as f:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HBM Learning — All Lessons</title>
+<title>HBM Learning -- All Lessons</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -370,8 +373,8 @@ with open("index.html", "w", encoding="utf-8") as f:
   details.module summary {{ list-style: none; cursor: pointer; margin-bottom: 0; }}
   details.module summary::-webkit-details-marker {{ display: none; }}
   details.module[open] summary {{ margin-bottom: 10px; }}
-  details.module summary .module-meta::before {{ content: "▶"; font-size: 0.65rem; color: #475569; margin-right: 4px; }}
-  details.module[open] summary .module-meta::before {{ content: "▼"; }}
+  details.module summary .module-meta::before {{ content: "\\25B6"; font-size: 0.65rem; color: #475569; margin-right: 4px; }}
+  details.module[open] summary .module-meta::before {{ content: "\\25BC"; }}
   .module-meta {{ display: flex; align-items: center; gap: 10px; }}
   .module-num {{ background: #1e3a5f; color: #60a5fa; font-size: 0.72rem; font-weight: 700;
                  padding: 2px 8px; border-radius: 4px; }}
@@ -395,8 +398,8 @@ with open("index.html", "w", encoding="utf-8") as f:
 </head>
 <body>
 <header>
-  <h1>📚 HBM Learning Curriculum</h1>
-  <div class="sub">Senior Test Engineer · 6 Modules · {total_topics} Topics</div>
+  <h1>&#x1F4DA; HBM Learning Curriculum</h1>
+  <div class="sub">Senior Test Engineer &middot; 6 Modules &middot; {total_topics} Topics</div>
   <div class="overall-prog">Overall progress: {done_topics}/{total_topics} topics completed</div>
   <div class="overall-bar"><div class="overall-bar-fill" style="width:{int(done_topics/total_topics*100)}%"></div></div>
 </header>
@@ -405,23 +408,20 @@ with open("index.html", "w", encoding="utf-8") as f:
 </body>
 </html>""")
 
-# ── Rebuild full index via rebuild_index.py ───────────────────────────────────
+print("index.html rebuilt.")
+
+# ── Rebuild additional-learning ───────────────────────────────────────────────
+import importlib.util, sys as _sys
 _spec = importlib.util.spec_from_file_location("rebuild_index", "rebuild_index.py")
-_mod  = importlib.util.module_from_spec(_spec)
+_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)
 
-print(f"Index rebuilt.")
-
-# ── Mark curriculum done ──────────────────────────────────────────────────────
-mark_done(topic_id)
-done_count_new, _ = curriculum_progress()
-print(f"Curriculum progress: {done_count_new}/{total_count}")
-import subprocess as _sp
-_sp.run(["git", "add", "curriculum.json"], cwd=str(curriculum_path.parent.resolve()), check=False)
+# ── Git stage curriculum.json ─────────────────────────────────────────────────
+subprocess.run(["git", "add", "curriculum.json"], check=False)
+print("curriculum.json staged.")
 
 # ── Telegram ──────────────────────────────────────────────────────────────────
-import urllib.request
-tg_token   = os.environ.get("TELEGRAM_TOKEN")
+tg_token = os.environ.get("TELEGRAM_TOKEN")
 tg_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 if tg_token and tg_chat_id:
     progress_bar = f"{done_count + 1}/{total_count}"
@@ -446,3 +446,7 @@ if tg_token and tg_chat_id:
         print("Telegram sent.")
     except Exception as e:
         print(f"Telegram failed: {e}")
+else:
+    print("No Telegram credentials.")
+
+print(f"Done. Topic: {topic}")
