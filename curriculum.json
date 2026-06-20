@@ -292,7 +292,7 @@
         {
           "id": "6.4",
           "title": "HBM Reliability Qualification — HTOL, HAST, TC, ESD stress",
-          "done": false
+          "done": true
         },
         {
           "id": "6.5",
