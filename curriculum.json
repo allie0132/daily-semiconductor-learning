@@ -328,7 +328,7 @@
         {
           "id": "7.2",
           "title": "HBM Defect Mechanism Analysis — EM, TDDB, and retention failures in stacked DRAM",
-          "done": false
+          "done": true
         },
         {
           "id": "7.3",
