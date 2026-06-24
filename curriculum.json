@@ -315,6 +315,52 @@
           "done": true
         }
       ]
+    },
+    {
+      "id": 7,
+      "name": "Advanced Test Methodologies",
+      "topics": [
+        {
+          "id": "7.1",
+          "title": "HBM4 High-Speed Interface Testing — 6.4 Gbps PHY, training sequences, and eye margin",
+          "done": true
+        },
+        {
+          "id": "7.2",
+          "title": "HBM Defect Mechanism Analysis — EM, TDDB, and retention failures in stacked DRAM",
+          "done": false
+        },
+        {
+          "id": "7.3",
+          "title": "Interposer-Level Failure Isolation — passive vs active interposer test strategies",
+          "done": false
+        },
+        {
+          "id": "7.4",
+          "title": "Statistical Process Control for HBM Yield — control charts, SPC, and FMEA workflows",
+          "done": false
+        },
+        {
+          "id": "7.5",
+          "title": "HBM Vendor Qualification Testing — acceptance criteria, lot qualification, and PPAP flows",
+          "done": false
+        },
+        {
+          "id": "7.6",
+          "title": "HBM Near-Memory Processing (NDP) Test Challenges — logic-in-memory DFT",
+          "done": false
+        },
+        {
+          "id": "7.7",
+          "title": "CXL-Attached HBM Memory Testing — CXL 2.0/3.0 protocol compliance and latency verification",
+          "done": false
+        },
+        {
+          "id": "7.8",
+          "title": "AI Workload-Driven HBM Test Coverage — bandwidth stress patterns for LLM inference",
+          "done": false
+        }
+      ]
     }
   ]
 }
