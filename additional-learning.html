@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 40 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 42 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -346,6 +346,22 @@
   <h3>Emerging HBM‑AI: Compute‑In‑Memory (CIM) with HBM‑Integrated Tensor Cores</h3>
   <p>Recent silicon (e.g., Samsung HBM3‑CIM) embeds simple matrix‑multiply units within the DRAM stack, requiring new test vectors that stimulate on‑die compute while verifying data integrity across shared <code>DQ</code> lanes. Calibration now includes <code>COMPUTE_ENABLE</code> timing and on‑stack thermal throttling checks.</p>
 </div></div><div class="module-group" id="module-7"><h2>Module 7 — Advanced Test Methodologies</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Friday, Jun 26 2026</span>
+    <span class="lesson-title">HBM Vendor Qualification Testing</span>
+  </div>
+  <h3>Adaptive Cpk Gates and SPC in HBM Lot Release</h3>
+  <p>Modern HBM procurement contracts increasingly specify adaptive Cpk gates: the initial qualification threshold is Cpk ≥ 1.67, but lots shipped after 6 months of production history can be accepted at Cpk ≥ 1.33 if no excursions have been recorded — and must revert to 1.67 for 90 days if any CAPA is opened against that product family. Integrators implement this via real-time SPC dashboards that ingest per-lot parametric data from vendor-provided wafer acceptance test (WAT) reports, flagging shifts using Western Electric rules before individual measurements breach the 3σ limit. This early-warning capability typically detects process drift 2–4 lots earlier than conventional accept/reject testing, preventing escapes into 2.5D assembly.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Thursday, Jun 25 2026</span>
+    <span class="lesson-title">SPC & FMEA for HBM Yield Improvement</span>
+  </div>
+  <h3>Multivariate SPC for Correlated HBM Parameters</h3>
+  <p>Recent work (IEEE 2023) shows that applying Hotelling's T² control charts to jointly monitor <code>DIE_TRAINING_TIME</code>, <code>VREF_WINDOW</code>, and <code>IO_TDR</code> captures cross‑parameter shifts that univariate charts miss, enabling earlier corrective actions.</p>
+</div>
 <div class="entry">
   <div class="entry-meta">
     <span class="date">Wednesday, Jun 24 2026</span>
