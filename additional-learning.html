@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 42 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 44 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -353,6 +353,22 @@
   </div>
   <h3>Adaptive Cpk Gates and SPC in HBM Lot Release</h3>
   <p>Modern HBM procurement contracts increasingly specify adaptive Cpk gates: the initial qualification threshold is Cpk ≥ 1.67, but lots shipped after 6 months of production history can be accepted at Cpk ≥ 1.33 if no excursions have been recorded — and must revert to 1.67 for 90 days if any CAPA is opened against that product family. Integrators implement this via real-time SPC dashboards that ingest per-lot parametric data from vendor-provided wafer acceptance test (WAT) reports, flagging shifts using Western Electric rules before individual measurements breach the 3σ limit. This early-warning capability typically detects process drift 2–4 lots earlier than conventional accept/reject testing, preventing escapes into 2.5D assembly.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Friday, Jun 26 2026</span>
+    <span class="lesson-title">Logic‑in‑Memory DFT for HBM NDP</span>
+  </div>
+  <h3>Hybrid Scan‑Chain with Built‑In Logic Analyzer</h3>
+  <p>Recent 2024 Samsung silicon releases embed a high‑speed logic analyzer (HLA) into the LiM scan chain, allowing conditional capture of internal datapath waveforms at up to 5 GHz. Leveraging HLA reduces the need for separate eBIST kernels and improves fault isolation for timing‑dependent bugs.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Saturday, Jun 27 2026</span>
+    <span class="lesson-title">CXL-Attached HBM Memory Testing</span>
+  </div>
+  <h3>CXL 3.0 Peer-to-Peer HBM Sharing and Fabric Testing</h3>
+  <p>CXL 3.0 introduces multi-level switching (CXL fabric) enabling multiple hosts to share a single HBM memory expander via Shared Memory (SM) regions. Testing this configuration requires verifying the Global Fabric Attach (GFA) protocol: each host must independently pass LTSSM negotiation to the CXL switch, and the switch must correctly arbitrate MemRd/MemWr ownership via the Bias State machine (Host Bias → Device Bias transitions, §9.14.1). A common failure mode is bias state desynchronization when two hosts simultaneously issue MemWr to the same HBM physical page — verify with concurrent traffic generators and confirm no data corruption via read-back CRC over at least 1M 256B cache lines per host.</p>
 </div>
 <div class="entry">
   <div class="entry-meta">

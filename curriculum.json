@@ -353,7 +353,7 @@
         {
           "id": "7.7",
           "title": "CXL-Attached HBM Memory Testing — CXL 2.0/3.0 protocol compliance and latency verification",
-          "done": false
+          "done": true
         },
         {
           "id": "7.8",
