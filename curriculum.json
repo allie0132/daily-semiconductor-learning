@@ -358,7 +358,7 @@
         {
           "id": "7.8",
           "title": "AI Workload-Driven HBM Test Coverage — bandwidth stress patterns for LLM inference",
-          "done": false
+          "done": true
         }
       ]
     }
