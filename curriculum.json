@@ -361,6 +361,52 @@
           "done": true
         }
       ]
+    },
+    {
+      "id": 8,
+      "name": "System Integration & Advanced Verification",
+      "topics": [
+        {
+          "id": "8.1",
+          "title": "HBM System-Level Test Strategies — host-side loopback, CPU/GPU interop, and co-verification",
+          "done": true
+        },
+        {
+          "id": "8.2",
+          "title": "HBM PHY Eye Margin Characterization — bathtub curves, BER targets, and margin budget allocation",
+          "done": false
+        },
+        {
+          "id": "8.3",
+          "title": "HBM Temperature Gradient Testing — thermal map correlation, per-die temperature compensation",
+          "done": false
+        },
+        {
+          "id": "8.4",
+          "title": "HBM3e Production Yield Learning — WAT correlation, inline defect density, and DRAM yield models",
+          "done": false
+        },
+        {
+          "id": "8.5",
+          "title": "HBM Test Automation Frameworks — Python ATE scripts, tester abstraction layers, CI/CD for test programs",
+          "done": false
+        },
+        {
+          "id": "8.6",
+          "title": "HBM Power Integrity at System Level — package PDN simulation, decap placement, and silicon validation",
+          "done": false
+        },
+        {
+          "id": "8.7",
+          "title": "Advanced HBM Failure Analysis — PFA flow, de-processing stacked dies, and EBIC/OBIRCH techniques",
+          "done": false
+        },
+        {
+          "id": "8.8",
+          "title": "HBM4 Near-Die Logic Testing — base-die compute blocks, NDP instruction set, and functional verification",
+          "done": false
+        }
+      ]
     }
   ]
 }
