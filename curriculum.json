@@ -379,7 +379,7 @@
         {
           "id": "8.3",
           "title": "HBM Temperature Gradient Testing — thermal map correlation, per-die temperature compensation",
-          "done": false
+          "done": true
         },
         {
           "id": "8.4",
