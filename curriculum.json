@@ -374,7 +374,7 @@
         {
           "id": "8.2",
           "title": "HBM PHY Eye Margin Characterization — bathtub curves, BER targets, and margin budget allocation",
-          "done": false
+          "done": true
         },
         {
           "id": "8.3",
