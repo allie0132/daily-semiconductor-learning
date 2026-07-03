@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM3e Production Yield Learning: WAT, Defect Density &amp; DRAM Models</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M8.4 System Integration &amp; Advanced Verification</span></div>
+  <h1>HBM3e Production Yield Learning: WAT, Defect Density &amp; DRAM Models</h1>
+  <div class="meta">Thursday, Jul 03 2026 · Lesson 68 of 72</div>
+</header>
+<div class="section"><h2>WAT Fundamentals and HBM3e-Specific Monitors</h2><p>Wafer Acceptance Testing (WAT) measures parametric performance on process control monitors (PCMs) fabricated adjacent to device arrays on each production wafer. In HBM3e, the critical WAT monitors extend beyond standard CMOS parameters to include DRAM-specific structures.</p>
+<p>Standard WAT monitors tracked for HBM3e:</p>
+<ul>
+<li><strong>NMOS/PMOS Vt</strong>: threshold voltage mean and sigma across the wafer; Vt spread >25 mV 3σ correlates strongly to sense amplifier offset failures</li>
+<li><strong>Idsat / Ioff</strong>: saturation current and leakage; Ioff elevation >3× nominal is a leading indicator of retention fails at elevated temperature</li>
+<li><strong>Contact resistance (Rc)</strong>: poly-to-diffusion and M1-to-poly; elevated Rc shifts tAC (access time) and tDQSCK</li>
+<li><strong>DRAM cell transistor subthreshold slope (SS)</strong>: ideally &lt;75 mV/decade; degraded SS increases off-state leakage and shortens retention time</li>
+<li><strong>Storage capacitor charge (Qcell)</strong>: measured via charge-pump structures; Qcell &lt; threshold (typically &lt;10 fC for HBM3e) correlates to DRAM cell fail rate</li>
+<li><strong>Sense amplifier (SA) offset Vos</strong>: on-chip test structures measure Vos distribution; wide Vos requires tighter Vref margin and reduces functional yield</li>
+</ul>
+<p>WAT data is available within 24 hours of wafer completion — providing a 4–6 week feedback advantage over waiting for final electrical test results after assembly.</p>
+</div>
+<div class="section"><h2>Inline Defect Density (D₀) Measurement Across the HBM3e Stack</h2><p>Inline defect density D₀ is measured at each process step using brightfield and darkfield optical inspection (KLA 29xx series) and electron-beam inspection (eBI) for sub-20 nm defects. In a 4-die HBM3e stack, D₀ accumulates across every integration layer:</p>
+<p>Critical inspection layers and typical D₀ targets:</p>
+<ul>
+<li><strong>Active/STI</strong>: &lt;0.015 defects/cm² — bridging shorts between adjacent cell transistors</li>
+<li><strong>TSV etch/fill</strong>: &lt;0.008 defects/cm² — Cu voids and Cu pipe defects are the dominant failure mode; void TSVs cause complete channel open failures</li>
+<li><strong>W-plug (contact)</strong>: &lt;0.012 defects/cm² — overfill (causing shorts) and voids (causing open Rc)</li>
+<li><strong>BEOL M1–M6</strong>: &lt;0.020 defects/cm² — metal bridging and opens; M1 is highest risk due to smallest pitch</li>
+<li><strong>Cu-Cu bonding interface</strong>: &lt;0.005 defects/cm² — Cu hillock, delamination, and oxide remnants cause bonding resistance and intermittent TSV connectivity</li>
+</ul>
+<p>The total critical-area-weighted defect density is: <code>D0_total = Σ (D0_layer × Acrit_layer)</code> where Acrit_layer is the critical area (in cm²) for each layer pattern. For HBM3e at 1γ-class DRAM node, a typical total Acrit per die is 0.8–1.2 cm².</p>
+<p>Fab targets: wafers with D0_TSV &gt; 0.05/cm² are scrapped before stacking to avoid spending expensive assembly resources on low-probability yield units.</p>
+</div>
+<div class="section"><h2>DRAM Yield Models for Stacked HBM3e Dies</h2><p>Two yield models dominate HBM3e production:</p>
+<p><strong>Murphy's Model</strong> (random defect distribution): <code>Y = [(1 - e^(-D0·A)) / (D0·A)]²</code> — useful for random particle-limited baseline but underestimates yield loss from clustered TSV defects.</p>
+<p><strong>Negative Binomial Model</strong> (preferred for HBM3e): <code>Y = [1 + D0·A / α]^(-α)</code> where α is the clustering parameter. α = 0.5–2 for TSV-related defects (highly clustered); α = 5–10 for random particle defects. HBM3e fabs fit α per layer from historical data.</p>
+<p><strong>Stack yield</strong> is the product of independent die and integration yields: <code>Y_stack = ∏(Y_die_i) × Y_TSV × Y_bonding × Y_repair</code></p>
+<p>Example for a 4Hi HBM3e stack:</p>
+<ul>
+<li>Y_die (per DRAM die, pre-repair) = 88%</li>
+<li>Y_repair (post-MBIST row/column repair) = +6% → 94% per die</li>
+<li>Y_TSV (all channels) = 97%</li>
+<li>Y_bonding (Cu-Cu face-to-face) = 99%</li>
+<li><strong>Y_stack = 0.94⁴ × 0.97 × 0.99 ≈ 73.6%</strong></li>
+</ul>
+<p>Repair significantly impacts stack yield — a 6% per-die repair gain multiplies across 4 dice before the TSV/bonding terms are applied.</p>
+</div>
+<div class="section"><h2>WAT-to-Yield Correlation Methodology</h2><p>The yield learning workflow correlates WAT signatures to final electrical test (ET) bin data:</p>
+<ol style="padding-left:20px;margin-bottom:12px;">
+<li style="font-size:1.05rem;line-height:1.8;color:#cbd5e1;margin-bottom:6px;"><strong>Extract</strong> WAT parameters per wafer (mean, sigma, min, max for each monitor)</li>
+<li style="font-size:1.05rem;line-height:1.8;color:#cbd5e1;margin-bottom:6px;"><strong>Bin</strong> final test results: BIN1 (functional pass), BIN2 (parametric marginal), BIN3–N (fail categories)</li>
+<li style="font-size:1.05rem;line-height:1.8;color:#cbd5e1;margin-bottom:6px;"><strong>Correlate</strong> using Pearson and Spearman rank correlation between each WAT parameter and BIN1 yield</li>
+<li style="font-size:1.05rem;line-height:1.8;color:#cbd5e1;margin-bottom:6px;"><strong>Regress</strong>: multivariate OLS or ridge regression; top predictors: Vt_nmos_sigma, D0_critical_total, Qcell_mean</li>
+<li style="font-size:1.05rem;line-height:1.8;color:#cbd5e1;margin-bottom:6px;"><strong>PCA virtual binning</strong>: cluster wafers by WAT signature space; anomalous clusters quarantined before assembly</li>
+</ol>
+<p>Key correlations from published HBM3e yield studies: Vt_nmos 3σ &gt;25 mV → BIN1 loss 3–8% from SA failures; D0_TSV &gt;0.03/cm² → BIN1 loss 5–12% from channel open/intermittent fails; Qcell &lt;9 fC → BIN1 loss 4–7% from retention margin failures at HTOL temperature.</p>
+</div>
+<div class="section"><h2>SPC, Yield Buckets, and Production Control</h2><p>Systematic SPC and bucketing drive continuous yield improvement:</p>
+<p><strong>SPC on D₀</strong>: X̄ and R charts for each critical inspection layer. UCL = D0_target + 3σ; any exceedance triggers a lot hold. Western Electric rules (2-of-3 &gt;2σ, 8-in-a-row) catch drift before UCL breach.</p>
+<p><strong>Yield bucket analysis</strong> partitions BIN fails:</p>
+<ul>
+<li><strong>Hard fails</strong>: open/short at wafer sort (MBIST, TSV continuity) — early binned before assembly</li>
+<li><strong>Parametric fails</strong>: tAC, IDD1, IDD4 out of spec — process issue needing WAT cross-reference</li>
+<li><strong>Repair-eligible</strong>: row/column fails from MBIST addressed via post-repair fuse programming</li>
+<li><strong>Marginal pass (BIN2)</strong>: functional but &lt;3σ margin on timing/power — HTOL reliability risk, screened out</li>
+</ul>
+<p><strong>Wafer position heat maps</strong> distinguish systematic vs. random defects: edge die loss from etch non-uniformity; center hot spots from reticle defects; radial gradients from CMP or implant dose non-uniformity.</p>
+<p><strong>WAT early warning gate</strong>: wafers with ≥2 WAT parameters &gt;1.5σ from lot mean are flagged before stacking. In production, this gate catches ~15% of eventual low-yield wafers before assembly cost is incurred.</p>
+</div>
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul>
+    <li>WAT monitors (Vt, Ioff, Qcell, SS, Rc) are leading indicators of HBM3e yield loss — available 14+ days before ET results close the feedback loop</li>
+    <li>D₀ accumulates across every integration layer; TSV etch/fill and Cu-Cu bonding interface defects are the dominant stack yield detractors in HBM3e</li>
+    <li>The Negative Binomial yield model (not Murphy's) is correct for HBM3e due to clustered TSV defects; fit the clustering parameter α per layer from production data</li>
+    <li>Stack yield is a product of per-die, TSV, and bonding yields — even a 6% repair lift per die multiplies across 4 dice to ~20% additional stack yield before integration terms</li>
+    <li>WAT-to-ET correlation plus PCA virtual binning enables quarantine of anomalous wafers before costly assembly, capturing ~15% of low-yield risk early</li>
+  </ul>
+</div>
+<div class="references"><h2>📚 References</h2>
+<div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JESD235C — High Bandwidth Memory (HBM) DRAM Standard</div><div class="ref-detail">Section 5: Electrical Parameters and Test Conditions — IDD, timing, and parametric limits</div></div></div>
+<div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEP148B — Yield Models for Integrated Circuits</div><div class="ref-detail">Murphy, Seeds, and Negative Binomial models; clustering parameter derivation</div></div></div>
+<div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">B. T. Murphy, "Cost-size optima of monolithic integrated circuits"</div><div class="ref-detail">Proc. IEEE, vol. 52, no. 12, pp. 1537–1545, 1964 — original Murphy yield model</div></div></div>
+<div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">C. H. Stapper, "Modeling of integrated circuit defect sensitivities"</div><div class="ref-detail">IBM J. Research &amp; Development, vol. 27, no. 6, 1983 — Negative Binomial model derivation for VLSI</div></div></div>
+<div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">J. Kim et al., "Yield enhancement of HBM2E through TSV defect analysis and WAT correlation"</div><div class="ref-detail">ISSM 2021 — WAT-to-ET correlation methodology and TSV D₀ impact quantification</div></div></div>
+<div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">R. Colclaser, "Microelectronics: Processing and Device Design"</div><div class="ref-detail">Wiley, Chapter 12: Yield and Reliability — yield model fundamentals</div></div></div>
+<div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">KLA Instruments, Surfscan SP7 Unpatterned Wafer Inspection System</div><div class="ref-detail">D₀ measurement methodology, defect capture rate vs. size at HVM DRAM nodes</div></div></div>
+</div>
+<div class="additional">
+<h2>&#x1F50D; Additional Learning</h2>
+<a href="../additional-learning.html#module-8">Murphy Clustering Parameter α: Calibration for TSV Processes</a>
+</div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>

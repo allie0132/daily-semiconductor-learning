@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 44 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 46 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -385,6 +385,22 @@
   </div>
   <h3>In‑situ Resistance Monitoring During HTOL</h3>
   <p>Recent HBM3 production lines embed on‑die sense resistors adjacent to TSVs to capture real‑time EM‑induced resistance shift during high‑temperature operating life. This enables dynamic adjustment of test duration and early detection of outliers before final test, reducing yield loss by up to 15%.</p>
+</div></div><div class="module-group" id="module-8"><h2>Module 8 — System Integration & Advanced Verification</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Thursday, Jul 02 2026</span>
+    <span class="lesson-title">HBM Temperature Gradient Testing – Thermal Map Correlation</span>
+  </div>
+  <h3>Dynamic Thermal Run‑away Detection Using Real‑Time Gradient Tracking</h3>
+  <p>A recent development adds a watchdog that monitors the derivative of the die‑temperature map; if dT/dt exceeds 2 °C/ms on any die, the test sequence aborts and logs a thermal run‑away event. This extension improves safety for over‑clocked stress tests and is supported in Advantest’s latest firmware release.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Thursday, Jul 03 2026</span>
+    <span class="lesson-title">HBM3e Production Yield Learning: WAT, Defect Density & DRAM Models</span>
+  </div>
+  <h3>Murphy Clustering Parameter α and Its Calibration for TSV Processes</h3>
+  <p>The clustering parameter α in the Negative Binomial model is not a fixed constant — it must be calibrated per process layer and updated as the process matures. For TSV etch/fill in HBM3e, α typically starts at 0.5–1.0 during ramp (highly clustered Cu voids from etch non-uniformity) and converges toward 2–4 at process maturity as the root causes of clustering (etch chamber condition, Cu seed layer coverage) are controlled. Calibration procedure: collect D₀ and final yield data for ≥50 wafer lots per layer, fit α using maximum likelihood estimation (MLE) on the negative binomial distribution, and update the yield model quarterly. A common mistake is using the Murphy model (equivalent to α → ∞, i.e., random) during ramp when clustering is severe — this over-predicts yield by 10–20%, leading to missed production targets and incorrect process prioritization.</p>
 </div></div>
 </body>
 </html>
