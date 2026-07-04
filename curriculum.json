@@ -389,7 +389,7 @@
         {
           "id": "8.5",
           "title": "HBM Test Automation Frameworks — Python ATE scripts, tester abstraction layers, CI/CD for test programs",
-          "done": false
+          "done": true
         },
         {
           "id": "8.6",
