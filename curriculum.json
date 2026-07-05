@@ -394,7 +394,7 @@
         {
           "id": "8.6",
           "title": "HBM Power Integrity at System Level — package PDN simulation, decap placement, and silicon validation",
-          "done": false
+          "done": true
         },
         {
           "id": "8.7",
