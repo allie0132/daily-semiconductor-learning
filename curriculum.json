@@ -404,7 +404,7 @@
         {
           "id": "8.8",
           "title": "HBM4 Near-Die Logic Testing — base-die compute blocks, NDP instruction set, and functional verification",
-          "done": false
+          "done": true
         }
       ]
     }
