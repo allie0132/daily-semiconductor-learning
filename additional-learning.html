@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 46 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 48 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -388,6 +388,14 @@
 </div></div><div class="module-group" id="module-8"><h2>Module 8 — System Integration & Advanced Verification</h2>
 <div class="entry">
   <div class="entry-meta">
+    <span class="date">Monday, Jul 06 2026</span>
+    <span class="lesson-title">HBM4 Near‑Die Logic Test & Verification</span>
+  </div>
+  <h3>On‑Chip Power‑Domain Isolation for NDL</h3>
+  <p>Recent HBM4 silicon revisions implement a dual‑rail power domain for the NDL compute block, enabling independent DVFS. Understanding the <code>HBM4_NDL_PWR_CTRL</code> register sequence is essential for low‑power functional testing and for verifying isolation leakage across the DRAM‑to‑logic interface.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
     <span class="date">Thursday, Jul 02 2026</span>
     <span class="lesson-title">HBM Temperature Gradient Testing – Thermal Map Correlation</span>
   </div>
@@ -401,6 +409,14 @@
   </div>
   <h3>Murphy Clustering Parameter α and Its Calibration for TSV Processes</h3>
   <p>The clustering parameter α in the Negative Binomial model is not a fixed constant — it must be calibrated per process layer and updated as the process matures. For TSV etch/fill in HBM3e, α typically starts at 0.5–1.0 during ramp (highly clustered Cu voids from etch non-uniformity) and converges toward 2–4 at process maturity as the root causes of clustering (etch chamber condition, Cu seed layer coverage) are controlled. Calibration procedure: collect D₀ and final yield data for ≥50 wafer lots per layer, fit α using maximum likelihood estimation (MLE) on the negative binomial distribution, and update the yield model quarterly. A common mistake is using the Murphy model (equivalent to α → ∞, i.e., random) during ramp when clustering is severe — this over-predicts yield by 10–20%, leading to missed production targets and incorrect process prioritization.</p>
+</div></div><div class="module-group" id="module-9"><h2>Module 9 — HBM4 & Next-Generation Technologies</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Wednesday, Jul 08 2026</span>
+    <span class="lesson-title">HBM4 Architecture: 16-Hi, 1024-bit Interface & JESD238</span>
+  </div>
+  <h3>Mid-Stack Heat Extraction & Die-Specific Timing Binning Strategy</h3>
+  <p>HBM4's 16-hi configuration creates a thermal 'hotspot' around dies 7–9 (interior stack layers). Advanced ATE correlates on-die temperature-sensor readings (TS_OUT pin) with timing parametrics during test, enabling <strong>die-level binning</strong> rather than stack-level binning. Samsung and SK Hynix implement <strong>firmware-programmable refresh throttling</strong> via MODE REG 34 (tREFI adjustment codes) to pre-emptively reduce refresh intervals for 'hot dies' during mission profile, preventing field soft-error escapes. Test engineers must validate this firmware response by injecting simulated high-temperature sensor values and confirming tREFI modification within 50 µs, critical for 72-hour soak qualification in HPC data centers.</p>
 </div></div>
 </body>
 </html>

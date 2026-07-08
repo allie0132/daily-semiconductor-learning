@@ -407,6 +407,190 @@
           "done": true
         }
       ]
+    },
+    {
+      "id": 9,
+      "name": "HBM4 & Next-Generation Technologies",
+      "topics": [
+        {
+          "id": "9.1",
+          "title": "HBM4 Architecture Deep Dive — 16-Hi stacking, 1024-bit interface, and JESD238 specification",
+          "done": true
+        },
+        {
+          "id": "9.2",
+          "title": "HBM4 Signal Integrity — PAM4 PHY, equalization, and channel loss budget at 6.4 Gbps+",
+          "done": false
+        },
+        {
+          "id": "9.3",
+          "title": "HBM4 Power Management Enhancements — fine-grained power gating, per-channel DVFS",
+          "done": false
+        },
+        {
+          "id": "9.4",
+          "title": "3D-IC Bonding Technology for HBM — TCB vs mass reflow, micro-bump pitch scaling to 10 um",
+          "done": false
+        },
+        {
+          "id": "9.5",
+          "title": "Hybrid Bonding for HBM — Cu-Cu direct bonding, yield implications, and test access",
+          "done": false
+        },
+        {
+          "id": "9.6",
+          "title": "HBM4 ECC Enhancements — SECDED vs multi-bit ECC architectures and scrubbing strategies",
+          "done": false
+        },
+        {
+          "id": "9.7",
+          "title": "HBM Chiplet Ecosystem — open standards, die disaggregation, and multi-vendor stacking",
+          "done": false
+        },
+        {
+          "id": "9.8",
+          "title": "HBM4 Thermal Budget — junction temperature limits, cooling solutions for >1 kW GPU packages",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Yield Optimization & Failure Analysis",
+      "topics": [
+        {
+          "id": "10.1",
+          "title": "HBM Wafer-Level Yield Models — Poisson vs Murphy yield models applied to stacked dies",
+          "done": false
+        },
+        {
+          "id": "10.2",
+          "title": "KGD Screening for HBM — known-good-die testing, burn-in wafer probing, and sort flows",
+          "done": false
+        },
+        {
+          "id": "10.3",
+          "title": "Post-Stacking Yield Recovery — redundancy repair, row/column replacement, and fuse programming",
+          "done": false
+        },
+        {
+          "id": "10.4",
+          "title": "HBM FMEA and DFMEA — systematic failure mode mapping for stacked DRAM assemblies",
+          "done": false
+        },
+        {
+          "id": "10.5",
+          "title": "E-beam Probing of HBM Stacks — voltage contrast, EBIC, and buried defect localization",
+          "done": false
+        },
+        {
+          "id": "10.6",
+          "title": "Acoustic Microscopy for Bump Defects — C-SAM inspection of TSV and micro-bump arrays",
+          "done": false
+        },
+        {
+          "id": "10.7",
+          "title": "Electromigration in TSVs — current density limits, void formation, and stress-induced voiding",
+          "done": false
+        },
+        {
+          "id": "10.8",
+          "title": "HBM Reliability Qualification — JEDEC JESD47 test sequence, activation energy, and MTTF projections",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Machine Learning for Test Optimization",
+      "topics": [
+        {
+          "id": "11.1",
+          "title": "ML-Based Test Coverage Optimization — using XGBoost and neural nets to prune ATE test time",
+          "done": false
+        },
+        {
+          "id": "11.2",
+          "title": "Anomaly Detection in HBM Parametric Data — unsupervised clustering for outlier identification",
+          "done": false
+        },
+        {
+          "id": "11.3",
+          "title": "Predictive Yield Modeling — wafer map correlation with inline metrology using regression models",
+          "done": false
+        },
+        {
+          "id": "11.4",
+          "title": "Neural Network Fault Diagnosis — classifying HBM fault signatures from BIST results",
+          "done": false
+        },
+        {
+          "id": "11.5",
+          "title": "Reinforcement Learning for ATE Scheduling — optimizing multi-site test parallelism dynamically",
+          "done": false
+        },
+        {
+          "id": "11.6",
+          "title": "Transfer Learning for New Product Introduction — leveraging previous HBM gen data for NPI",
+          "done": false
+        },
+        {
+          "id": "11.7",
+          "title": "Generative AI for Test Vector Synthesis — LLM-assisted pattern generation and coverage closure",
+          "done": false
+        },
+        {
+          "id": "11.8",
+          "title": "Data Pipeline Architecture for HBM Test — real-time ATE data streaming, warehousing, and dashboards",
+          "done": false
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Heterogeneous Integration & Advanced Packaging Test",
+      "topics": [
+        {
+          "id": "12.1",
+          "title": "Multi-Die Package Test Strategy — EMIB, Foveros, and CoWoS interposer test access architectures",
+          "done": false
+        },
+        {
+          "id": "12.2",
+          "title": "Chiplet Interface Standards — UCIe protocol testing, loopback compliance, and die-to-die link BER",
+          "done": false
+        },
+        {
+          "id": "12.3",
+          "title": "Thermal Test of Heterogeneous Packages — multi-die thermal resistance, theta-JC, and junction mapping",
+          "done": false
+        },
+        {
+          "id": "12.4",
+          "title": "Power Delivery Network Testing in 2.5D — PDN impedance, decap tuning, and IR drop measurement",
+          "done": false
+        },
+        {
+          "id": "12.5",
+          "title": "Known-Good-Stack Qualification — testing HBM stacks before integration into the 2.5D package",
+          "done": false
+        },
+        {
+          "id": "12.6",
+          "title": "System-Level Test Post-Assembly — socket-based SLT for GPU+HBM packages at system power",
+          "done": false
+        },
+        {
+          "id": "12.7",
+          "title": "Boundary Scan for Heterogeneous Packages — JTAG 1149.1/1 and P1838 multi-die test access",
+          "done": false
+        },
+        {
+          "id": "12.8",
+          "title": "RMA Failure Isolation in 2.5D Packages — field return analysis, X-ray CT, and layer-selective FIB",
+          "done": false
+        }
+      ]
     }
   ]
 }
