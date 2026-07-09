@@ -420,7 +420,7 @@
         {
           "id": "9.2",
           "title": "HBM4 Signal Integrity — PAM4 PHY, equalization, and channel loss budget at 6.4 Gbps+",
-          "done": false
+          "done": true
         },
         {
           "id": "9.3",
