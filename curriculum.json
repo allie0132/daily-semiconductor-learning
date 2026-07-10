@@ -425,7 +425,7 @@
         {
           "id": "9.3",
           "title": "HBM4 Power Management Enhancements — fine-grained power gating, per-channel DVFS",
-          "done": false
+          "done": true
         },
         {
           "id": "9.4",
