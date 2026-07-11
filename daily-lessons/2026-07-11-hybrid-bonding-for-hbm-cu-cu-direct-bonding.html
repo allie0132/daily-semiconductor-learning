@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hybrid Bonding for HBM: Cu-Cu Direct Bonding</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M9.5 HBM4 & Next-Generation Technologies</span></div>
+  <h1>Hybrid Bonding for HBM: Cu-Cu Direct Bonding</h1>
+  <div class="meta">Saturday, Jul 11 2026 · Lesson 77 of 104</div>
+</header>
+<div class="section"><h2>What Is Hybrid Bonding?</h2><p>Hybrid bonding (also called direct bonding or Cu-Cu thermocompression-free bonding) is an advanced wafer- or die-level interconnect technology that forms metallic copper-to-copper bonds between two surfaces without solder or micro-bumps. The bonding stack consists of a dielectric-to-dielectric oxide bond (SiO₂ or SiCN) formed at room temperature via surface activation, followed by a copper-to-copper diffusion bond anneal typically at 200–400 °C.</p><p>For HBM, hybrid bonding is the critical enabling technology for <strong>HBM4</strong> and beyond. The JEDEC HBM4 specification (JESD235D, under development) targets a base-die-to-DRAM interface pitch of <strong>≤ 1 µm</strong>, far below the 40 µm micro-bump pitch used in HBM2E and the 25–30 µm pitch in HBM3. This pitch reduction increases I/O density by 100× over conventional flip-chip micro-bumps while simultaneously eliminating the stand-off height that limits heat transfer.</p><p>The key industry implementations include TSMC's <strong>SoIC (System on Integrated Chips)</strong>, Samsung's <strong>X-Cube</strong>, and Intel's <strong>Foveros Direct</strong>. All three use the same underlying mechanism: chemical-mechanical planarization (CMP) to sub-nanometer roughness, plasma surface activation, room-temperature dielectric pre-bond, then thermal anneal for Cu grain growth and diffusion bonding.</p></div>
+<div class="section"><h2>Process Flow and Critical Parameters</h2><p>The hybrid bonding process for HBM stacking follows these steps:</p><ul><li><strong>Surface preparation:</strong> CMP to achieve surface roughness Ra &lt; 0.5 nm and dishing of Cu pads &lt; 5 nm below the dielectric surface. Under-recess is critical — Cu must be slightly recessed before bonding to allow for thermal expansion during anneal.</li><li><strong>Activation:</strong> N₂ plasma or chemical activation of both SiO₂/SiCN surfaces to generate Si-OH bonds that enable room-temperature van der Waals pre-bond.</li><li><strong>Alignment and pre-bond:</strong> Die-to-wafer (D2W) or wafer-to-wafer (W2W) placement with &lt; 200 nm overlay accuracy (sub-100 nm for 1 µm pitch nodes). Bond wave propagates spontaneously upon contact.</li><li><strong>Anneal:</strong> 200–400 °C for 30–120 minutes. Cu expands to fill the recessed gap, grains interdiffuse across the interface. Target bond strength &gt; 1 J/m².</li><li><strong>Thinning:</strong> Donor wafer/die thinned to 3–10 µm via back-grinding + CMP after bonding to reveal TSVs.</li></ul><p>Key process monitors include bond void density (X-ray or SAM), Cu pad resistance continuity, and dielectric bond energy (blade insertion test). Voids &gt; 2 µm diameter at the Cu interface are yield killers — they create open circuits or reliability failures under thermal cycling (JESD47).</p></div>
+<div class="section"><h2>Yield Implications</h2><p>Hybrid bonding introduces yield loss mechanisms absent in micro-bump stacking:</p><ul><li><strong>Pad-level opens:</strong> Cu recess non-uniformity across a die (&gt; ±5 nm variation) causes some pads to fail to form a continuous Cu-Cu bridge after anneal. At 1 µm pitch with thousands of signal pads per DRAM die, a single-pad open rate of 10 ppm accumulates to measurable yield loss per stack.</li><li><strong>Dielectric voids:</strong> Particles &gt; 50 nm between bonding surfaces prevent oxide bond formation. ITRS defect density requirements tighten to &lt; 0.05 defects/cm² for hybrid bonding versus ~0.5 defects/cm² for micro-bump flip-chip.</li><li><strong>Alignment-induced shorts:</strong> At sub-micron pitch, 200 nm overlay error causes adjacent-pad bridging. W2W bonding achieves better alignment than D2W but requires both wafers to have identical die layout and matching yield.</li><li><strong>KGD (Known-Good Die) leverage:</strong> Unlike micro-bump HBM stacking where post-bond test can detect opens electrically, hybrid-bonded stacks are extremely difficult to debond for rework. KGD screening at the individual DRAM wafer level becomes economically mandatory — each die must be tested to near-final quality before commit to bonding.</li></ul><p>Stacked yield for an 8-die HBM4 stack at 98% individual die yield = 0.98⁸ ≈ 85%, and hybrid bond interface yield (per die interface) must exceed 99.9% to keep total stack yield above 80%. This drives aggressive pre-bond wafer-level electrical test (WLBI and probe) requirements.</p></div>
+<div class="section"><h2>Test Access Challenges</h2><p>Hybrid bonding fundamentally changes ATE test strategy:</p><ul><li><strong>No physical probe access post-bond:</strong> Hybrid-bonded stacks have no accessible pads between the DRAM dice and the base die — the interface is fully buried. All test access must occur either pre-bond (wafer probe) or post-stack through the base die's HBM PHY interface.</li><li><strong>JEDEC boundary scan limitations:</strong> HBM3 and earlier support IEEE 1149.1 JTAG and JESD235-defined BIST for post-stack interconnect test (PHY loopback, per-channel PRBS test). HBM4 extends this with finer-granularity per-TSV test modes, but Cu-Cu bonded I/Os between DRAM layers lack the TAP infrastructure present on conventional bump interfaces.</li><li><strong>MISR/BIST reliance:</strong> Because direct probing of inter-die Cu-Cu nets is impossible, embedded BIST (Multiple Input Signature Registers, March C- memory algorithms) running through the base die PHY is the primary post-bond verification path. Any BIST failure must be root-caused through FIB cross-section or acoustic microscopy — there is no electrical rework path.</li><li><strong>Burn-in constraints:</strong> Traditional clamshell burn-in sockets cannot apply per-die stress to a hybrid-bonded stack. Board-level burn-in at package level using HBM controller stimulus is required. Temperature uniformity across the stack (ΔT &lt; 5 °C between top and bottom DRAM) is critical for HTOL (High-Temperature Operating Life) equivalence per JESD47.</li></ul><p>ATE patterns for HBM4 pre-bond wafer test must achieve parametric coverage of all TSV signal nets at &gt; 99.9% fault coverage, since post-bond repair is not feasible. Teradyne UltraFlex and Advantest T2000 platforms are extending probe card pin counts to 10,000+ for HBM4 wafer probe at sub-micron pitch.</p></div>
+<div class="section"><h2>Industry Adoption and Roadmap</h2><p>Hybrid bonding for HBM is transitioning from research to production:</p><ul><li><strong>HBM3E (2024):</strong> Still uses micro-bump stacking at 25–30 µm pitch. Hybrid bonding is used in TSMC SoIC for logic-on-logic integration (e.g., N3 on N6) but not yet for DRAM stacking in production HBM.</li><li><strong>HBM4 (2025–2026 ramp):</strong> First HBM generation targeting hybrid bonding for DRAM-to-DRAM interfaces. SK Hynix, Samsung, and Micron all have disclosed hybrid bonding roadmaps. JEDEC JESD235D (HBM4) standardizes the electrical interface; the physical stacking method is vendor-defined.</li><li><strong>Pitch roadmap:</strong> HBM4 targets 1 µm Cu-Cu pad pitch → HBM4E at 0.5 µm → beyond 2028 at sub-0.5 µm. Each half-pitch node roughly doubles I/O bandwidth density.</li><li><strong>Chiplet ecosystems:</strong> UCIe 2.0 and BoW (Bunch of Wires) interconnect standards are incorporating hybrid bonding as an optional physical layer for die-to-die distances &lt; 10 µm, directly impacting how HBM base dies connect to GPU/CPU logic tiles.</li></ul><p>For test engineers, the key near-term impact is the shift of quality gates earlier in the flow — from final stack test to pre-bond wafer-level test — and the increased reliance on embedded DFT structures for post-bond interconnect verification where probe access is impossible.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Hybrid bonding (Cu-Cu direct bonding) enables ≤1 µm pitch for HBM4, replacing 25–40 µm micro-bumps and increasing interconnect density 100×.</li><li>Pre-bond KGD screening is mandatory since hybrid-bonded stacks cannot be debonded — single-die probe coverage must exceed 99.9% fault coverage.</li><li>Post-bond test access relies entirely on the base die PHY interface and embedded BIST/MISR; direct probing of Cu-Cu bonded inter-die nets is not physically possible.</li><li>Bond void density (SAM/X-ray) and Cu pad recess uniformity (CMP) are the primary process yield knobs; voids >2 µm are reliability killers under thermal cycling.</li><li>ATE strategy for HBM4 requires board-level burn-in and HTOL since per-die clamshell sockets cannot access individual DRAM dice in a hybrid-bonded stack.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JESD235D — High Bandwidth Memory (HBM4) DRAM Standard</div><div class="ref-detail">JEDEC Solid State Technology Association, draft 2025 — defines HBM4 electrical interface, BIST modes, and DFT requirements for hybrid-bonded stacks</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Direct Bond Interconnect (DBI) Technology for 3D Integration</div><div class="ref-detail">Enquist P. et al., IEEE ECTC 2019 — foundational paper on Cu-Cu hybrid bonding process parameters and bond strength vs. anneal temperature</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">TSMC System on Integrated Chips (SoIC) Technology</div><div class="ref-detail">TSMC Technology Symposium 2023 whitepaper — describes SoIC-WoW (wafer-on-wafer) and SoIC-WoD (wafer-on-die) hybrid bonding for HBM integration</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE JTAG 1149.1-2013 — Boundary-Scan Architecture Standard</div><div class="ref-detail">IEEE Std 1149.1-2013 — defines TAP controller and boundary-scan cells referenced in HBM post-stack interconnect test</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JESD47K — Stress-Test-Driven Qualification of Integrated Circuits</div><div class="ref-detail">JEDEC JESD47K — HTOL and thermal cycling requirements applicable to hybrid-bonded HBM stacks during qualification</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Known Good Die (KGD) Strategies for Advanced Packaging</div><div class="ref-detail">Lau J.H., 'Semiconductor Advanced Packaging', Springer 2021, Chapter 9 — covers KGD testing methodologies for 3D stacked packages</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-9">SAM vs. X-Ray for Hybrid Bond Void Detection</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
