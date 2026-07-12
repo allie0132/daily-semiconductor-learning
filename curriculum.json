@@ -440,7 +440,7 @@
         {
           "id": "9.6",
           "title": "HBM4 ECC Enhancements — SECDED vs multi-bit ECC architectures and scrubbing strategies",
-          "done": false
+          "done": true
         },
         {
           "id": "9.7",
