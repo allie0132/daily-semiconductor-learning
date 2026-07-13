@@ -450,7 +450,7 @@
         {
           "id": "9.8",
           "title": "HBM4 Thermal Budget — junction temperature limits, cooling solutions for >1 kW GPU packages",
-          "done": false
+          "done": true
         }
       ]
     },
