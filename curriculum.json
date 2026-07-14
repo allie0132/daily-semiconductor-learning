@@ -466,7 +466,7 @@
         {
           "id": "10.2",
           "title": "KGD Screening for HBM — known-good-die testing, burn-in wafer probing, and sort flows",
-          "done": false
+          "done": true
         },
         {
           "id": "10.3",
