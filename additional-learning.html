@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 50 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 52 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -433,6 +433,22 @@
   </div>
   <h3>Mid-Stack Heat Extraction & Die-Specific Timing Binning Strategy</h3>
   <p>HBM4's 16-hi configuration creates a thermal 'hotspot' around dies 7–9 (interior stack layers). Advanced ATE correlates on-die temperature-sensor readings (TS_OUT pin) with timing parametrics during test, enabling <strong>die-level binning</strong> rather than stack-level binning. Samsung and SK Hynix implement <strong>firmware-programmable refresh throttling</strong> via MODE REG 34 (tREFI adjustment codes) to pre-emptively reduce refresh intervals for 'hot dies' during mission profile, preventing field soft-error escapes. Test engineers must validate this firmware response by injecting simulated high-temperature sensor values and confirming tREFI modification within 50 µs, critical for 72-hour soak qualification in HPC data centers.</p>
+</div></div><div class="module-group" id="module-10"><h2>Module 10 — Yield Optimization & Failure Analysis</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Tuesday, Jul 14 2026</span>
+    <span class="lesson-title">KGD Screening for HBM: Burn‑in Wafer Probing and Sort Flows</span>
+  </div>
+  <h3>Machine‑Learning Defect Classification from Burn‑in Wafer Probe Data</h3>
+  <p>Recent fabs deploy supervised ML models that ingest time‑resolved IDDQ and delay‑margin measurements from burn‑in wafer probes to predict latent failure modes. By labeling historical escape data, these models improve binning accuracy and reduce over‑test of good die, tightening yield ramps for next‑gen HBM stacks.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Wednesday, Jul 15 2026</span>
+    <span class="lesson-title">Post-Stacking Yield Recovery in HBM</span>
+  </div>
+  <h3>Algorithmic Repair: Minimum-Cost-Flow vs. Greedy Solvers</h3>
+  <p>While greedy first-fit repair solvers are fast and ATE-friendly, they can miss feasible repair solutions when defect clusters span multiple bank groups that share a spare pool. Minimum-cost-flow (MCF) algorithms model the repair problem as a bipartite matching between failing addresses and available spares with capacity constraints; they are guaranteed to find a solution if one exists and can reduce unnecessary spare consumption by 10–15% on clustered defect distributions (Tsai et al., IEEE TCAD 2019). HVM ATE platforms typically implement MCF as an off-line host-side computation with the solution downloaded to the tester pattern set, adding less than 200 ms per device to the overall test time.</p>
 </div></div>
 </body>
 </html>

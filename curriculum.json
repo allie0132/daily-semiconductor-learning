@@ -471,7 +471,7 @@
         {
           "id": "10.3",
           "title": "Post-Stacking Yield Recovery — redundancy repair, row/column replacement, and fuse programming",
-          "done": false
+          "done": true
         },
         {
           "id": "10.4",
