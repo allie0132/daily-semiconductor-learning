@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C‑SAM for TSV and Micro‑Bump Defect Detection</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M10.6 Yield Optimization & Failure Analysis</span></div>
+  <h1>C‑SAM for TSV and Micro‑Bump Defect Detection</h1>
+  <div class="meta">Thursday, Jul 16 2026 · Lesson 86 of 104</div>
+</header>
+<div class="section"><h2>Principles of C‑SAM for 3D Packages</h2><p>C‑SAM uses focused ultrasound (typically 50–300 MHz) to generate acoustic impedance contrast; reflections from interfaces reveal internal defects such as voids, cracks, or delaminations that change the acoustic transmission coefficient.</p><p>The technique is non‑destructive, penetrates silicon, under‑bump metallization (UBM), and dielectric layers, making it ideal for stacked die and TSV structures where optical inspection fails.</p></div>
+<div class="section"><h2>Setting Up C‑SAM: Frequency, Focus, and Coupling</h2><p>Select transducer frequency based on feature size: 150 MHz (~10 µm lateral resolution) for micro‑bump pitch ≥40 µm; 300 MHz (~5 µm) for sub‑20 µm bumps.</p><p>Use a deionized water coupling layer with a thickness of 0.5–2 mm; maintain temperature stability (±0.2 °C) to avoid velocity drift.</p><p>Set the focal depth to the mid‑plane of the TSV stack (e.g., 50 µm for a 100 µm thick silicon interposer) and acquire both A‑scan (amplitude vs. time) and C‑scan (planar map) data.</div>
+<div class="section"><h2>Detecting TSV Void and Crack Signatures</h2><p>Voids appear as low‑amplitude (dark) spots in C‑scan because the acoustic wave transmits through the void with minimal reflection; the surrounding Si/oxide interface gives a strong reflection.</p><p>Cracks manifest as linear or branched high‑amplitude (bright) features due to scattering at the crack faces; orientation relative to the ultrasound beam influences contrast.</p><p>Quantify defect size by measuring the full‑width at half‑maximum (FWHM) of the acoustic signature and compare against the TSV diameter (typically 5–10 µm).</div>
+<div class="section"><h2>Micro‑Bump Array Defect Identification</h2><p>Missing bumps show as localized voids in the UBM/solder layer with a characteristic diameter equal to the bump pitch.</p><p>Non‑wetting or insufficient reflow produces a halo‑shaped low‑amplitude ring around the bump, indicating partial delamination between solder and UBM.</p><p>Thermal‑mechanical stress‑induced cracks appear as radial lines emanating from the bump edge; they are more visible at higher frequencies due to increased scattering.</div>
+<div class="section"><h2>Data Interpretation, Reporting, and Correlation with Electrical Test</h2><p>Generate a defect density map (defects/mm²) and overlay with wafer map electrical fail sites; a Pearson correlation coefficient >0.7 indicates acoustic defects dominate yield loss.</p><p>Report using IPC‑9704 style: defect type, size, location (x,y,z), and confidence level based on signal‑to‑noise ratio (SNR >6 dB).</p><p>Feed back C‑SAM results to process engineers to adjust TSV etch depth, bump flux, or reflow profile, reducing defect recurrence by ~30 % in subsequent lots.</div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>C‑SAM provides micron‑scale acoustic contrast to reveal voids, cracks, and delaminations invisible to optical inspection.</li><li>Proper transducer frequency, focus, and coupling are essential to resolve TSVs (5‑10 µm) and micro‑bumps (≥20 µm pitch).</li><li>Correlating acoustic defect maps with electrical fail sites enables targeted process improvements and measurable yield recovery.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C – 3D Integrated Circuit (3D‑IC) Mechanical and Thermal Test Methods</div><div class="ref-detail">Section 4.2 outlines ultrasonic inspection criteria for TSVs and micro‑bumps.</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">Acoustic Microscopy for Void Detection in Silicon TSVs</div><div class="ref-detail">J. Lee et al., IEEE Transactions on Components, Packaging and Manufacturing Technology, vol. 12, no. 3, pp. 456‑465, 2022.</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Failure Analysis of Semiconductor Devices</div><div class="ref-detail">S. M. Sze and K. K. Ng, 3rd ed., Wiley, 2020, Chap. 9: Ultrasonic Techniques.</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Sonoscan SONOSCAN 3000 C‑SAM System Datasheet</div><div class="ref-detail">Specifies 50‑400 MHz transducers, 1 µm vertical resolution, and software for C‑scan stitching.</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">High‑Frequency C‑SAM for Sub‑10 µm Bump Inspection</div><div class="ref-detail">A. Patel et al., Proceedings of the 2023 IEEE International Test Conference, pp. 112‑119.</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-10">Multi‑Frequency C‑SAM for Depth‑Resolved Defect Mapping</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
