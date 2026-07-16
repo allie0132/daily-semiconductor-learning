@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-beam Probing of HBM Stacks</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M10.5 Yield Optimization & Failure Analysis</span></div>
+  <h1>E-beam Probing of HBM Stacks</h1>
+  <div class="meta">Thursday, Jul 16 2026 · Lesson 85 of 104</div>
+</header>
+<div class="section"><h2>Fundamentals of E-beam Probing in Semiconductor FA</h2><p>Electron beam (e-beam) probing uses a focused electron beam — typically in a scanning electron microscope (SEM) at 0.5–5 kV — to image electrical potential distribution across metal interconnects and active devices. In conventional planar ICs, this technique has been used for decades to localize opens, leakage paths, and latch-up. In HBM stacks, the stacked-die architecture introduces unique challenges: buried metal layers, through-silicon vias (TSVs), micro-bumps, and thin inter-die oxide layers all limit direct e-beam access to defective nodes.</p><p>The two dominant e-beam FA modalities for HBM stacks are <strong>voltage contrast (VC)</strong> and <strong>electron beam induced current (EBIC)</strong>. Both require careful sample preparation and bias conditions, and often must be combined with mechanical delayering or FIB cross-sectioning to expose the layer of interest.</p></div>
+<div class="section"><h2>Voltage Contrast (VC): Principles and HBM Application</h2><p>Voltage contrast imaging exploits the dependence of secondary electron (SE) emission yield on the local surface potential. A node held at positive potential attracts low-energy secondary electrons back to the surface, appearing <strong>dark</strong> in SE images; a node at negative or floating potential repels them, appearing <strong>bright</strong>. For HBM stacks, VC is applied in two modes:</p><ul><li><strong>Passive VC (PVC):</strong> No external bias; differential charging under the beam distinguishes electrically floating nodes (bright) from grounded/shorted nodes (dark). An HBM TSV with a leakage path to VSS appears anomalously dark relative to its floating neighbors.</li><li><strong>Active VC (AVC):</strong> An external signal or DC bias is applied to the DUT while the beam scans. AVC at 1–5 MHz can visualize signal propagation along HBM control paths (CA bus, CK, WCKDIFF) and flag dead nodes or broken chains within the Logic Die or DRAM dies.</li></ul><p>Beam energy selection is critical: at ≤1 kV, SE yield is dominated by surface oxide effects; at 2–3 kV, metal contrast improves significantly. For HBM with 55–65 nm inter-metal dielectrics and low-k materials, beam penetration must not exceed the layer of interest to avoid charging underlying conductors.</p></div>
+<div class="section"><h2>EBIC: Electron Beam Induced Current for Junction and Defect Imaging</h2><p>EBIC measures the current collected by a reverse-biased p-n junction or Schottky contact when the e-beam generates electron-hole pairs near the depletion region. In HBM DRAM dies — which contain storage capacitor junctions — EBIC can reveal:</p><ul><li><strong>Leaky bit-cell junctions:</strong> Regions of anomalously high EBIC signal indicate excess minority carrier generation, consistent with crystal defects (dislocations, stacking faults) near the capacitor storage node.</li><li><strong>TSV stress-induced defects:</strong> Copper TSVs in HBM create a keep-out zone (KOZ) of ~2 µm radius due to CTE mismatch-induced stress. EBIC maps generated by scanning the beam across TSV cross-sections reveal stress-induced defect clusters that increase junction leakage (IOFF).</li><li><strong>ESD damage:</strong> Gate-oxide rupture or silicide spiking near ESD protection circuits in the Logic Die can be localized with EBIC even when defect dimensions are below the SEM resolution limit.</li></ul><p>EBIC sensitivity is enhanced at low beam currents (1–10 pA) and beam energies chosen to maximize generation in the target epitaxial layer. Typical EBIC collection efficiency for HBM bit-cell junctions at 3 kV is 10–30% depending on surface recombination velocity and minority carrier diffusion length.</p></div>
+<div class="section"><h2>Buried Defect Localization Workflow for HBM Stacks</h2><p>Localizing buried defects in a 4-Hi or 8-Hi HBM stack requires a multi-step workflow:</p><ul><li><strong>Step 1 — Electrical isolation:</strong> Use ATE (e.g., Advantest T2000/T5503 or Teradyne Magnum) to run JEDEC JESD235C-compliant test modes — ZQ calibration, CA training, read/write leveling — to isolate the failing die, channel, and bank. HBM2E pseudo-channel mode (two 64-bit channels per die) helps narrow defect location to within a 4-bank group.</li><li><strong>Step 2 — Flip-chip decapsulation:</strong> Chemical delayering (fuming nitric acid or plasma dry etch) is used on the back side of the failing die to expose metal layers without disturbing microbump connections. BGA underfill removal precedes this step.</li><li><strong>Step 3 — E-beam screening:</strong> PVC scan at 2 kV identifies floating or shorted nets. Cross-reference with the logical netlist to determine which physical layer to target.</li><li><strong>Step 4 — FIB cross-section:</strong> Focused Ion Beam (FIB) at the suspect location exposes the defect layer for SEM imaging, EDX compositional analysis, and EBIC collection under applied bias.</li><li><strong>Step 5 — Root cause correlation:</strong> Correlate defect type (void, hillock, contamination particle, electromigration) with process split data using statistical FA tools (JMP, Spotfire).</li></ul></div>
+<div class="section"><h2>Practical Challenges and Yield Improvement Actions</h2><p>Several challenges limit e-beam probing effectiveness in HBM stacks:</p><ul><li><strong>Charging in low-k dielectrics:</strong> Ultra-low-k inter-metal dielectric (k &lt; 2.4) in advanced DRAM nodes (e.g., 10 nm-class) charges rapidly under the beam, causing image drift and masking real VC contrast. Mitigation: coat with 2–5 nm of evaporated carbon or use charge neutralization with a flood gun.</li><li><strong>Inaccessibility of mid-stack layers:</strong> In an 8-Hi HBM3 stack, dies 3–6 are only accessible after complete removal of 2–3 overlying dies — a destructive, irreversible process. Nanoprober systems with in-SEM tips can contact exposed TSV pads at intermediate stack levels.</li><li><strong>Signal attenuation through microbumps:</strong> The Cu pillar + SnAg microbumps (25 µm pitch, 15 µm height) attenuate AVC signals; frequency roll-off above ~5 MHz reduces contrast. Use of lock-in amplifier detection (LIAD) with 100 kHz–1 MHz modulation improves SNR by 10–20 dB.</li></ul><p>Yield improvement actions driven by e-beam FA findings include TSV process window tightening (target &lt;0.3% TSV via-resistance outliers per JESD235C Table 4), microbump reflow profile optimization (peak temperature ±2°C control), and bit-cell implant dose corrections to reduce storage node leakage below 1 fA/cell at 85°C.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Passive voltage contrast (PVC) at 2–3 kV is the fastest first-pass screen for HBM open/short defects; dark anomalies on floating nodes point to leakage to ground.</li><li>EBIC is sensitive to sub-resolution crystal defects near TSV keep-out zones and bit-cell junctions that increase IOFF — it catches what SEM imaging alone misses.</li><li>Buried defect localization in HBM stacks requires ATE-guided die/channel isolation, chemical delayering, and FIB cross-section before e-beam analysis can be conclusive.</li><li>Charging artifacts in low-k dielectrics are mitigated with thin carbon coating (2–5 nm) or charge neutralization; lock-in detection (LIAD) at 100 kHz–1 MHz improves AVC SNR by 10–20 dB.</li><li>Correlate FA findings with process split data: TSV resistance outliers, microbump reflow profiles, and implant dose are the primary root-cause levers.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C — High Bandwidth Memory (HBM) DRAM</div><div class="ref-detail">JESD235C, January 2021 — Sections 3 (electrical specs), 4 (TSV requirements), and 8 (test modes for CA/DQ characterization)</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Electron Beam Testing Technology</div><div class="ref-detail">J.T.L. Thong, ed., Plenum Press, 1993 — Chapter 5: Voltage Contrast Theory and Quantitative Waveform Measurement</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">EBIC Analysis of TSV-Induced Defects in 3D-IC Stacks</div><div class="ref-detail">C. Huynh et al., Proceedings of ISTFA 2019, pp. 112–118 — EBIC mapping of KOZ defects around 5 µm Cu TSVs in DRAM</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Voltage Contrast Failure Analysis of HBM2 Devices</div><div class="ref-detail">K. Takeda et al., Proceedings of IRPS 2020, pp. 1–6 — Active VC at 2 MHz on HBM2 Logic Die pseudo-channel shorts</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">FIB/SEM and EBIC Characterization of Cu Pillar Microbumps</div><div class="ref-detail">M. Deschamps et al., Microelectronics Reliability, vol. 52, 2012, pp. 1720–1724 — Defect analysis in SnAg microbumps for advanced packaging</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JEP159 — Guidance on Through-Silicon Vias (TSVs) for 3D-IC Integration</div><div class="ref-detail">JEP159A, 2018 — TSV electrical characterization, keep-out zone rules, and yield monitoring methodology</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-10">Lock-In EBIC (LIEBIC) for Sub-pA Leakage Detection</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
