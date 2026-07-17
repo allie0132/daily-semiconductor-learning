@@ -496,7 +496,7 @@
         {
           "id": "10.8",
           "title": "HBM Reliability Qualification — JEDEC JESD47 test sequence, activation energy, and MTTF projections",
-          "done": false
+          "done": true
         }
       ]
     },
