@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 55 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 56 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -434,6 +434,14 @@
   <h3>Mid-Stack Heat Extraction & Die-Specific Timing Binning Strategy</h3>
   <p>HBM4's 16-hi configuration creates a thermal 'hotspot' around dies 7–9 (interior stack layers). Advanced ATE correlates on-die temperature-sensor readings (TS_OUT pin) with timing parametrics during test, enabling <strong>die-level binning</strong> rather than stack-level binning. Samsung and SK Hynix implement <strong>firmware-programmable refresh throttling</strong> via MODE REG 34 (tREFI adjustment codes) to pre-emptively reduce refresh intervals for 'hot dies' during mission profile, preventing field soft-error escapes. Test engineers must validate this firmware response by injecting simulated high-temperature sensor values and confirming tREFI modification within 50 µs, critical for 72-hour soak qualification in HPC data centers.</p>
 </div></div><div class="module-group" id="module-10"><h2>Module 10 — Yield Optimization & Failure Analysis</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Friday, Jul 17 2026</span>
+    <span class="lesson-title">HBM Reliability Qualification per JEDEC JESD47</span>
+  </div>
+  <h3>Bayesian Updating of MTTF with Limited Failure Data</h3>
+  <p>When only a few failures are observed during JESD47 stress (common for high‑reliability HBM), a Bayesian approach can combine prior Ea distributions (from literature or process monitors) with the observed failure times to produce a posterior MTTF estimate. This reduces uncertainty compared to pure frequentist chi‑square limits and is increasingly used in qualification reports for advanced packages.</p>
+</div>
 <div class="entry">
   <div class="entry-meta">
     <span class="date">Thursday, Jul 16 2026</span>
