@@ -512,7 +512,7 @@
         {
           "id": "11.2",
           "title": "Anomaly Detection in HBM Parametric Data — unsupervised clustering for outlier identification",
-          "done": false
+          "done": true
         },
         {
           "id": "11.3",
