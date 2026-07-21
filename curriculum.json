@@ -522,7 +522,7 @@
         {
           "id": "11.4",
           "title": "Neural Network Fault Diagnosis — classifying HBM fault signatures from BIST results",
-          "done": false
+          "done": true
         },
         {
           "id": "11.5",
