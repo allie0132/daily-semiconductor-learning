@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predictive Yield Modeling via Wafer Map Correlation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M11.3 Machine Learning for Test Optimization</span></div>
+  <h1>Predictive Yield Modeling via Wafer Map Correlation</h1>
+  <div class="meta">Tuesday, Jul 21 2026 &middot; Lesson 91 of 104</div>
+</header>
+<div class="section"><h2>Inline Metrology as Yield Predictors</h2><p>Inline metrology captures process state at intermediate fabrication steps before electrical test is possible. Key measurement types used in yield prediction include:</p><ul><li><strong>CMP uniformity maps</strong>: post-planarization thickness variation (WIWNU), measured by ellipsometry or reflectometry at 49-121 sites per wafer. Thickness non-uniformity directly impacts resistance and RC delay across die.</li><li><strong>Overlay error maps</strong>: lithographic misalignment between layers measured in nm by optical overlay metrology (e.g., ASML Atlas-H). Overlay &gt;20% of critical dimension budget causes systematic pattern failures.</li><li><strong>Critical dimension (CD) maps</strong>: gate or via width variation from CD-SEM or optical CD (OCD) tools. CD variation shifts Vt distributions and drives leakage spread.</li><li><strong>Defect density maps</strong>: particle and scratch counts from inspection tools (KLA-Tencor Surfscan, KLARF output). Spatial clustering reveals tool-specific signatures.</li></ul><p>Each measurement type produces a spatial map across the 300 mm wafer. The regression target is the final wafer sort map from ATE: which dies pass, and at what parametric margin (e.g., Vmin, IDDQ, maximum test frequency).</p></div>
+<div class="section"><h2>Wafer Map Registration and Feature Matrix Construction</h2><p>Before regression can be applied, inline measurement grids must be registered to the die grid from the probe card layout. Critical alignment steps:</p><ul><li><strong>Coordinate system alignment</strong>: wafer notch angle and map origin from SEMI M1 must match the ATE wafer map coordinate system (SEMI G85 format). A rotation or flip error misregisters all die-to-metrology assignments.</li><li><strong>Sparse-to-dense interpolation</strong>: inline tools measure at 13, 49, or 121 sites per wafer, far fewer than the 500-2000 die on a 300 mm wafer. Spatial interpolation (bilinear, RBF, or kriging) expands the measurement grid to die resolution before feature extraction.</li><li><strong>Multi-layer temporal stacking</strong>: overlay from lithography step N must be paired with CMP uniformity from step N-2 using lot/wafer/timestamp metadata from the MES. Mismatched layers corrupt the feature matrix.</li></ul><p>The result is a per-die feature matrix <code>X[die, feature]</code> where each column is an interpolated inline measurement, and the target vector <code>y[die]</code> is binary (pass/fail) or continuous (e.g., <code>IDDQ</code> or Vmin in mV). Typical feature counts range from 10 to several hundred parameters across all process steps.</p></div>
+<div class="section"><h2>Regression Model Selection and Training</h2><p>For binary yield (pass/fail), <strong>logistic regression</strong> is the baseline; for continuous parametric prediction (Vmin, leakage), ordinary least squares (OLS) or regularized variants are used.</p><ul><li><strong>Ordinary Least Squares (OLS)</strong>: <code>y = X&#946; + &#949;</code>. Simple and interpretable but sensitive to multicollinearity when inline features are correlated (e.g., CMP thickness and overlay error often share spatial pattern). R-squared and adjusted R-squared are standard fit metrics.</li><li><strong>Ridge Regression (L2)</strong>: adds penalty <code>&#955;||&#946;||&#178;</code> to the loss, shrinking correlated feature coefficients. Lambda is selected by k-fold cross-validation (typically k=5 or 10). Preferred when feature count exceeds ~20 or features are strongly correlated.</li><li><strong>Lasso Regression (L1)</strong>: penalty <code>&#955;||&#946;||&#8321;</code> drives sparse solutions, automatically zeroing non-predictive features. Valuable for automatic feature selection from hundreds of inline parameters.</li><li><strong>Elastic Net</strong>: linear combination of L1 and L2 penalties, controlled by mixing parameter <code>&#945;</code>. Best general choice when both feature selection and collinearity management are needed.</li></ul><p>For non-linear yield surfaces near systematic defect clusters, ensemble methods (XGBoost, LightGBM, random forests) capture interaction effects missed by linear models at the cost of interpretability.</p></div>
+<div class="section"><h2>Model Evaluation Metrics for Yield Prediction</h2><p>Models must be evaluated on held-out lots — never the training lot — to measure genuine predictive power. Key metrics in production use:</p><ul><li><strong>AUC-ROC</strong>: for binary pass/fail prediction. AUC &gt; 0.80 is a practical threshold for production-quality yield prediction. Compute per wafer, then report mean ± std across a validation lot set.</li><li><strong>R&#178; (coefficient of determination)</strong>: fraction of parametric variance explained. R&#178; &gt; 0.7 indicates useful predictive power for continuous targets such as IDDQ or Vmin.</li><li><strong>Lot-level yield correlation (&#961;)</strong>: Pearson or Spearman correlation between predicted and actual die yield, reported at lot level to smooth within-wafer noise. This is the metric most relevant to production disposition decisions.</li><li><strong>Spatial residual map</strong>: <code>y_actual - y_predicted</code> plotted as a wafer map. A good model leaves no systematic spatial pattern in residuals. Concentric ring or edge-heavy residuals indicate an unmodeled CMP or etch non-uniformity effect.</li></ul><p>Production deployment typically uses a prediction interval rather than a point estimate. If predicted lot yield falls below a control limit (e.g., mean - 2&#963;), the lot is flagged for engineering disposition before reaching probe, enabling early scrap or rework decisions.</p></div>
+<div class="section"><h2>Closed-Loop Yield Learning and Model Maintenance</h2><p>Predictive yield models degrade over time as process tools drift, consumables are replaced, or process recipes are optimized. Production-grade virtual metrology systems require:</p><ul><li><strong>Drift detection via SPC on residuals</strong>: track prediction residuals (actual - predicted) using EWMA or Shewhart charts. A shift in residual mean or increase in variance signals process change requiring model retraining. EWMA with &#955;=0.2 is standard for slowly drifting processes.</li><li><strong>Rolling-window retraining</strong>: ATE sort results feed back into the training pipeline via the MES. A 90-day rolling window is typical in high-volume production; shorter windows (30 days) are used after process changes or tool PM events.</li><li><strong>Confidence scoring via Mahalanobis distance</strong>: lots with feature vectors far from the training distribution are flagged as low-confidence. Mahalanobis distance D&#178; = (x - &#956;)&#7488; &#931;&#8315;&#185; (x - &#956;) provides a scalar confidence metric. High-D lots should not be acted on autonomously without engineering review.</li><li><strong>Concept drift vs. data drift</strong>: data drift (new tool with different absolute offset) is handled by feature normalization or recalibration. Concept drift (yield-metrology relationship changes after process optimization) requires full model retraining or domain adaptation techniques.</li></ul><p>The long-term goal is <strong>virtual metrology</strong>: predicting electrical yield at fab completion or after key inline steps, enabling early disposition and reducing cost-per-wafer at sort.</p></div>
+
+<div class="takeaways">
+  <h2>&#x26A1; Key Takeaways</h2>
+  <ul><li>Inline metrology maps (CMP, overlay, CD) must be registered to die-grid coordinates and spatially interpolated to die resolution before regression modeling.</li><li>Ridge or Lasso regression is preferred over OLS for yield prediction due to multicollinearity; Lasso additionally performs automatic feature selection.</li><li>Model quality is evaluated by AUC-ROC (binary pass/fail) or R-squared (continuous), with spatial residual maps used to detect unmodeled systematic effects.</li><li>Production models require EWMA-based drift monitoring and rolling retraining; Mahalanobis distance identifies out-of-distribution lots that should not be automatically dispositioned.</li></ul>
+</div>
+<div class="references"><h2>&#x1F4DA; References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">SEMI M1: Specification for Polished Single Crystal Silicon Wafers</div><div class="ref-detail">SEMI M1 standard defining wafer flat/notch and coordinate system for 300 mm wafers — establishes map orientation used in metrology-to-die registration</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">SEMI G85: ASCII Format for Semiconductor Die Results</div><div class="ref-detail">Standard defining the wafer map interchange format used by ATE and MES for sort results; wafer bin map format for die-level pass/fail data</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Virtual Metrology for Semiconductor Manufacturing: A Review</div><div class="ref-detail">Hung-En Tseng et al., IEEE Trans. Semiconductor Manufacturing, vol. 25, no. 1, pp. 132-144, 2012 — comprehensive review of VM regression methods and industrial deployment</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">The Elements of Statistical Learning</div><div class="ref-detail">Hastie, Tibshirani, Friedman — Chapter 3 (Linear Methods for Regression) and Chapter 18 (High-Dimensional Problems); 2nd ed., Springer, 2009</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">KLA KLARF 1.8 File Format Specification</div><div class="ref-detail">KLA-Tencor KLARF (KLA Results File) v1.8 format documentation for defect map interchange between inspection tools and downstream analysis — key for defect density feature extraction</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Yield Prediction Using Inline Parametric Data in Semiconductor Manufacturing</div><div class="ref-detail">L. Pelegrini et al., IEEE Trans. Semiconductor Manufacturing, vol. 20, no. 4, pp. 391-400, 2007 — case study of logistic regression for sort yield prediction from inline data</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-11">Kriging Interpolation for Sparse Metrology Upsampling</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
