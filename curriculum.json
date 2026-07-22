@@ -527,7 +527,7 @@
         {
           "id": "11.5",
           "title": "Reinforcement Learning for ATE Scheduling — optimizing multi-site test parallelism dynamically",
-          "done": false
+          "done": true
         },
         {
           "id": "11.6",
