@@ -542,7 +542,7 @@
         {
           "id": "11.8",
           "title": "Data Pipeline Architecture for HBM Test — real-time ATE data streaming, warehousing, and dashboards",
-          "done": false
+          "done": true
         }
       ]
     },
