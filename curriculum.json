@@ -537,7 +537,7 @@
         {
           "id": "11.7",
           "title": "Generative AI for Test Vector Synthesis — LLM-assisted pattern generation and coverage closure",
-          "done": false
+          "done": true
         },
         {
           "id": "11.8",
