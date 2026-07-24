@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 58 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 59 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -482,6 +482,14 @@
   <h3>Algorithmic Repair: Minimum-Cost-Flow vs. Greedy Solvers</h3>
   <p>While greedy first-fit repair solvers are fast and ATE-friendly, they can miss feasible repair solutions when defect clusters span multiple bank groups that share a spare pool. Minimum-cost-flow (MCF) algorithms model the repair problem as a bipartite matching between failing addresses and available spares with capacity constraints; they are guaranteed to find a solution if one exists and can reduce unnecessary spare consumption by 10–15% on clustered defect distributions (Tsai et al., IEEE TCAD 2019). HVM ATE platforms typically implement MCF as an off-line host-side computation with the solution downloaded to the tester pattern set, adding less than 200 ms per device to the overall test time.</p>
 </div></div><div class="module-group" id="module-11"><h2>Module 11 — Machine Learning for Test Optimization</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Thursday, Jul 23 2026</span>
+    <span class="lesson-title">Data Pipeline Architecture for HBM Test Streaming</span>
+  </div>
+  <h3>Edge ML Inference in ATE Firmware</h3>
+  <p>Deploying a quantized TensorFlow Lite model on the ATE’s FPGA allows on‑board classification of fail patterns before streaming, reducing upstream bandwidth by up to 70 %. Recent work (IEEE Access 2024) shows a 2‑layer LSTM running at 200 MHz on a Xilinx UltraScale+ can detect HBM timing violations with <5 µs latency, enabling immediate adaptive voltage scaling.</p>
+</div>
 <div class="entry">
   <div class="entry-meta">
     <span class="date">Tuesday, Jul 21 2026</span>

@@ -553,7 +553,7 @@
         {
           "id": "12.1",
           "title": "Multi-Die Package Test Strategy — EMIB, Foveros, and CoWoS interposer test access architectures",
-          "done": false
+          "done": true
         },
         {
           "id": "12.2",
