@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UCIe Protocol Testing & Die-to-Die Link BER</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M12.2 Heterogeneous Integration & Advanced Packaging Test</span></div>
+  <h1>UCIe Protocol Testing & Die-to-Die Link BER</h1>
+  <div class="meta">Saturday, Jul 25 2026 · Lesson 98 of 104</div>
+</header>
+<div class="section"><h2>UCIe Standard Overview and Physical Layer</h2><p>The Universal Chiplet Interconnect Express (UCIe) specification (v1.1, released 2023) defines a standardized die-to-die interconnect for 2D, 2.5D, and 3D packaging. It builds on PCIe and CXL protocol stacks over a PHY layer optimized for short-reach die-to-die links.</p><p>UCIe defines two physical variants: <strong>Standard Package</strong> (C4 bumps, 25–55 µm pitch, &lt;25 mm reach) and <strong>Advanced Package</strong> (µbumps or hybrid bonding, 10 µm pitch, &lt;2 mm reach). The advanced package variant targets &lt;1 pJ/bit energy efficiency at line rates up to 32 GT/s per lane.</p><ul><li><code>D2D PHY</code>: 64b/73b encoding for advanced package; supports NRZ at 4/8/16 GT/s and PAM4 at 32 GT/s</li><li><code>FDI (Flit-aware Die-to-Die Interface)</code>: decouples protocol layer from PHY; carries 512-bit flits at protocol layer</li><li><code>RDI (Raw Die-to-Die Interface)</code>: direct PHY-to-die bridge without protocol decode, used for raw BER testing</li><li>Sideband: low-speed I2C/SPI-like channel for training, equalization control, and test mode entry</li></ul></div>
+<div class="section"><h2>Loopback Compliance Testing</h2><p>UCIe loopback testing is the primary ATE method to validate physical-layer integrity before full protocol stack bring-up. Two loopback modes are defined in the UCIe spec Section 6.4:</p><ul><li><strong>Analog Loopback</strong>: TX output is returned directly to RX input at the bump level. Tests the combined TX+RX analog path, bump/µbump continuity, and trace quality. Set via sideband register <code>LPBK_CTRL[0]</code>.</li><li><strong>Digital Loopback</strong>: data is looped after the RX CDR and re-driven through the TX serializer. Isolates digital datapath correctness. Set via <code>LPBK_CTRL[1]</code>.</li></ul><p>Compliance requires BER &lt; 1e-15 sustained for ≥1e15 UI per lane across PVT corners (0.85–1.05V VDD, -40°C to 105°C junction). A typical ATE run at 16 GT/s uses a PRBS-31 pattern. At 16 GT/s per lane and a 128-lane interface, full BER floor verification requires approximately 488 seconds at the 1e15 UI limit — typically reduced by parallel lane testing and confidence-interval stopping rules.</p><p>Lane margining registers (<code>LM_CTRL</code>, <code>LM_STATUS</code>) allow voltage and time margin sweeps without external instruments, enabling in-situ BER vs. margin characterization on-ATE.</p></div>
+<div class="section"><h2>BER Measurement and Statistical Methods</h2><p>Die-to-die link BER characterization must account for the extremely low targets required (&lt;1e-15 uncorrected). Direct measurement at these levels is impractical in production; instead, ATE engineers use bathtub curve extrapolation and confidence-interval methods.</p><ul><li><strong>Eye contour / bathtub</strong>: sweep time margin (TM) and voltage margin (VM) via lane margining registers; fit the resulting BER vs. margin data to a dual-Dirac + Gaussian jitter model per OIF-CEI-112G methodology</li><li><strong>Q-factor extrapolation</strong>: convert measured BER at accessible margins (e.g., 1e-6) to Q, extrapolate to 1e-15 target; requires care with tail correlation</li><li><strong>Confidence intervals (CI)</strong>: for go/no-go decisions, apply the Poisson chi-squared bound. With 0 errors over N UI, the 95% CI upper bound on BER is -ln(0.05)/N ≈ 3/N. A 3e-15 BER pass at 95% CI requires ≥1e15 UI per lane.</li><li>BERT integration: Keysight M8040A or Spirent VST-based BERT can be connected via ATE digital pins or high-speed instrument ports when on-die BIST is insufficient</li></ul><p>The UCIe spec mandates that <code>FEC_STATUS</code> registers report pre-FEC and post-FEC error counters. Reading these via sideband during a production test provides a rapid &lt;100ms BER proxy using the raw pre-FEC rate.</p></div>
+<div class="section"><h2>ATE Test Flow for UCIe Links</h2><p>A production UCIe link test on an ATE (e.g., Advantest T2000 or Teradyne UltraFLEX) follows a defined sequence:</p><ul><li><strong>Step 1 — Power-on and reset</strong>: apply VDD ramp ≤1 ms/V, deassert RESET_N; poll <code>SBINIT_STATUS</code> sideband register for <code>SBINIT_DONE=1</code> within 10 ms</li><li><strong>Step 2 — Sideband link training</strong>: exchange capability registers (<code>CAP0</code>, <code>CAP1</code>); negotiate speed, width, and FEC mode; confirm <code>SB_ACTIVE</code></li><li><strong>Step 3 — Mainband PHY init</strong>: run TX/RX adaptation (DFE, CTLE, TX equalization); poll <code>MB_INIT_STATUS</code> for <code>ACTIVE</code> state</li><li><strong>Step 4 — Loopback BER</strong>: enable PRBS-31 via <code>PRBS_CTRL</code>; arm error counter; run for required UI count; read <code>PRBS_ERR_CNT</code> per lane</li><li><strong>Step 5 — Lane margining</strong>: sweep TM ±0.5 UI and VM ±50 mV; log BER vs. margin per lane; flag lanes below margin specification</li><li><strong>Step 6 — FEC stress</strong>: inject single-bit errors via <code>ERR_INJ_CTRL</code>; verify FEC corrects up to the symbol correction limit (t=6 symbols for RS(544,528))</li></ul><p>Test time budget for a 128-lane UCIe interface at 16 GT/s is typically 4–8 seconds per DUT for steps 1–6 in production, excluding wafer-level probe overhead.</p></div>
+<div class="section"><h2>Common Failure Modes and Debug</h2><p>UCIe link failures on ATE fall into distinct categories with specific debug signatures:</p><ul><li><strong>Sideband timeout</strong> (<code>SBINIT_DONE</code> not asserted): indicates power delivery issue, bump open/short, or sideband clock not reaching die. Check VDD ramp compliance and probe sideband CLK/DATA toggles.</li><li><strong>Mainband adaptation failure</strong>: CDR fails to lock, or <code>MB_INIT_STATUS</code> stays in <code>TRAINING</code>. Root cause is often excessive ISI from advanced package trace loss or bump impedance mismatch. Capture <code>CTLE_GAIN</code> register — saturation at max gain indicates insertion loss exceeding the link budget.</li><li><strong>Lane-specific BER failures</strong>: single-lane BER &gt;1e-12 while neighbors pass → bump/µbump contact issue or solder void. Correlate failing lane position with wafer map; check for systematic pattern indicating probe card alignment.</li><li><strong>Systematic BER floor &gt;1e-15</strong>: all lanes fail margin at same time/voltage offset → shared PLL jitter or VDD noise coupling. Measure <code>TXPLL_LOCK</code> status and record supply noise via PMIC scope channel on ATE.</li><li><strong>FEC symbol errors at rest</strong>: non-zero <code>FEC_UNCORR_CNT</code> at nominal conditions indicates ECC overhead exceeded — typically caused by a stuck-at lane with &gt;2500 errors/second on a RS(544,528) codeword</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>UCIe defines two loopback modes (analog and digital) via sideband registers; BER target is <1e-15 at 1e15 UI per lane minimum.</li><li>Production ATE flows use pre-FEC error counters and Q-factor extrapolation to verify BER in <8 s per DUT rather than direct counting.</li><li>Lane margining registers (TM/VM sweep) enable in-situ bathtub curve capture without external BERT, critical for chiplet wafer-level test.</li><li>Sideband initialization timeout and CDR lock failure are the two most common ATE bring-up failures; debug via register polling and supply integrity checks.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">UCIe Specification v1.1</div><div class="ref-detail">UCIe Consortium, 2023. https://uciexpress.org/specification — Sections 4 (PHY), 6 (Test Modes), 7 (FEC)</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">OIF-CEI-112G-LR-COMMON-01.0</div><div class="ref-detail">OIF Common Electrical Interface 112G — jitter model and BER extrapolation methodology, Appendix A</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JESD235C — High Bandwidth Memory (HBM) DRAM Standard</div><div class="ref-detail">JEDEC Solid State Technology Association, 2023 — PHY layer compliance reference for HBM-UCIe co-packaged stacks</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">IEEE 802.3ck-2022 Clause 120 — Lane Margining</div><div class="ref-detail">Defines time and voltage margin test methodology adapted by UCIe for die-to-die link characterization</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Cadence Palladium Z2 UCIe Compliance Validation Application Note</div><div class="ref-detail">Cadence Design Systems, AN-UCIe-2023 — ATE integration and sideband register map for protocol compliance testing</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Chiplet Design for AI and HPC — Heterogeneous Integration Roadmap</div><div class="ref-detail">IEEE ECTC 2023, Stow et al. — Die-to-die link BER characterization under thermal stress for co-packaged chiplets</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-12">UCIe Retimer and Repeater Test Considerations</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>

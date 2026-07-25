@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 59 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 60 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -505,6 +505,14 @@
   </div>
   <h3>Domain‑Adversarial Neural Networks for Robust Transfer</h3>
   <p>Recent work shows that adding a gradient‑reversal layer to penalize generation‑specific features improves transfer across process nodes. By training the feature extractor to maximize label accuracy while minimizing the ability of a domain classifier to distinguish HBM2E from HBM3 data, the learned representation becomes invariant to voltage‑temperature shifts, reducing the need for frequent retraining when moving to a new HBM generation.</p>
+</div></div><div class="module-group" id="module-12"><h2>Module 12 — Heterogeneous Integration & Advanced Packaging Test</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Saturday, Jul 25 2026</span>
+    <span class="lesson-title">UCIe Protocol Testing & Die-to-Die Link BER</span>
+  </div>
+  <h3>UCIe Retimer and Repeater Test Considerations</h3>
+  <p>When UCIe links span more than 25 mm in a standard-package substrate — common in large interposers or organic packages with HBM stacks at one end and CPU dies at the other — a UCIe retimer (defined in UCIe Section 5.3) may be inserted. Retimers re-time and re-drive the signal, resetting accumulated jitter. ATE verification must test the retimer's own PRBS loopback independently before full end-to-end link testing, and the sideband path must be validated through the retimer's sideband bypass relay. A subtle failure mode is retimer clock domain crossing (CDC) metastability under voltage stress that manifests as intermittent burst errors rather than a raised BER floor — catch it with an extended 30-second PRBS run at 0.9V VDD rather than the standard 4-second nominal test.</p>
 </div></div>
 </body>
 </html>
