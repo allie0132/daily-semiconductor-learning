@@ -563,7 +563,7 @@
         {
           "id": "12.3",
           "title": "Thermal Test of Heterogeneous Packages — multi-die thermal resistance, theta-JC, and junction mapping",
-          "done": false
+          "done": true
         },
         {
           "id": "12.4",
