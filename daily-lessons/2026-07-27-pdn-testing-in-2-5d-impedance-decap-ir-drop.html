@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDN Testing in 2.5D: Impedance, Decap & IR Drop</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M12.4 Heterogeneous Integration & Advanced Packaging Test</span></div>
+  <h1>PDN Testing in 2.5D: Impedance, Decap & IR Drop</h1>
+  <div class="meta">Monday, Jul 27 2026 · Lesson 100 of 104</div>
+</header>
+<div class="section"><h2>Why PDN Testing in 2.5D Is Uniquely Challenging</h2><p>In conventional monolithic packages, the power delivery network is relatively straightforward: PCB planes, package capacitors, and on-die decoupling work in a well-understood hierarchy. In 2.5D heterogeneous integration—where a GPU or CPU die sits alongside one or more HBM stacks on a silicon or organic interposer—the PDN topology becomes multi-domain and extremely sensitive.</p><p>Key challenges include:</p><ul><li><strong>Interposer transmission line impedance:</strong> The redistribution layers (RDL) on a silicon interposer have parasitic inductance and resistance that must be characterized at operating frequencies (typically 100 MHz–5 GHz for noise analysis).</li><li><strong>Multiple voltage domains crossing the interposer:</strong> HBM operates at VDDQ (1.2 V for HBM2E/HBM3), VDD core, and VDDC, each with independent PDN paths requiring separate characterization.</li><li><strong>Micro-bump and TSV parasitics:</strong> Each HBM PHY interface traverses C4 bumps, interposer RDL, and micro-bumps, introducing distributed L and R that shift the PDN anti-resonance frequency.</li><li><strong>Thermal coupling:</strong> As HBM and GPU die temperatures rise under load, IR-drop increases due to copper resistance increases (~0.39%/°C), making static IR-drop measurements at room temperature insufficient.</li></ul></div>
+<div class="section"><h2>PDN Impedance Measurement with VNA</h2><p>The standard method for PDN characterization is 2-port vector network analyzer (VNA) measurement using the S-parameter to Z-parameter conversion. The target PDN impedance <code>Z_target = ΔV_ripple / I_transient</code>.</p><p>For HBM3 with a 1.2 V VDDQ rail and a 5% ripple spec (60 mV), driving 10 A transients, the target is <code>Z_target = 60 mV / 10 A = 6 mΩ</code>.</p><p>Measurement procedure:</p><ul><li>Use a Keysight E5063A or similar 2-port VNA with 50 Ω calibration (SOLT or LRRM).</li><li>Apply a probe fixture or soldered SMA launchers directly on the interposer power plane or test pads near the HBM PHY power pins.</li><li>Convert S11 or differential S-parameters to impedance: <code>Z = Z0 × (1 + S11) / (1 - S11)</code>.</li><li>Sweep from 1 MHz to 3 GHz; plot on a log-log scale and identify resonance peaks (where PDN impedance exceeds Z_target).</li><li>Anti-resonance peaks appear at frequencies where package inductance and interposer decap capacitance form an LC tank—typically 50–500 MHz range.</li></ul><p>On-wafer or KGD (Known Good Die) PDN tests prior to 2.5D assembly use a probe station with calibrated RF probes to measure the bare interposer PDN before die attachment, providing a baseline for post-assembly delta analysis.</p></div>
+<div class="section"><h2>Decap Tuning on the Interposer</h2><p>Decoupling capacitors on a silicon interposer serve to suppress mid-frequency (10 MHz–500 MHz) PDN impedance spikes. Unlike PCB-level decaps, interposer decaps are passive IPD (Integrated Passive Devices) or discrete 0402/0201 capacitors mounted on the interposer surface.</p><p>Placement strategy:</p><ul><li><strong>Near HBM PHY power pins:</strong> Place decaps within 200–500 µm of the HBM micro-bump field to minimize loop inductance. Inductance of a 500 µm trace at typical widths contributes ~50–150 pH, shifting resonance above 1 GHz.</li><li><strong>On-interposer IPD capacitors:</strong> Integrated trench or MIM capacitors in the silicon interposer provide very low ESL (~10 pH) and capacitances from 1–100 nF. These are characterized by the foundry but must be verified post-dicing.</li><li><strong>Tuning iteration:</strong> After first-pass VNA measurement, simulate with SPICE PDN models (e.g., Sigrity PowerDC or Ansys RedHawk-SC). Add or remove decap values in SPICE to flatten the impedance profile, then verify on the next hardware spin.</li></ul><p>ESR (equivalent series resistance) tuning is also critical: a decap with ESR near Z_target provides active damping of the anti-resonance peak. Too low ESR leaves a sharp resonance; too high ESR defeats the capacitor's charge delivery role. Target <code>ESR ≈ Z_target / 2</code> for a critically damped response.</p></div>
+<div class="section"><h2>IR Drop Measurement Methodology</h2><p>IR drop (ΔV = I × R_pdn) across the HBM PHY power rails is measured both statically and dynamically. Static IR drop reflects the DC resistance of power traces and vias; dynamic IR drop adds inductive effects during fast current transients (e.g., DRAM array activate commands with slew rates >1 A/ns).</p><p><strong>Static IR drop</strong> is measured using:</p><ul><li>4-wire Kelvin measurement from the VRM (voltage regulator module) output to test points adjacent to HBM VDDQ balls, using a Keithley 2602B or similar SMU.</li><li>Force known DC currents representing typical HBM read/write power (e.g., 2–5 A per HBM stack) and measure voltage differential. Compare against PDN simulation output from tools such as Ansys RedHawk-SC or Cadence Voltus.</li></ul><p><strong>Dynamic IR drop</strong> is measured using:</p><ul><li>A high-bandwidth oscilloscope (Tektronix DPO70000 or Keysight UXR series, ≥20 GHz BW) with a differential active probe (e.g., Tektronix P7520A) placed on VDDQ test pads near HBM power pins.</li><li>Stimulus: run JEDEC JESD235C compliance traffic patterns (e.g., WCK-synchronized row activates across all banks) to generate worst-case simultaneous switching current.</li><li>Capture voltage waveforms; peak droop amplitude should remain within JEDEC-defined VDDQ AC tolerance bands (±80 mV for HBM3 VDDQ = 1.2 V).</li></ul><p>Thermal derating: perform IR drop sweeps at elevated junction temperature (90–105 °C using a thermal chuck or forced-air heating) to capture the worst-case condition. Add a 15–20% margin for production guard-band.</p></div>
+<div class="section"><h2>Test Automation and Pass/Fail Criteria</h2><p>PDN testing in 2.5D production environments requires automation at ATE to scale across high-volume packages. Typical integration approaches:</p><ul><li><strong>Impedance spot checks at ATE:</strong> Rather than full VNA sweeps, production tests inject a known AC current stimulus at a critical frequency (e.g., 100 MHz, near the expected anti-resonance) and measure the AC voltage response. The ratio gives a single-frequency impedance that can be binned against Z_target.</li><li><strong>Parametric IR drop test:</strong> ATE forces a programmable DC current through the HBM VDDQ plane (using a high-current PPMU or an external active load) and measures the resulting voltage sag. Fail limits are typically ≤50 mV drop from VRM to HBM PHY balls under full-load current conditions.</li><li><strong>Functional stress correlation:</strong> Any package that passes structural PDN limits is further stressed with JEDEC Maximum Power Traffic (worst-case simultaneous switching) to ensure no latent failures from borderline PDN at speed.</li></ul><p>Pass/fail criteria summary:</p><ul><li>PDN impedance at 100 MHz: ≤ Z_target (e.g., ≤6 mΩ for HBM3 VDDQ 10A rail)</li><li>Static IR drop: ≤ 40 mV from VRM to HBM VDDQ balls at max operating current</li><li>Dynamic VDDQ droop: ≤ 80 mV peak during worst-case switching transients</li><li>At 105 °C: all limits derated by +15% to account for temperature coefficient of resistance</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>PDN impedance in 2.5D packages must be characterized with VNA from 1 MHz to 3 GHz; anti-resonance peaks above Z_target cause VDDQ droop failures under HBM switching transients.</li><li>Interposer decap placement within 500 µm of HBM PHY micro-bumps is critical—loop inductance from longer traces shifts anti-resonance into the HBM3 WCK operating window (1–2 GHz).</li><li>IR drop must be validated both statically (Kelvin 4-wire at DC) and dynamically (oscilloscope differential probe during JEDEC worst-case traffic) with thermal derating at 105 °C junction temperature.</li><li>Production ATE PDN tests use spot-frequency impedance injection and parametric IR drop (PPMU or active load) rather than full VNA sweeps, with pass limits traceable to JESD235C VDDQ AC tolerance bands.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C — High Bandwidth Memory (HBM) DRAM Standard</div><div class="ref-detail">JESD235C §6.4–6.6: VDDQ DC and AC specifications, VDDQ ripple limits, and PHY power delivery requirements</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Ansys RedHawk-SC — Power Integrity Analysis for Advanced Packaging</div><div class="ref-detail">Ansys RedHawk-SC product documentation, 2024; covers 2.5D/3D-IC PDN simulation methodology and IR-drop flow</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">S. Sandhu et al., 'PDN Design and Validation for HBM2 in a High-Performance GPU Package'</div><div class="ref-detail">Hot Chips 2019; presents interposer PDN impedance budgeting, decap co-optimization, and silicon measurement results</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Keysight E5063A ENA Vector Network Analyzer — Application Note: PDN Impedance Measurements</div><div class="ref-detail">Keysight application note 'Power Integrity Measurements Using a Vector Network Analyzer', Part No. 5992-2850EN</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">Kim et al., 'On-Package Power Delivery Network Analysis for 2.5D IC'</div><div class="ref-detail">IEEE Transactions on Components, Packaging and Manufacturing Technology, Vol. 9, No. 5, May 2019, pp. 893–902, DOI: 10.1109/TCPMT.2019.2898012</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Tektronix P7520A TriMode Differential Probe User Manual</div><div class="ref-detail">Tektronix P7520A, 20 GHz differential active probe; recommended for HBM VDDQ dynamic IR drop waveform capture on 2.5D packages</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-12">On-Die PDN Sensors for Real-Time IR Drop Monitoring</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>

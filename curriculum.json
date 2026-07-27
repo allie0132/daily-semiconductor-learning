@@ -568,7 +568,7 @@
         {
           "id": "12.4",
           "title": "Power Delivery Network Testing in 2.5D — PDN impedance, decap tuning, and IR drop measurement",
-          "done": false
+          "done": true
         },
         {
           "id": "12.5",
