@@ -573,7 +573,7 @@
         {
           "id": "12.5",
           "title": "Known-Good-Stack Qualification — testing HBM stacks before integration into the 2.5D package",
-          "done": false
+          "done": true
         },
         {
           "id": "12.6",
