@@ -578,7 +578,7 @@
         {
           "id": "12.6",
           "title": "System-Level Test Post-Assembly — socket-based SLT for GPU+HBM packages at system power",
-          "done": false
+          "done": true
         },
         {
           "id": "12.7",
