@@ -588,7 +588,7 @@
         {
           "id": "12.8",
           "title": "RMA Failure Isolation in 2.5D Packages — field return analysis, X-ray CT, and layer-selective FIB",
-          "done": false
+          "done": true
         }
       ]
     }
