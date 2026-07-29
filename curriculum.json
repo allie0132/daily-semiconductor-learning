@@ -583,7 +583,7 @@
         {
           "id": "12.7",
           "title": "Boundary Scan for Heterogeneous Packages — JTAG 1149.1/1 and P1838 multi-die test access",
-          "done": false
+          "done": true
         },
         {
           "id": "12.8",
