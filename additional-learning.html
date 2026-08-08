@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 62 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 64 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -529,6 +529,22 @@
   </div>
   <h3>UCIe Retimer and Repeater Test Considerations</h3>
   <p>When UCIe links span more than 25 mm in a standard-package substrate — common in large interposers or organic packages with HBM stacks at one end and CPU dies at the other — a UCIe retimer (defined in UCIe Section 5.3) may be inserted. Retimers re-time and re-drive the signal, resetting accumulated jitter. ATE verification must test the retimer's own PRBS loopback independently before full end-to-end link testing, and the sideband path must be validated through the retimer's sideband bypass relay. A subtle failure mode is retimer clock domain crossing (CDC) metastability under voltage stress that manifests as intermittent burst errors rather than a raised BER floor — catch it with an extended 30-second PRBS run at 0.9V VDD rather than the standard 4-second nominal test.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Wednesday, Jul 29 2026</span>
+    <span class="lesson-title">RMA Failure Isolation in 2.5D Packages</span>
+  </div>
+  <h3>In‑Situ Biasing During FIB Milling for Defect Activation</h3>
+  <p>Applying a low‑voltage bias (≤1 V) to the specimen while milling can activate latent leakage paths, making them visible in EBIC or conductive AFM before final polishing. This technique has been shown to increase detection sensitivity for sub‑10 nm TSV sidewall defects by up to 40 % in recent studies (IEEE CPMT 2023).</p>
+</div></div><div class="module-group" id="module-13"><h2>Module 13 — Emerging Technologies & Future Directions</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Friday, Aug 08 2026</span>
+    <span class="lesson-title">HBM4E Architecture Preview</span>
+  </div>
+  <h3>HBM4E vs. GDDR7: Competing Bandwidth Roadmaps for AI Inference</h3>
+  <p>While HBM4E targets ~1.2 TB/s per stack via a wide parallel interface, GDDR7 (JESD239) targets 32 Gbps per pin on a narrow 32-bit bus per device, yielding ~128 GB/s per device. At equal bandwidth, GDDR7 offers lower latency for sequential access patterns and lower package cost, making it competitive for inference-optimized accelerators where bandwidth-to-capacity ratio is less critical than in training. The DRAM industry is watching whether next-generation LLM inference ASICs (such as Groq LPU Gen 3 or Cerebras WSE-4 successors) opt for GDDR7 over HBM4E for cost-sensitive deployments.</p>
 </div></div>
 </body>
 </html>

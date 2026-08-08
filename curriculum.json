@@ -591,6 +591,52 @@
           "done": true
         }
       ]
+    },
+    {
+      "id": 13,
+      "name": "Emerging Technologies & Future Directions",
+      "topics": [
+        {
+          "id": "13.1",
+          "title": "HBM4E Architecture Preview — projected specs, 2 TB/s bandwidth roadmap, and stacking limits",
+          "done": true
+        },
+        {
+          "id": "13.2",
+          "title": "Processing-in-Memory (PIM) with HBM — HBM-PIM architecture, DRAM logic integration, and AiM testing",
+          "done": false
+        },
+        {
+          "id": "13.3",
+          "title": "HBM Security Testing — side-channel vulnerabilities, data remanence in DRAM, and tamper resistance qualification",
+          "done": false
+        },
+        {
+          "id": "13.4",
+          "title": "HBM in Radiation Environments — SEU/SEL hardening, space and defense qualification, JESD89 testing",
+          "done": false
+        },
+        {
+          "id": "13.5",
+          "title": "Photonic HBM Integration — optical I/O co-packaging concepts, co-design challenges, and test implications",
+          "done": false
+        },
+        {
+          "id": "13.6",
+          "title": "HBM Standards Roadmap Beyond HBM4E — JEDEC committee work, bandwidth scaling limits, and post-TSV packaging",
+          "done": false
+        },
+        {
+          "id": "13.7",
+          "title": "Sustainable HBM Manufacturing — energy-per-bit trends, materials sustainability, and carbon footprint of ATE testing",
+          "done": false
+        },
+        {
+          "id": "13.8",
+          "title": "Multi-Physics Co-Simulation for HBM — EM-thermal-mechanical coupling, stress-induced TSV failures, and TCAD models",
+          "done": false
+        }
+      ]
     }
   ]
 }
