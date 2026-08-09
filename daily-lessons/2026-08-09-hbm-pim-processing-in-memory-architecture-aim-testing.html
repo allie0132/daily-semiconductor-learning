@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM-PIM: Processing-in-Memory Architecture & AiM Testing</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  em { color: #e2e8f0; font-style: italic; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M13.2 Emerging Technologies & Future Directions</span></div>
+  <h1>HBM-PIM: Processing-in-Memory Architecture & AiM Testing</h1>
+  <div class="meta">Sunday, Aug 09 2026 &middot; Lesson 106 of 112</div>
+</header>
+<div class="section"><h2>HBM-PIM Architecture Overview</h2><p>Processing-in-Memory (PIM) for HBM integrates arithmetic compute units—primarily multiply-accumulate (MAC) engines—directly inside each DRAM bank of the HBM stack. Rather than shipping data across the package to a GPU or CPU for computation, the <strong>PIM unit</strong> operates where the data resides, eliminating the off-chip bandwidth bottleneck known as the <em>memory wall</em>.</p><p>Samsung's commercial implementation, marketed as <strong>AiM (Artificial Intelligence Memory)</strong> or <strong>HBM-PIM</strong>, was introduced in 2021 with the Aquabolt-XL (HBM2-based). The architecture places a <strong>Programmable Computing Unit (PCU)</strong> near the sense amplifiers of every DRAM bank. Each HBM2 die has 16 banks; with 8 dies per stack, a single HBM-PIM device contains 128 independent PIM execution units operating simultaneously.</p><ul><li><strong>Bank-level parallelism:</strong> Each bank's PCU fetches operands from its own sub-array rows, computes independently, and writes results to a dedicated output register.</li><li><strong>Global Register File (GRF):</strong> A small SRAM buffer shared across banks within a pseudo-channel holds weights for GEMM operations, reducing redundant DRAM reads.</li><li><strong>Pseudo-channel awareness:</strong> HBM2's pseudo-channel mode (two 32-bit channels per die) is preserved; PIM commands are issued per pseudo-channel.</li></ul></div>
+<div class="section"><h2>JEDEC JESD238 — HBM-PIM Standard</h2><p>JEDEC standard <strong>JESD238</strong> (released 2022) formalises HBM-PIM as an extension of the HBM2E electrical and logical interface. It defines additional command encodings and mode register fields that coexist with standard HBM2/2E commands.</p><p>Key JESD238 additions:</p><ul><li><code>PIM_OP_MODE</code> bit in Mode Register 0 (<strong>MR0[14]</strong>) — switches the device between <em>DRAM mode</em> (normal memory operation) and <em>PIM mode</em> (MAC execution enabled).</li><li><strong>PROGRAM</strong> command: loads a micro-kernel (up to 32 instructions) into the PCU instruction SRAM using the address bus as an instruction word.</li><li><strong>PIM_GRF_WRITE / PIM_GRF_READ</strong>: burst-transfer 16×FP16 weight vectors into/out of the GRF without leaving PIM mode.</li><li><strong>PIM_EXECUTE</strong>: triggers the PCU to begin executing the loaded kernel across all enabled banks simultaneously.</li><li>Result data is written to a dedicated <strong>PIM Output Register (POR)</strong> row and read back via a standard READ command to that address.</li></ul><p>JESD238 supports <strong>FP16</strong> and <strong>BF16</strong> precision natively; INT8 is handled via software emulation within the PCU kernel.</p></div>
+<div class="section"><h2>DRAM–Logic Integration Techniques</h2><p>Integrating compute logic inside a DRAM array demands a manufacturing process that can handle both dense capacitor cells and planar CMOS logic on the same wafer—or at least on the same die stack. Samsung's HBM-PIM uses a <strong>modified DRAM peripheral process</strong> for the PCU, placing it in the row-decoder and sense-amplifier periphery region rather than the cell array itself, avoiding cell-array area penalty.</p><ul><li><strong>Sense amplifier coupling:</strong> The PCU input multiplexer is AC-coupled to the bitline sense amplifier output, allowing bank data to feed the MAC adder tree in the same cycle as the sense operation—effectively a zero-latency data path.</li><li><strong>Local SRAM (LRF):</strong> A 128×FP16 Local Register File per bank buffers partial sums, avoiding result write-back to DRAM cells between accumulate steps.</li><li><strong>Power gating:</strong> Each PCU has an independent power gate controlled by the pseudo-channel arbiter; banks in DRAM mode gate their PCU to avoid leakage penalty on standard memory transactions.</li><li><strong>Area overhead:</strong> Samsung reported ~2.5% die-area overhead per bank for the PCU in Aquabolt-XL, using a 1Ynm HBM2 process node.</li></ul><p>SK Hynix's <strong>AiM</strong> (Accelerator-in-Memory, distinct naming from Samsung's) takes a similar bank-level approach in their HBM2E variant, with differences in GRF organisation and supported precision types.</p></div>
+<div class="section"><h2>AiM Test Program Design</h2><p>Testing HBM-PIM requires a two-layer strategy: the full standard HBM2/2E DRAM test suite <em>plus</em> a PIM-specific test layer that validates compute correctness, mode transitions, and isolation between DRAM and PIM paths.</p><p><strong>Test flow for PIM compute validation:</strong></p><ul><li><strong>1. DRAM baseline:</strong> Run full MARCH-C+ or MATS++ pattern on all banks to confirm array integrity before enabling PIM mode.</li><li><strong>2. Mode entry:</strong> Issue MRS to set <code>MR0[14]=1</code>. Verify the device acknowledges by reading back MR0 and checking <code>PIM_OP_MODE</code> is set; confirm DRAM transactions are blocked (expect JEDEC-defined error response or NO-OP).</li><li><strong>3. GRF load:</strong> Issue <code>PIM_GRF_WRITE</code> with known FP16 weight vectors (e.g., all-ones to simplify expected result). Verify via <code>PIM_GRF_READ</code>.</li><li><strong>4. Input preload:</strong> Return to DRAM mode, write known input activation vectors to target rows, re-enter PIM mode.</li><li><strong>5. PROGRAM + EXECUTE:</strong> Load a 4-instruction GEMV kernel (load, MAC, accumulate, store), issue <code>PIM_EXECUTE</code>, poll status register until done flag is set.</li><li><strong>6. Result readout:</strong> Exit PIM mode, read POR address, compare against software-computed golden reference (using the same FP16 rounding mode).</li><li><strong>7. Isolation check:</strong> Verify that banks <em>not</em> targeted by PIM_EXECUTE retain their original DRAM data unchanged.</li></ul><p>ATE platforms (Teradyne J750/UltraFLEX, Advantest T2000) require custom PIM command vectors and extended vector depth for the PROGRAM sequence; vector depth of 2M+ entries is typical for full-coverage PIM testing.</p></div>
+<div class="section"><h2>PIM Yield & Fault Classification</h2><p>HBM-PIM adds a new fault category that has no analogue in standard DRAM: <strong>compute faults</strong>. These must be distinguished from DRAM cell faults during test to assign correct repair or reject decisions.</p><ul><li><strong>MAC accumulation error:</strong> A stuck-at or bridging fault in the adder tree produces a consistent offset in the computed result. Detected by comparing MAC output to golden reference across multiple input patterns.</li><li><strong>GRF retention fault:</strong> The weight SRAM loses content under elevated temperature or voltage stress. Stress-read after burn-in at T<sub>MAX</sub> + 10°C.</li><li><strong>Mode-switch hang:</strong> Failure to transition cleanly between DRAM and PIM modes; often caused by power-gate timing margin issues. Detected by repeated mode-entry stress (1000 cycles) at V<sub>DD</sub> min.</li><li><strong>Bank-level crosstalk:</strong> PIM execution in one bank induces bitline noise in an adjacent bank under simultaneous DRAM read. Test by running PIM_EXECUTE on odd banks while reading even banks; compare read data to expected.</li><li><strong>Repair interaction:</strong> Row-spare activation in a bank disables that bank's PCU in some implementations; post-repair PIM coverage must re-verify affected banks.</li></ul><p>Industry data from Samsung (ISSCC 2021) showed PIM-specific yield loss of approximately <strong>1.2–1.8%</strong> above baseline DRAM yield for the first-generation Aquabolt-XL, primarily from GRF SRAM single-bit fails and mode-switch timing marginalities.</p></div>
+
+<div class="takeaways">
+  <h2>&#x26A1; Key Takeaways</h2>
+  <ul><li>HBM-PIM places bank-level MAC units near sense amplifiers to eliminate the memory-wall bandwidth bottleneck for AI workloads.</li><li>JEDEC JESD238 defines PIM_OP_MODE (MR0[14]), PROGRAM, GRF_WRITE/READ, and PIM_EXECUTE commands that coexist with the HBM2E command set.</li><li>AiM test programs must validate DRAM integrity first, then separately verify MAC compute correctness, GRF retention, mode-switch reliability, and bank isolation.</li><li>New fault classes—MAC accumulation errors, GRF retention fails, mode-switch hangs, and bank crosstalk—require PIM-specific test vectors beyond the standard DRAM suite.</li><li>Row-spare activation can silently disable a bank's PCU; post-repair re-verification of PIM compute coverage is mandatory.</li></ul>
+</div>
+<div class="references"><h2>&#x1F4DA; References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">High Bandwidth Memory with Processing-In-Memory (HBM-PIM)</div><div class="ref-detail">JESD238A, JEDEC Solid State Technology Association, 2022</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">HBM-PIM: An Industry-First Whole-MnM Solution for Satisfying the Insatiable Bandwidth Demands of AI Architectures</div><div class="ref-detail">Kwon et al., IEEE ISSCC 2021, Session 25.4, pp. 342–344</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Hardware Architecture and Software Stack for PIM Based on Commercial DRAM Technology: Industry Product</div><div class="ref-detail">Lee et al., Proc. 48th ISCA, 2021, pp. 43–56</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">A 16nm 128 GB/s 1ynm HBM2E-PIM DRAM with Bank-Level Parallelism for AI Processing</div><div class="ref-detail">Kim et al., IEEE ISSCC 2022, Session 11.6</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">High Bandwidth Memory (HBM) DRAM — JESD235C</div><div class="ref-detail">JESD235C, JEDEC, 2021 — baseline HBM2E spec extended by JESD238</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Aquabolt-XL: Samsung HBM2-PIM with in-memory processing</div><div class="ref-detail">Samsung Semiconductor, Product Brief v1.2, 2021; available via Samsung Developer</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-13">ECC Interaction with PIM Compute Error Detection</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>

@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 64 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 65 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -545,6 +545,14 @@
   </div>
   <h3>HBM4E vs. GDDR7: Competing Bandwidth Roadmaps for AI Inference</h3>
   <p>While HBM4E targets ~1.2 TB/s per stack via a wide parallel interface, GDDR7 (JESD239) targets 32 Gbps per pin on a narrow 32-bit bus per device, yielding ~128 GB/s per device. At equal bandwidth, GDDR7 offers lower latency for sequential access patterns and lower package cost, making it competitive for inference-optimized accelerators where bandwidth-to-capacity ratio is less critical than in training. The DRAM industry is watching whether next-generation LLM inference ASICs (such as Groq LPU Gen 3 or Cerebras WSE-4 successors) opt for GDDR7 over HBM4E for cost-sensitive deployments.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Sunday, Aug 09 2026</span>
+    <span class="lesson-title">HBM-PIM: Processing-in-Memory Architecture & AiM Testing</span>
+  </div>
+  <h3>ECC Interaction with PIM Compute Error Detection</h3>
+  <p>When HBM-PIM operates over an ECC-enabled DRAM array, a single-bit error in an input activation row that is corrected by on-die ECC before the MAC unit reads it will silently alter the computation result—the MAC sees corrected data but the test program's golden reference was computed against the originally written (uncorrected) data. This creates a false-pass scenario: the PIM result matches the corrected-data golden reference but the underlying DRAM cell fault is masked. To expose this interaction, PIM test suites should include deliberate single-bit injection via column-repair override, verifying that the UECC status register flags the event while the PIM result is quarantined and the cell is flagged for row-redundancy repair.</p>
 </div></div>
 </body>
 </html>
