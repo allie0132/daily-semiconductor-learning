@@ -609,7 +609,7 @@
         {
           "id": "13.3",
           "title": "HBM Security Testing — side-channel vulnerabilities, data remanence in DRAM, and tamper resistance qualification",
-          "done": false
+          "done": true
         },
         {
           "id": "13.4",
