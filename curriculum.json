@@ -614,7 +614,7 @@
         {
           "id": "13.4",
           "title": "HBM in Radiation Environments — SEU/SEL hardening, space and defense qualification, JESD89 testing",
-          "done": false
+          "done": true
         },
         {
           "id": "13.5",
