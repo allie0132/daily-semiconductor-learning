@@ -634,7 +634,7 @@
         {
           "id": "13.8",
           "title": "Multi-Physics Co-Simulation for HBM — EM-thermal-mechanical coupling, stress-induced TSV failures, and TCAD models",
-          "done": false
+          "done": true
         }
       ]
     }

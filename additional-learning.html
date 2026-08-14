@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 65 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 68 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -548,11 +548,35 @@
 </div>
 <div class="entry">
   <div class="entry-meta">
+    <span class="date">Friday, Aug 14 2026</span>
+    <span class="lesson-title">Sustainable HBM Manufacturing: Energy-per-bit & ATE Carbon Footprint</span>
+  </div>
+  <h3>AI‑Driven Test Pattern Reduction for HBM</h3>
+  <p>Recent work shows reinforcement‑learning‑based test pattern generators can achieve 55% compression of March‑C‑style HBM tests while preserving fault coverage. By cutting pattern length, tester active time drops proportionally, reducing per‑device test energy from 30 kWh to ~13.5 kWh on a 12‑site V93000 system. Implementing such AI flow requires integration with the tester’s pattern‑export API and validation against JEDEC‑defined defect levels.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
     <span class="date">Sunday, Aug 09 2026</span>
     <span class="lesson-title">HBM-PIM: Processing-in-Memory Architecture & AiM Testing</span>
   </div>
   <h3>ECC Interaction with PIM Compute Error Detection</h3>
   <p>When HBM-PIM operates over an ECC-enabled DRAM array, a single-bit error in an input activation row that is corrected by on-die ECC before the MAC unit reads it will silently alter the computation result—the MAC sees corrected data but the test program's golden reference was computed against the originally written (uncorrected) data. This creates a false-pass scenario: the PIM result matches the corrected-data golden reference but the underlying DRAM cell fault is masked. To expose this interaction, PIM test suites should include deliberate single-bit injection via column-repair override, verifying that the UECC status register flags the event while the PIM result is quarantined and the cell is flagged for row-redundancy repair.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Thursday, Aug 13 2026</span>
+    <span class="lesson-title">HBM Roadmap Beyond HBM4E: Bandwidth & Post‑TSV</span>
+  </div>
+  <h3>Hybrid Bonding Impact on HBM Test Flow</h3>
+  <p>Hybrid bonding enables sub‑micron Cu‑Cu interfaces, reducing interconnect resistance to <1 mΩ and eliminating TSV‑related parasitic capacitance. This shift requires ATE to measure low‑resistance bonds using Kelvin‑style four‑wire probing and to validate bond integrity through high‑frequency (>10 GHz) reflectometry before functional memory tests.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Wednesday, Aug 12 2026</span>
+    <span class="lesson-title">Photonic HBM Integration: Optical I/O Co-Packaging and Test Implications</span>
+  </div>
+  <h3>WDM Channel Allocation and Optical Test Calibration</h3>
+  <p>In a typical 4‑lane WDM HBM3E link, channels are spaced at 0.8 nm around 1310 nm to avoid inter‑channel crosstalk. Test calibration must sweep each lane’s center wavelength with a tunable laser, record the optical spectrum via an OSA, and apply per‑lane gain offsets in the ATE to equalize received power within ±0.5 dB. This process ensures that BER measurements reflect true link performance rather than wavelength‑dependent loss variations.</p>
 </div></div>
 </body>
 </html>
