@@ -637,6 +637,52 @@
           "done": true
         }
       ]
+    },
+    {
+      "id": 14,
+      "name": "Production Test Automation & Cost Optimization",
+      "topics": [
+        {
+          "id": "14.1",
+          "title": "Adaptive Test Insertion — using die-level data to skip redundant tests and reduce test time",
+          "done": true
+        },
+        {
+          "id": "14.2",
+          "title": "HBM Wafer-Level Burn-In — WLBI stress conditions, infant mortality screening, and cost tradeoffs",
+          "done": false
+        },
+        {
+          "id": "14.3",
+          "title": "Statistical Process Control in HBM ATE — Western Electric rules, OCAP triggers, and SPC integration",
+          "done": false
+        },
+        {
+          "id": "14.4",
+          "title": "Multi-Site HBM Test Architecture — parallel test efficiency, resource contention, and handler synchronization",
+          "done": false
+        },
+        {
+          "id": "14.5",
+          "title": "HBM Known-Good-Die (KGD) Qualification — JEDEC requirements, sort flow, and die-level reliability screening",
+          "done": false
+        },
+        {
+          "id": "14.6",
+          "title": "Test Data Management & Analytics — STDF format, yield correlation, and per-lot excursion detection",
+          "done": false
+        },
+        {
+          "id": "14.7",
+          "title": "Contact and Probe Card Engineering for HBM — probe technology, contact resistance, and kelvin sensing at fine pitch",
+          "done": false
+        },
+        {
+          "id": "14.8",
+          "title": "HBM Test Economics — cost-of-test modeling, ATE depreciation, guard-banding vs. yield loss tradeoffs",
+          "done": false
+        }
+      ]
     }
   ]
 }
