@@ -665,7 +665,7 @@
         {
           "id": "14.5",
           "title": "HBM Known-Good-Die (KGD) Qualification — JEDEC requirements, sort flow, and die-level reliability screening",
-          "done": false
+          "done": true
         },
         {
           "id": "14.6",
