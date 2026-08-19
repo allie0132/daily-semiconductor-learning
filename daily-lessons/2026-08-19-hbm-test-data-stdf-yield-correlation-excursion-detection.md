@@ -1,0 +1,61 @@
+# HBM Test Data: STDF, Yield Correlation & Excursion Detection
+
+*Wednesday, Aug 19 2026*
+
+*Module 14.6 — Production Test Automation & Cost Optimization*
+
+## STDF v4 Binary Format Architecture
+
+The Standard Test Data Format (STDF) v4 is the de-facto binary interchange standard for ATE test results, used by Advantest, Teradyne, Cohu, and all major HBM test platforms. Each STDF file is a stream of variable-length records, each prefixed by a 4-byte header: `REC_LEN` (2 bytes, little-endian), `REC_TYP` (1 byte), and `REC_SUB` (1 byte).
+The most critical record types for HBM data analytics are:
+- **MIR (Master Information Record, typ=1/sub=10)** — lot ID, device ID, test program name, start time, ATE ID, operator ID. Must appear once per STDF file.- **SDR (Site Description Record, typ=1/sub=80)** — maps site numbers to handler/prober head configurations. Essential for multi-site HBM testing on handlers like Advantest HTOL fixtures.- **PIR/PRR (Part Information/Result Records, typ=5/sub=10, typ=5/sub=20)** — bracket each DUT's test sequence, carrying site number, part X/Y coordinates, and final PASS/FAIL disposition.- **PTR (Parametric Test Record, typ=15/sub=10)** — single numeric result per test per DUT: test number, site, PASS/FAIL flag, measured value, HI/LO limits, and optional units string. A typical HBM STDF file contains thousands of PTRs per DUT for DC parametrics, ZQ, tRCD, tCL, and temperature sensor readings.- **MPR (Multiple-Result Parametric Record, typ=15/sub=15)** — used for per-lane eye margin sweeps and multi-read DQ training results, encoding an array of float results in one record.- **FTR (Functional Test Record, typ=15/sub=20)** — functional test PASS/FAIL with optional captured fail cycle data; used for BIST (Built-In Self-Test) results and post-repair re-test outcomes.All numeric fields are IEEE 754 single-precision floats. STDF v4 mandates little-endian byte order regardless of host architecture. The CPU_TYPE field in MIR encodes the generating machine's byte order (1=little, 2=big) but modern parsers always normalize to little-endian on read.
+
+
+## Parsing STDF for HBM Parametric Extraction
+
+Raw STDF parsing for HBM production data requires handling several edge cases. PTR records use optional fields with a presence bitmap in bytes 14–17; unpopulated limit fields default to the GDR (Generic Data Record) defaults established by a preceding PLR (Pin List Record). Parsers that assume fixed PTR length will silently corrupt limit values for tests that omit HI_LIMIT or LO_LIMIT.
+For HBM-specific analytics, the key PTR fields to extract and index are:
+- **TEST_NUM** — maps to a test plan entry; HBM programs typically assign test numbers in ranges: 10000–19999 for DC parametrics (IDD, IZQ, IVDDQ), 20000–29999 for AC timing (tRCD, tCL, tWR), 30000–39999 for temperature sensor calibration, 40000–49999 for per-lane BER sweeps.- **RESULT** (float) — the measured value in engineering units (mA, mV, ns, °C).- **SITE_NUM** — critical for per-site yield decomposition. HBM quad-stack tests on a 4-site handler can show site 2 degradation from a worn socket pin, invisible at the lot level.- **OPT_FLAG** bits 4 and 5 — when set, indicate that RESULT is invalid (test was not executed or result was not stored). These must be filtered before computing statistics, not treated as zero.A production-grade HBM STDF pipeline typically ingests files into a columnar store (Apache Parquet recommended) with a schema of `(lot_id, wafer_id, x, y, site, test_num, result, pass_fail, ts)`. Parquet's predicate pushdown then enables fast per-lot or per-wafer queries across terabytes of historical data without full scans.
+
+
+## Cross-Tester Yield Correlation for HBM
+
+HBM production flows require correlation between multiple tester types and test stages: wafer probe (KGD qualification on Advantest T2000 or STS STS-5400), stack assembly functional test, and final packaged HBM test on an ASIC SoC load board. Yield correlation failures manifest as two classes:
+- **Yield escapes** — units that pass upstream test but fail downstream. For HBM, common escape vectors include marginal tRCD timing that passes at nominal voltage/temperature but fails at guardbanded conditions later, or TSV leakage below probe detection threshold that degrades after thermal cycling in package.- **Yield loss (false failures)** — units that fail at one station but would pass at another, caused by mechanical variation in probe contact resistance, socket impedance mismatch, or tester calibration offset.The standard correlation methodology uses **split-lot correlation**: a defined set of DUTs (typically 100–200 per lot) is tested on both the reference tester and the candidate tester, with PTR results paired by DUT serial or X/Y coordinate. Key metrics:
+- **Pearson R²** per parametric test — values below 0.95 for DC tests or 0.90 for AC timing tests trigger investigation.- **Mean offset (Δμ)** — systematic tester bias; acceptable threshold is typically ±2% of nominal for DC, ±50ps for timing.- **Sigma ratio (σ_candidate / σ_reference)** — a ratio above 1.2 indicates higher measurement noise on the candidate tester, often from signal integrity issues in the load board or cable harness.For HBM ZQ calibration correlation specifically, `IZQ_VDDQ` (target 240Ω ±15%) is a sensitive indicator of socket contact quality; ZQ spread >30Ω site-to-site on the same lot indicates socket wear and not genuine device variation.
+
+
+## Statistical Process Control for Per-Lot Excursion Detection
+
+Per-lot excursion detection applies SPC to summarized lot-level statistics extracted from STDF PTR records. The goal is to flag lots that deviate from baseline before they ship or advance to the next process step.
+The recommended control chart types for HBM production parametrics are:
+- **Individuals (I) chart** — used for lot-mean tracking when lot-to-lot variation is the primary concern. Control limits set at μ ± 3σ<sub>lot</sub> computed from a baseline of ≥25 consecutive lots. Alert when any single lot mean falls outside 3σ or two consecutive lots fall outside 2σ (Western Electric Rule 2).- **EWMA chart (λ=0.2)** — superior to Shewhart for detecting small sustained mean shifts (e.g., a TSV etch-depth drift causing progressive IDD increase). EWMA UCL/LCL = μ ± 3σ√(λ/(2-λ)) for large samples; particularly effective for detecting HBM thermal sensor calibration drift across fab seasons.- **Cpk monitoring** — Cpk = min((USL-μ)/3σ, (μ-LSL)/3σ) computed per lot per test. Cpk < 1.33 triggers an auto-hold in most MES systems. HBM targets Cpk ≥ 1.67 for tier-1 customers (AI accelerator vendors).Critical HBM parameters to monitor per lot:
+- **tRCD mean and σ** (nominal 14ns at 933 MHz HBM3e) — shifts >0.5ns mean or >0.2ns σ increase indicate DRAM die row activation degradation.- **VDDQ leakage (IDD6 standby)** — lot mean creeping up ≥5% baseline signals TSV inter-stack leakage from process variation in micro-bump bonding.- **Temperature sensor offset** — HBM3e JEDEC JESD235C §7.4 specifies TS accuracy ±2°C; lot means outside ±1°C from calibration baseline indicate fab thermal implant dose shift.
+
+## Automated Excursion Response and MES Integration
+
+An effective HBM test data management system integrates SPC control charts with the Manufacturing Execution System (MES) to automate excursion disposition. The standard flow on an excursion trigger is:
+- **Auto-hold** — lot flagged in MES, prevented from advancing to next operation. In Synopsys Yield Explorer or PDF Solutions Exensio, this is a configurable rule fired by any SPC alarm on a lot-level summary table.- **Root-cause classification** — the STDF site-by-site breakdown is used to classify: if all sites fail uniformly, the excursion is device-origin (fab or stack process); if a single site shows elevation, the failure is likely test cell origin (handler, socket, or tester channel).- **Escaping lot audit** — for lots that already shipped when a delayed excursion is detected (common with wafer-to-final-test latency of 4–6 weeks), STDF archives are queried retrospectively. All lots with overlapping fab timestamps are pulled from the Parquet data lake and screened against the excursion parameter limits.Modern HBM fabs (TSMC CoWoS, SK Hynix HBM3e line) use **Automated Data Collection (ADC)** interfaces from ATE to MES: Advantest's WSFTP and Teradyne's SmartDataCollect push STDF files to the data lake within seconds of lot completion. Real-time SPC engines (e.g., Infometrix, or in-house Kafka+Flink pipelines) then compute control statistics and fire MES API calls for hold/release decisions without human latency.
+Key ADC integration considerations for HBM: STDF files must include **SBIN (Software Bin) and HBIN (Hardware Bin) records** with consistent bin definitions across all tester configurations. Bin mapping discrepancies between tester types are the most common cause of spurious yield correlation failures and must be resolved in the test program before mass production release.
+
+
+## Key Takeaways
+
+- STDF v4 PTR records carry HBM parametric results as IEEE 754 floats with optional fields; always check OPT_FLAG bits 4-5 before including RESULT in statistics to avoid corrupting distributions with invalid values.
+- Cross-tester yield correlation requires paired split-lot testing with R²>0.95, Δμ<±2%, and σ-ratio<1.2; HBM ZQ spread >30Ω site-to-site indicates socket wear, not device variation.
+- Per-lot excursion detection should combine Shewhart I-charts (for outlier lots) with EWMA (λ=0.2) for drift detection, targeting Cpk≥1.67 on critical HBM parameters like tRCD and VDDQ leakage.
+- Integrate SPC alarms directly with MES auto-hold workflows; site-by-site STDF decomposition distinguishes device-origin from test-cell-origin excursions to avoid unnecessary lot dispositions.
+- Real-time ADC pipelines (STDF→Parquet data lake→streaming SPC) reduce excursion response latency from days to minutes; consistent SBIN/HBIN definitions across all tester types are a prerequisite for valid yield analytics.
+
+## References
+
+1. **[Web]** Standard Test Data Format (STDF) Specification Version 4 — Teradyne, STDF v4 specification document; freely available from Teradyne and mirror sites; defines all record types, field formats, and optional field handling rules
+2. **[JEDEC]** JEDEC JESD235C: High Bandwidth Memory (HBM) DRAM — JESD235C §7.4 — Temperature Sensor specification, accuracy ±2°C; §6.2 — ZQ calibration requirements; used as baseline for excursion limit derivation
+3. **[Book]** Statistical Quality Control — Montgomery, D.C., 8th Ed., Wiley 2020 — Chapter 5 (Shewhart control charts), Chapter 9 (EWMA charts); standard reference for Cpk, EWMA λ selection, and Western Electric rules
+4. **[Paper]** Yield Correlation Methodology for Multi-Site ATE Environments — International Test Conference (ITC) 2019, Session 4.2 — cross-tester correlation split-lot protocol, R² and sigma-ratio acceptance criteria for production release
+5. **[Datasheet]** Advantest T2000 STDF Data Logger Reference Manual — Advantest Corp., T2000 System Software v3.x documentation — WSFTP protocol, STDF generation options, site-number mapping for multi-site HBM handlers
+6. **[Web]** Apache Parquet Format Specification v2.6 — apache.github.io/parquet-format — columnar storage format recommended for STDF-derived HBM test data lakes; predicate pushdown, dictionary encoding, and snappy compression reduce query latency by 10-50x vs. row-oriented stores
+
+## Additional Learning: STDF DTR Records for Custom HBM Debug Annotations
+
+Beyond the standard PTR/MPR/FTR records, STDF v4 defines the <strong>DTR (Datalog Text Record, typ=50/sub=30)</strong> for embedding free-form ASCII annotations mid-test. Advanced HBM test programs use DTR records to embed per-DUT repair map summaries (post-BIST row/column repair decisions), DRAM die stack layer identifiers from UID registers, and ZQ calibration convergence counts that don't fit into the fixed PTR schema. Analytics pipelines that ignore DTRs lose this rich debug context; a production HBM data platform should parse DTR payloads with structured regex patterns (e.g., <code>REPAIR_ROW=[0-9]+,COL=[0-9]+</code>) and store them as additional columns alongside the PTR data in the Parquet schema for root-cause correlation.
