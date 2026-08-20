@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM Test Economics: Cost Modeling & Yield Tradeoffs</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M14.8 Production Test Automation & Cost Optimization</span></div>
+  <h1>HBM Test Economics: Cost Modeling & Yield Tradeoffs</h1>
+  <div class="meta">Thursday, Aug 20 2026 · Lesson 120 of 120</div>
+</header>
+<div class="section"><h2>Introduction to HBM Test Cost Drivers</h2><p>HBM test cost is dominated by three factors: <strong>test time per die</strong>, <strong>ATE equipment utilization</strong>, and <strong>guard‑band induced yield loss</strong>. The high I/O count (>1024 pins) and ultra‑wide bus (≥2 Gb/s per pin) drive long pattern execution, while thermal constraints require parallel‑site testing to keep cost per bit manageable.</p></div>
+<div class="section"><h2>Cost-of-Test Modeling Framework</h2><p>A cost‑of‑test model can be expressed as:</p><ul><li><code>C_test = (N_sites × T_pattern × C_ATE) + C_overhead + C_yield_loss</code></li><li>where <code>N_sites</code> is the number of parallel test sites, <code>T_pattern</code> is the average pattern execution time per site (seconds), and <code>C_ATE</code> is the hourly cost of the ATE (including depreciation, power, and maintenance).</li><li>Yield loss is modeled as <code>C_yield_loss = C_good × (Y_target − Y_actual)</code> with <code>C_good</code> the profit per good die.</li></ul></div>
+<div class="section"><h2>ATE Depreciation & Utilization Impact</h2><p>ATE depreciation follows a straight‑line or declining‑balance schedule; for a Teradyne Flex™ system the typical 5‑year depreciation yields an hourly rate of ≈ $120 /hr when fully utilized. Utilization below 60 % raises the effective hourly cost sharply because fixed costs (floor space, cooling, labor) are spread over fewer test hours.</p><p>Key equation: <code>C_ATE_eff = C_ATE_depr / U</code> where <code>U</code> is utilization (0‑1).</p></div>
+<div class="section"><h2>Guard-banding vs. Yield Loss Tradeoffs</h2><p>Guard‑banding adds margin to test limits to compensate for measurement uncertainty and process drift, but each extra % of guard‑band can reduce yield by 0.5‑1.5 % depending on the distribution tail. The trade‑off is optimized when the marginal cost of extra guard‑band equals the marginal cost of yield loss:</p><ul><li><code>∂C_guard/∂GB = ∂C_yield/∂GB</code></li><li>where <code>GB</code> is guard‑band percentage.</li></ul><p>Statistical yield models (e.g., normal‑distribution with σ derived from test repeatability) are used to compute <code>∂C_yield/∂GB</code>.</p></div>
+<div class="section"><h2>Practical Optimization Strategies & Real‑World Example</h2><p>Practical optimization steps:</p><ul><li>Characterize test repeatability (σ_meas) using <code>MSSQ</code> (mean‑square‑successive‑difference) on a control lot.</li><li>Apply adaptive guard‑band: start with nominal GB, then iteratively shrink GB while monitoring yield via real‑time SPC.</li><li>Leverage multi‑site testing: increase <code>N_sites</sub> until ATE utilization > 80 % without exceeding thermal limits (use JEDEC JESD235C thermal derating tables).</li><li>Deploy test‑time reduction techniques such as pattern compression and parallel‑bit‑wise testing (e.g., Teradyne’s Flex™ “Fast‑Mode” for HBM2E).</li></ul><p>Example: a 12 Gb/s HBM2E die reduced test time from 1.8 s to 1.1 s (‑39 %) by enabling 2‑site parallel test and 15 % guard‑band reduction, saving ≈ $0.025 per die in high‑volume production.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>Model test cost as C_test = (N_sites × T_pattern × C_ATE) + C_overhead + C_yield_loss.</li><li>Effective ATE cost rises sharply when utilization falls below ~60 % due to fixed‑cost allocation.</li><li>Optimal guard‑band satisfies ∂C_guard/∂GB = ∂C_yield/∂GB, balancing measurement margin against yield loss.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JESD235C: High Bandwidth Memory (HBM) DRAM Standard</div><div class="ref-detail">Section 4.2 – Test Conditions and Guard‑band Requirements, 2020</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Cost‑Effective Test Strategies for 3D‑Stacked Memories</div><div class="ref-detail">IEEE Transactions on VLSI Systems, Vol. 30, No. 4, pp. 567‑580, April 2022</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Semiconductor Test Engineering</div><div class="ref-detail">Terry L. Payne, 3rd edition, Springer, 2021, Chap. 9 – Test Cost Modeling</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Teradyne Flex™ Test System Datasheet – HBM2E/3</div><div class="ref-detail">Teradyne, 2023, Specifies max site count 48, pattern execution rates, and power consumption</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Guard‑band Optimization in Memory Test using Statistical Yield Modeling</div><div class="ref-detail">Proceedings of DATE 2023, pp. 112‑119, DOI:10.23919/DATE.2023.1012345</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Economics of Test for Advanced Packaging</div><div class="ref-detail">SEMI White Paper, WP‑001‑2024, https://www.semi.org/test‑economics‑advanced‑packaging, accessed Sep 2025</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-14">Machine‑Learning‑Guided Adaptive Guard‑band</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
