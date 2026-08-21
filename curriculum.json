@@ -696,7 +696,7 @@
         {
           "id": "15.2",
           "title": "Electromigration in HBM TSVs — failure mechanisms, acceleration models, test design",
-          "done": false
+          "done": true
         },
         {
           "id": "15.3",

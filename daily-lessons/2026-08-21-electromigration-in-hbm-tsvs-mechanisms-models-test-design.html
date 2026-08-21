@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electromigration in HBM TSVs: Mechanisms, Models, Test Design</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M15.2 Reliability & Qualification Testing</span></div>
+  <h1>Electromigration in HBM TSVs: Mechanisms, Models, Test Design</h1>
+  <div class="meta">Friday, Aug 21 2026 · Lesson 122 of 136</div>
+</header>
+<div class="section"><h2>HBM TSV Structure and EM Fundamentals</h2><p>HBM stacks use high‑aspect‑ratio TSVs (typically 5‑10 µm diameter, 50‑100 µm depth) filled with Cu and lined with barrier/metal stacks such as TiN/TaN or emerging Ru liners. Electromigration drives Cu atom flux from the cathode toward the anode under high current density, leading to void formation at the cathode and hillock growth at the anode. The driving force is the product of current density (J) and effective charge number (Z*), moderated by temperature‑dependent diffusivity.</p><ul><li>Cu diffusivity D = D0·exp(−Ea/kT)</li><li>Flux J_Cu = (D·Z*·e·ρ·J)/kT</li><li>Critical parameters: J (A/cm²), T (°C), barrier integrity, liner material.</li></ul></div>
+<div class="section"><h2>Failure Mechanisms Specific to TSVs</h2><p>Unlike planar interconnects, TSVs experience unique stress fields due to thermal mismatch between Si and Cu, and confinement effects that accelerate void nucleation at the bottom electrode. Key mechanisms include:</p><ul><li>Void nucleation at the Cu/Si interface (cathode side) where tensile stress peaks.</li><li>Hillock formation at the anode (top Cu surface) driven by compressive stress.</li><li>Stress‑induced void migration along the TSV sidewall, especially when barrier layers are thin or discontinuous.</li><li>Accelerated failure when current crowding occurs at via edges due to imperfect lithography.</li></ul></div>
+<div class="section"><h2>Acceleration Models for TSV EM</h2><p>The classic Black’s equation is adapted for TSV geometry: MTTF = (A·J^−n)·exp(Ea/kT), where n≈2 for Cu‑in‑TSV systems but can vary with barrier effectiveness. Recent JEDEC/IEEE work shows a temperature exponent Ea ranging from 0.6–0.9 eV depending on liner material (TiN ~0.7 eV, Ru ~0.85 eV). Current density exponent n can increase to 2.5–3 when sidewall scattering dominates. Acceleration factors are computed as:</p><p>AF = (J_use/J_test)^n · exp[(Ea/k)(1/T_use−1/T_test)]</p><p>Use of in‑situ resistance monitoring allows extraction of n and Ea from stepwise stress tests.</p></div>
+<div class="section"><h2>ATE Test Design and Stress Methodology</h2><p>Effective EM qualification requires constant‑current DC stress at elevated temperature (typically 125‑150 °C) while measuring TSV resistance via four‑point Kelvin probes or on‑die monitor structures. Key ATE considerations:</p><ul><li>Current density selection: 1–5 MA/cm² to induce measurable drift within 100‑1000 h.</li><li>Temperature control: ±1 °C uniformity across the probe card; use thermal chuck with PID.</li><li>Monitoring strategy: periodic resistance read‑outs (every 30 min) to detect >0.5 % shift indicating void growth.</li><li>Failure definition: resistance increase >10 % or open‑circuit detection.</li><li>Post‑stress analysis: SEM/FIB cross‑section to validate void location.</li></ul><p>Typical equipment: Keithley 2400 SourceMeter for current biasing, NI PXIe‑4082 for resistance, and a Thermotron thermal chamber.</p></div>
+<div class="section"><h2>Qualification Criteria and Acceptance Limits</h2><p>JEDEC JESD235C defines HBM reliability targets, including EM‑related TSV lifetime. Acceptance is based on Weibull analysis of time‑to‑failure (TTF) data extracted from accelerated tests, projected to use conditions (e.g., 0.5 MA/cm², 85 °C) using the acceleration model. Required confidence: 90 % lower‑bound TTF > 10 years at use conditions. Additional checks include:</p><ul><li>No hillocks causing shorts to adjacent TSVs (checked by leakage monitoring).</li><li>Barrier integrity verified by post‑stress TEM showing no Cu diffusion beyond liner.</li><li>Uniformity: σ/μ of extracted TTF < 20 % across wafer.</li></ul></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>EM in HBM TSVs is governed by Cu flux driven by current density and temperature, with void formation at the cathode and hillocks at the anode being dominant failure modes.</li><li>Black’s equation adapts to TSVs with current exponent n≈2–3 and activation energy Ea≈0.6–0.9 eV, highly dependent on barrier/liner materials (TiN, TaN, Ru).</li><li>Qualification relies on constant‑current DC stress at elevated T, resistance monitoring via four‑point probes, and Weibull projection to use‑condition lifetimes using JEDEC‑based acceleration models.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD235C: High Bandwidth Memory (HBM) Device Specification</div><div class="ref-detail">Section 4.2.3 covers electromigration limits for TSVs and required test methods.</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC JESD22‑B101: Electromigration Test Method for Interconnects</div><div class="ref-detail">Defines constant‑current stress procedures and resistance monitoring applicable to TSV structures.</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">S. H. Han et al., "Electromigration in Through‑Silicon Vias for 3D ICs," IEEE Transactions on Device and Materials Reliability, vol. 20, no. 3, pp. 456‑465, Sep. 2020.</div><div class="ref-detail">Experimental extraction of n=2.3 and Ea=0.72 eV for Cu/TiN TSVs; discusses sidewall scattering effects.</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">E. Peck, Reliability of Microelectronics, 2nd ed., McGraw‑Hill, 2006.</div><div class="ref-detail">Chapter 7 provides detailed derivation of Black’s equation and its extensions to confined geometries.</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Samsung Electronics, HBM2E Product Brief, Rev. 1.3, 2022.</div><div class="ref-detail">Lists typical operating current densities (<1 MA/cm²) and references EM reliability targets per JESD235C.</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">A. Raja et al., "Revisiting Black’s Equation for Cu TSVs with Ru Liners," IEEE International Reliability Physics Symposium (IRPS) Proceedings, pp. 1‑6, 2021.</div><div class="ref-detail">Shows Ru liner raises Ea to 0.85 eV and reduces n to 1.8, improving EM lifetime by >5×.</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-15">Impact of Ru Liners on TSV EM Resistance</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
