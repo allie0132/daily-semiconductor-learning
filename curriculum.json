@@ -701,7 +701,7 @@
         {
           "id": "15.3",
           "title": "HBM Thermal Cycling & Mechanical Stress Testing — CTE mismatch, solder joint fatigue",
-          "done": false
+          "done": true
         },
         {
           "id": "15.4",
