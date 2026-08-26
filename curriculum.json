@@ -716,7 +716,7 @@
         {
           "id": "15.6",
           "title": "HBM Retention and Data Integrity Testing — refresh failures, charge leakage mechanisms",
-          "done": false
+          "done": true
         },
         {
           "id": "15.7",
