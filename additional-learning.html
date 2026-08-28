@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 75 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 77 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -628,11 +628,27 @@
 </div>
 <div class="entry">
   <div class="entry-meta">
+    <span class="date">Thursday, Aug 27 2026</span>
+    <span class="lesson-title">Field Failure Analysis of HBM: FIB, EBSD, and Lock‑In Thermography</span>
+  </div>
+  <h3>In‑Situ FIB‑EBSD Correlative Microscopy with AI‑Assisted Defect Classification</h3>
+  <p>Recent dual‑beam systems integrate an EBSD detector directly into the FIB chamber, allowing site‑specific orientation mapping without breaking vacuum. Combined with machine‑learning‑based pattern indexing, phase fractions and strain gradients can be extracted in <2 min per site, accelerating root‑cause analysis for intermittent HBM defects. This approach reduces sample handling artifacts and enables feedback‑locked milling for targeted defect isolation.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
     <span class="date">Wednesday, Aug 26 2026</span>
     <span class="lesson-title">HBM Retention & Data Integrity: Refresh Failures & Charge Leakage</span>
   </div>
   <h3>Adaptive Refresh and Temperature Compensation in HBM3E</h3>
   <p>HBM3E introduces a built‑in temperature sensor (TSEN) that feeds a dynamic refresh controller, allowing tREF to be scaled from 64 ms at 85 °C down to 32 ms at 125 °C based on real‑time sensor readings. This reduces unnecessary refresh bandwidth while maintaining retention margins, and can be programmed via MR4[3:0] to set the temperature‑compensation slope.</p>
+</div></div><div class="module-group" id="module-16"><h2>Module 16 — HBM Test Program Development & Characterization</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Friday, Aug 28 2026</span>
+    <span class="lesson-title">ATE Test Program Structure for HBM</span>
+  </div>
+  <h3>APG vs. Stored-Vector Tradeoff in HBM Testing</h3>
+  <p>Algorithmic Pattern Generators (APGs) solve the tester memory depth problem for HBM by computing address and data on the fly in hardware at full rate, rather than streaming pre-stored vectors. On Teradyne UltraFlex, the APG engine supports March algorithms natively, enabling a full 16 Gbit pseudo-channel pass in under 90 seconds with near-zero waveform memory consumption. The tradeoff is reduced flexibility: APG algorithms are parameterized but fixed, so defects that require irregular addressing sequences — such as activating adjacent rows to stress sense amplifiers — still require stored patterns. Production programs typically blend both: APG for bulk March passes, stored vectors for initialization, shmoo, and JEDEC mandatory test modes.</p>
 </div></div>
 </body>
 </html>
