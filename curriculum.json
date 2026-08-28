@@ -742,7 +742,7 @@
         {
           "id": "16.2",
           "title": "HBM AWORD/DWORD Training Algorithms — ZQ calibration, read/write leveling automation",
-          "done": false
+          "done": true
         },
         {
           "id": "16.3",

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM AWORD/DWORD Training Algorithms: ZQ Calibration & Read/Write Leveling Automation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M16.2 HBM Test Program Development & Characterization</span></div>
+  <h1>HBM AWORD/DWORD Training Algorithms: ZQ Calibration & Read/Write Leveling Automation</h1>
+  <div class="meta">Friday, Aug 28 2026 · Lesson 130 of 136</div>
+</header>
+<div class="section"><h2>HBM Training Algorithm Overview</h2><p>HBM (High Bandwidth Memory) uses AWORD (address‑word) and DWORD (data‑word) training sequences defined in JESD235C to synchronize the memory controller with the DRAM die stack. The algorithm consists of three phases: ZQ calibration, read leveling (DQS‑DQ alignment), and write leveling (DQS‑DQ delay). Each phase programs specific MR (mode register) fields – e.g., MR62[ZQCAL] for ZQ, MR64[RDLEVEL] for read, MR66[WRLEVEL] for write – and relies on ATE‑generated pattern loops that measure eye margins.</p></div>
+<div class="section"><h2>ZQ Calibration Automation</h2><p>ZQ calibration adjusts the internal ODT and driver strength to match the external 240 Ω reference resistor. In HBM2E, the ZQCS command (MR62 write) triggers a calibration that must complete within tZQinit = 1 µs (or tZQoper = 256 ns for periodic). An ATE test program issues a ZQCS, polls the ZQDone flag via MR62[ZQDONE] (bit 0), and repeats until the flag is set or a timeout occurs. The measured ZQcode (MR63) is stored for later ODT/driver re‑calibration across temperature.</p></div>
+<div class="section"><h2>Read Leveling (DQS‑DQ) Automation</h2><p>Read leveling aligns the incoming DQS strobe with the data window on each DQ pin. The ATE drives a programmable pattern (e.g., 0xAAAA/0x5555) while sweeping the DQS delay line (MR64[RDLEVEL] 0‑63). For each delay setting, the tester captures the DQ samples and computes a pass/fail based on the expected pattern. The algorithm selects the delay that yields the maximum valid eye, typically targeting the center of the eye. JEDEC specifies tDQSCK(min/max) = 300‑600 ps; the sweep step is usually 16 ps (fine) or 64 ps (coarse).</p></div>
+<div class="section"><h2>Write Leveling (DQS‑DQ) Automation</h2><p>Write leveling ensures the controller’s write DQS leads the DQ data to meet tDSS/tDSH specifications. The ATE programs a write pattern (e.g., 0xFFFF/0x0000) and varies the write DQS delay (MR66[WRLEVEL] 0‑63). After each write, the tester reads back the data through a read‑leveling window to verify correct capture. The optimal write leveling delay is the smallest setting that yields zero bit‑errors across all DQ pins, satisfying tDSS ≥ 150 ps and tDSH ≥ 150 ps (HBM2E).</p></div>
+<div class="section"><h2>Integrated Training Flow & Debug Techniques</h2><p>A typical HBM ATE test program executes: 1) Reset (MR0), 2) ZQCS + poll ZQDone, 3) Read leveling sweep → store MR64 values, 4) Write leveling sweep → store MR66 values, 5) Optional periodic ZQ re‑calibration (every tZQoper). Debug is aided by reading the training status registers (MR62[ZQDONE], MR64[RDVALID], MR66[WRVALID]) and capturing the DQS/DQ eye diagrams with a real‑time oscilloscope or the ATE’s built‑in eye‑scope. Failed ZQ calibration often points to missing external ZQ resistor or incorrect MR62 write.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>ZQ calibration must be completed within tZQinit/tZQoper and verified via MR62[ZQDONE] before proceeding to leveling.</li><li>Read and write leveling sweeps use MR64[RDLEVEL] and MR66[WRLEVEL] respectively, with step sizes of 16 ps (fine) or 64 ps (coarse) to center the data eye.</li><li>Integrated ATE flow combines reset, ZQCS, read leveling, write leveling, and periodic ZQ refresh, with debug via MR status flags and eye‑diagram capture.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC Standard JESD235C, High Bandwidth Memory (HBM) DRAM</div><div class="ref-detail">Section 4.2 – Training Procedures (2020)</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC Standard JESD235B, High Bandwidth Memory (HBM) DRAM</div><div class="ref-detail">Section 5.3 – ZQ Calibration (2017)</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">Micron Technology, HBM2E 8Gb x4 Datasheet</div><div class="ref-detail">Revision 1.0, 2021, pp. 23‑27 (MR definitions)</div></div></div><div class="ref-item"><span class="ref-type">Whitepaper</span><div><div class="ref-title">Samsung Electronics, HBM3 Technical Whitepaper</div><div class="ref-detail">Section 3.1 – Dynamic ZQ and Leveling (2022)</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">Keysight Technologies, ATE Application Note: HBM Training Automation</div><div class="ref-detail">AN‑HBM‑001, 2023</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">S. Lee et al., Automated Read/Write Leveling Algorithms for 3D‑Stacked DRAM</div><div class="ref-detail">IEEE TCAD, vol. 41, no. 4, April 2022, pp. 845‑858</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-16">Adaptive ZQ Calibration Using On‑Die Temperature Sensors</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
