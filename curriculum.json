@@ -747,7 +747,7 @@
         {
           "id": "16.3",
           "title": "Scan-Based Testing for HBM Logic Die — IEEE 1149.1, JTAG-based access in stacked die",
-          "done": false
+          "done": true
         },
         {
           "id": "16.4",

@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 77 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 78 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -649,6 +649,14 @@
   </div>
   <h3>APG vs. Stored-Vector Tradeoff in HBM Testing</h3>
   <p>Algorithmic Pattern Generators (APGs) solve the tester memory depth problem for HBM by computing address and data on the fly in hardware at full rate, rather than streaming pre-stored vectors. On Teradyne UltraFlex, the APG engine supports March algorithms natively, enabling a full 16 Gbit pseudo-channel pass in under 90 seconds with near-zero waveform memory consumption. The tradeoff is reduced flexibility: APG algorithms are parameterized but fixed, so defects that require irregular addressing sequences — such as activating adjacent rows to stress sense amplifiers — still require stored patterns. Production programs typically blend both: APG for bulk March passes, stored vectors for initialization, shmoo, and JEDEC mandatory test modes.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Friday, Aug 28 2026</span>
+    <span class="lesson-title">HBM AWORD/DWORD Training Algorithms: ZQ Calibration & Read/Write Leveling Automation</span>
+  </div>
+  <h3>Adaptive ZQ Calibration Using On‑Die Temperature Sensors</h3>
+  <p>Recent HBM3 implementations embed a temperature‑sensor‑driven ZQ trigger that automatically re‑issues ZQCS when the die temperature crosses a programmable delta (e.g., ±5 °C), reducing ATE intervention. This dynamic calibration leverages MR62[ZQEN] and MR63[ZQCODE] updates in real time, allowing the ATE to monitor ZQDone status only during initial calibration and rely on the DRAM’s self‑refresh for subsequent temperature compensation.</p>
 </div></div>
 </body>
 </html>
