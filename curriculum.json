@@ -706,27 +706,27 @@
         {
           "id": "15.4",
           "title": "ESD and Latch-Up Qualification in HBM Stacks — CDM, HBM ESD model distinctions",
-          "done": false
+          "done": true
         },
         {
           "id": "15.5",
           "title": "HBM Burn-In Strategies — accelerated aging, binning by reliability grade",
-          "done": false
+          "done": true
         },
         {
           "id": "15.6",
           "title": "HBM Retention and Data Integrity Testing — refresh failures, charge leakage mechanisms",
-          "done": false
+          "done": true
         },
         {
           "id": "15.7",
           "title": "Package-Level Reliability for 2.5D Systems — CoWoS moisture sensitivity, JEDEC J-STD-020",
-          "done": false
+          "done": true
         },
         {
           "id": "15.8",
           "title": "Field Failure Analysis Methods — FIB cross-section, EBSD, lock-in thermography for HBM defects",
-          "done": false
+          "done": true
         }
       ]
     },
@@ -737,17 +737,17 @@
         {
           "id": "16.1",
           "title": "ATE Test Program Structure for HBM — flow design, pattern organization, timing sets",
-          "done": false
+          "done": true
         },
         {
           "id": "16.2",
           "title": "HBM AWORD/DWORD Training Algorithms — ZQ calibration, read/write leveling automation",
-          "done": false
+          "done": true
         },
         {
           "id": "16.3",
           "title": "Scan-Based Testing for HBM Logic Die — IEEE 1149.1, JTAG-based access in stacked die",
-          "done": false
+          "done": true
         },
         {
           "id": "16.4",
