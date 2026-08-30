@@ -752,7 +752,7 @@
         {
           "id": "16.4",
           "title": "HBM Pseudo-Channel Mode Testing — independent channel characterization, cross-channel isolation",
-          "done": false
+          "done": true
         },
         {
           "id": "16.5",
