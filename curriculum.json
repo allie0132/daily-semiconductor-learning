@@ -757,7 +757,7 @@
         {
           "id": "16.5",
           "title": "High-Speed Pattern Generation for HBM — PRBS, algorithmic patterns, custom stress patterns",
-          "done": false
+          "done": true
         },
         {
           "id": "16.6",
