@@ -767,7 +767,7 @@
         {
           "id": "16.7",
           "title": "HBM Test Escape Analysis — fault coverage metrics, ATPG for HBM PHY defects",
-          "done": false
+          "done": true
         },
         {
           "id": "16.8",
