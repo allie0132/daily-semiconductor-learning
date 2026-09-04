@@ -772,7 +772,7 @@
         {
           "id": "16.8",
           "title": "Multi-Site and Gang Testing for HBM — parallelism limits, resource sharing, yield impact",
-          "done": false
+          "done": true
         }
       ]
     }
