@@ -775,6 +775,52 @@
           "done": true
         }
       ]
+    },
+    {
+      "id": 17,
+      "name": "HBM Ecosystem & Cross-Domain Test Engineering",
+      "topics": [
+        {
+          "id": "17.1",
+          "title": "HBM-GPU Integration Testing — memory controller validation, training sequence verification at system level",
+          "done": true
+        },
+        {
+          "id": "17.2",
+          "title": "HBM PHY Eye Diagram Automation — automated margining, corner analysis, BERT-based BER sweeps",
+          "done": false
+        },
+        {
+          "id": "17.3",
+          "title": "Wafer-Level Known Good Die (KGD) for HBM — probe challenges, temporary bonding, electrical acceptance criteria",
+          "done": false
+        },
+        {
+          "id": "17.4",
+          "title": "HBM ECC Deep Dive — SEC-DED, Chipkill architectures, scrubbing algorithms, ECC error injection for validation",
+          "done": false
+        },
+        {
+          "id": "17.5",
+          "title": "AI Accelerator Memory Subsystem Validation — HBM bandwidth saturation tests, latency profiling in AI ASIC context",
+          "done": false
+        },
+        {
+          "id": "17.6",
+          "title": "HBM3E to HBM4 Migration — test coverage deltas, new structural features, updated ATE program requirements",
+          "done": false
+        },
+        {
+          "id": "17.7",
+          "title": "Tape-Out to First Silicon HBM Bringup — oscilloscope-based debug strategies before ATE, lab bring-up checklist",
+          "done": false
+        },
+        {
+          "id": "17.8",
+          "title": "HBM Post-Package Repair (PPR) & Soft Post-Package Repair (sPPR) — fuse mechanisms, test flow integration, yield impact",
+          "done": false
+        }
+      ]
     }
   ]
 }

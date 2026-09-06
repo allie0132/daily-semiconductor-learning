@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 78 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 79 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -657,6 +657,14 @@
   </div>
   <h3>Adaptive ZQ Calibration Using On‑Die Temperature Sensors</h3>
   <p>Recent HBM3 implementations embed a temperature‑sensor‑driven ZQ trigger that automatically re‑issues ZQCS when the die temperature crosses a programmable delta (e.g., ±5 °C), reducing ATE intervention. This dynamic calibration leverages MR62[ZQEN] and MR63[ZQCODE] updates in real time, allowing the ATE to monitor ZQDone status only during initial calibration and rely on the DRAM’s self‑refresh for subsequent temperature compensation.</p>
+</div></div><div class="module-group" id="module-17"><h2>Module 17 — HBM Ecosystem & Cross-Domain Test Engineering</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Sunday, Sep 06 2026</span>
+    <span class="lesson-title">HBM-GPU Memory Controller Validation & Training Sequence Testing</span>
+  </div>
+  <h3>Adaptive Training & In-Field Recalibration Algorithms</h3>
+  <p>Recent GPU firmware updates (e.g., NVIDIA Ada Lovelace, AMD MI300) implement adaptive training that re-centers DQ eyes mid-boot based on real-time VDD/temperature telemetry, rather than static calibration. This extends field life by 15-25% in thermally stressed data centers. Test engineers must now validate firmware's ability to detect and recover from marginal corners: simulate worst-case voltage droop (-150 mV) and thermal spike (+15°C overshoot) during training, confirm controller reaches READY_FOR_CMD within timeout even under stress. Production flow should include firmware version regression testing to ensure older, less adaptive firmware variants do not ship to new silicon revisions.</p>
 </div></div>
 </body>
 </html>
