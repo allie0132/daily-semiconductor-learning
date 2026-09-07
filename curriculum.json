@@ -788,7 +788,7 @@
         {
           "id": "17.2",
           "title": "HBM PHY Eye Diagram Automation — automated margining, corner analysis, BERT-based BER sweeps",
-          "done": false
+          "done": true
         },
         {
           "id": "17.3",
