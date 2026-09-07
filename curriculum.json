@@ -793,7 +793,7 @@
         {
           "id": "17.3",
           "title": "Wafer-Level Known Good Die (KGD) for HBM — probe challenges, temporary bonding, electrical acceptance criteria",
-          "done": false
+          "done": true
         },
         {
           "id": "17.4",
