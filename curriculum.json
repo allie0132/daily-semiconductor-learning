@@ -798,7 +798,7 @@
         {
           "id": "17.4",
           "title": "HBM ECC Deep Dive — SEC-DED, Chipkill architectures, scrubbing algorithms, ECC error injection for validation",
-          "done": false
+          "done": true
         },
         {
           "id": "17.5",

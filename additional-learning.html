@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 79 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 81 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -660,11 +660,27 @@
 </div></div><div class="module-group" id="module-17"><h2>Module 17 — HBM Ecosystem & Cross-Domain Test Engineering</h2>
 <div class="entry">
   <div class="entry-meta">
+    <span class="date">Monday, Sep 07 2026</span>
+    <span class="lesson-title">Wafer-Level KGD for HBM — Probe Challenges, Temporary Bonding, Electrical Acceptance</span>
+  </div>
+  <h3>In‑situ TSV Impedance Spectroscopy During Wafer Probe</h3>
+  <p>Recent work shows that applying a small‑signal AC sweep (1 kHz–1 GHz) across probed TSVs while measuring impedance can detect sub‑micron cracks before bonding. The technique integrates a vector network analyzer (VNA) probe head with the existing ATE, providing a pass/fail threshold of |Z| < 55 mΩ at 100 MHz for defect-free TSVs. Implementing this adds <2 s per die and improves KGD yield by ~0.8 % in high‑volume HBM2E production.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
     <span class="date">Sunday, Sep 06 2026</span>
     <span class="lesson-title">HBM-GPU Memory Controller Validation & Training Sequence Testing</span>
   </div>
   <h3>Adaptive Training & In-Field Recalibration Algorithms</h3>
   <p>Recent GPU firmware updates (e.g., NVIDIA Ada Lovelace, AMD MI300) implement adaptive training that re-centers DQ eyes mid-boot based on real-time VDD/temperature telemetry, rather than static calibration. This extends field life by 15-25% in thermally stressed data centers. Test engineers must now validate firmware's ability to detect and recover from marginal corners: simulate worst-case voltage droop (-150 mV) and thermal spike (+15°C overshoot) during training, confirm controller reaches READY_FOR_CMD within timeout even under stress. Production flow should include firmware version regression testing to ensure older, less adaptive firmware variants do not ship to new silicon revisions.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Tuesday, Sep 08 2026</span>
+    <span class="lesson-title">HBM ECC Deep Dive: SEC-DED, Chipkill & Scrubbing</span>
+  </div>
+  <h3>On-Die ECC (ODECC) vs. Controller ECC in HBM3E</h3>
+  <p>HBM3E introduces On-Die ECC (ODECC), where the ECC engine moves fully inside the DRAM die rather than the host controller, reducing the ECC bits visible on the PHY from 8 to 0 — the full 128-bit bus carries data only. ODECC improves effective bandwidth efficiency but removes the controller's ability to read raw syndromes, complicating post-silicon debug: the host can only observe a CE/UE flag bit rather than the 8-bit syndrome. Engineers working on HBM3E validation must rely on additional in-stack diagnostic modes (enabled via Mode Register MR30 in the JEDEC HBM3E spec) and on SoC-level error counters rather than direct syndrome interrogation, requiring updated test programs and debug workflows compared to HBM2E.</p>
 </div></div>
 </body>
 </html>
