@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 81 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 82 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -681,6 +681,14 @@
   </div>
   <h3>On-Die ECC (ODECC) vs. Controller ECC in HBM3E</h3>
   <p>HBM3E introduces On-Die ECC (ODECC), where the ECC engine moves fully inside the DRAM die rather than the host controller, reducing the ECC bits visible on the PHY from 8 to 0 — the full 128-bit bus carries data only. ODECC improves effective bandwidth efficiency but removes the controller's ability to read raw syndromes, complicating post-silicon debug: the host can only observe a CE/UE flag bit rather than the 8-bit syndrome. Engineers working on HBM3E validation must rely on additional in-stack diagnostic modes (enabled via Mode Register MR30 in the JEDEC HBM3E spec) and on SoC-level error counters rather than direct syndrome interrogation, requiring updated test programs and debug workflows compared to HBM2E.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Wednesday, Sep 09 2026</span>
+    <span class="lesson-title">AI Accelerator Memory Subsystem Validation</span>
+  </div>
+  <h3>Roofline Model for HBM Bandwidth Bottleneck Diagnosis</h3>
+  <p>The Roofline model — plotting compute throughput (FLOP/s) vs. arithmetic intensity (FLOP/byte) — provides a direct diagnostic for whether an AI kernel is memory-bandwidth-bound or compute-bound on a given HBM configuration. For HBM3 at 3.35 TB/s peak, the roofline ridge point (where compute and memory limits intersect) falls around 100 TFLOP/s for FP16, meaning any kernel with arithmetic intensity below ~30 FLOP/byte will expose the memory subsystem at full utilization. Test engineers can use this to prioritize which traffic patterns to stress: kernels below the ridge point are the ones most likely to expose HBM BW or latency margin issues during silicon validation.</p>
 </div></div>
 </body>
 </html>

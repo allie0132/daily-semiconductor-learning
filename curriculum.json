@@ -803,7 +803,7 @@
         {
           "id": "17.5",
           "title": "AI Accelerator Memory Subsystem Validation — HBM bandwidth saturation tests, latency profiling in AI ASIC context",
-          "done": false
+          "done": true
         },
         {
           "id": "17.6",
