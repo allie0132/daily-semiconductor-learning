@@ -808,7 +808,7 @@
         {
           "id": "17.6",
           "title": "HBM3E to HBM4 Migration — test coverage deltas, new structural features, updated ATE program requirements",
-          "done": false
+          "done": true
         },
         {
           "id": "17.7",
