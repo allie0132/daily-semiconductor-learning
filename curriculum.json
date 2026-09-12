@@ -813,7 +813,7 @@
         {
           "id": "17.7",
           "title": "Tape-Out to First Silicon HBM Bringup — oscilloscope-based debug strategies before ATE, lab bring-up checklist",
-          "done": false
+          "done": true
         },
         {
           "id": "17.8",

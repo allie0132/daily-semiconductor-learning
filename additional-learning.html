@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 82 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 83 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -665,6 +665,14 @@
   </div>
   <h3>In‑situ TSV Impedance Spectroscopy During Wafer Probe</h3>
   <p>Recent work shows that applying a small‑signal AC sweep (1 kHz–1 GHz) across probed TSVs while measuring impedance can detect sub‑micron cracks before bonding. The technique integrates a vector network analyzer (VNA) probe head with the existing ATE, providing a pass/fail threshold of |Z| < 55 mΩ at 100 MHz for defect-free TSVs. Implementing this adds <2 s per die and improves KGD yield by ~0.8 % in high‑volume HBM2E production.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Saturday, Sep 12 2026</span>
+    <span class="lesson-title">First Silicon HBM Bringup: Oscilloscope Debug & Lab Checklist</span>
+  </div>
+  <h3>Using a Probing Interposer for Ball-Level Access on HBM</h3>
+  <p>Accessing HBM microbumps with oscilloscope probes directly is physically impossible once the stack is assembled to the interposer. Test houses (e.g., Xcerra/Cohu, Advantest) and in-house bringup teams solve this by designing a probing interposer — an intermediate substrate that routes critical HBM signals (WCK, CA, DQ[0:3]) to accessible pads or SMA connectors while maintaining matched trace lengths to stay within JEDEC de-embedding specs. The probing interposer must preserve differential impedance (85Ω ±5% for WCK per JESD235C) and add <5 ps excess group delay relative to the production interposer, or measured jitter numbers will not map to ATE test conditions.</p>
 </div>
 <div class="entry">
   <div class="entry-meta">
