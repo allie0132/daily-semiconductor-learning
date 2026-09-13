@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM Post-Package Repair (PPR) & sPPR</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M17.8 HBM Ecosystem & Cross-Domain Test Engineering</span></div>
+  <h1>HBM Post-Package Repair (PPR) & sPPR</h1>
+  <div class="meta">Sunday, Sep 13 2026 · Lesson 144 of 144</div>
+</header>
+<div class="section"><h2>PPR and sPPR: Purpose and JEDEC Definition</h2><p>Post-Package Repair (PPR) and Soft Post-Package Repair (sPPR) are JEDEC-standardized mechanisms that allow DRAM row repair after the device has been fully assembled and soldered onto a substrate or interposer. Unlike wafer-level and assembly-level laser fuse repair, PPR/sPPR operate through the memory interface itself, enabling repair in-system or at final test without physical re-work.</p><p>JESD235C (HBM2E) Section 4.9 and JESD238A (HBM3) Section 4.11 define the PPR and sPPR command sequences. The distinction is critical: <strong>PPR</strong> programs one-time-programmable (OTP) antifuse or poly-fuse elements — the repair is <em>permanent and irreversible</em>. <strong>sPPR</strong> stores the row-redirect address in a volatile shadow register that is reloaded from non-volatile storage (e.g., SPD EEPROM or host firmware) on every power cycle — the repair is <em>reversible and re-programmable</em> within its repair-row budget.</p><p>Both mechanisms redirect a failing DRAM row address to a spare row pre-allocated during wafer-level redundancy assignment, using the same redundancy infrastructure as wafer-level repair but activated by a different trigger path.</p></div>
+<div class="section"><h2>Fuse Mechanisms: Antifuse vs. Poly-Fuse vs. sPPR Latch</h2><p>Three physical implementations underlie PPR and sPPR:</p><ul><li><strong>Antifuse (OTP dielectric breakdown):</strong> A thin dielectric between two metal lines is permanently shorted by applying a high-voltage programming pulse (typically 3.0–3.6 V for ≈10 μs). Once programmed, the low-resistance shunt cannot be reversed. Antifuses occupy very small area and are immune to read disturb, making them the dominant PPR mechanism in HBM2E and HBM3 stacks. The programming voltage is supplied via a dedicated VPP rail or transiently boosted by an on-die charge pump activated during the PPR command sequence.</li><li><strong>Poly-fuse (laser or electrically blown):</strong> A thin polysilicon resistor is blown by a high-current pulse, irreversibly increasing its resistance from ~10 Ω to >1 MΩ. Less common in modern HBM due to area overhead; still used in some DRAM periphery for address decoding trim.</li><li><strong>sPPR volatile latch:</strong> No fuse element. The repair address is written to a shadow row-address register via MRS (Mode Register Set) commands during the sPPR entry sequence. The register content is lost at power-off; JEDEC specifies that sPPR repair data must be re-issued by the host within a defined initialization window (tINIT5 in JESD235C) after each power cycle. Typical sPPR budget: <strong>4–8 rows per die</strong> depending on HBM generation.</li></ul><p>For antifuse PPR, JEDEC specifies a <strong>PPR Guard Key</strong> — a multi-step command sequence (PPR_GUARD_KEY[0:3]) that must be issued before programming to prevent accidental fuse blow from a single erroneous command. The guard key sequence is unique per device to prevent systematic attacks.</p></div>
+<div class="section"><h2>Test Flow Integration: When and How PPR Is Applied</h2><p>PPR integrates into the production test flow at two distinct checkpoints:</p><ul><li><strong>Final Test (FT) post-package:</strong> After HBM package assembly and before 2.5D/3D integration, the tester applies full functional and parametric tests including MBIST march algorithms (MATS+, March C−, March B). Rows that fail functional test and survive with a spare redirect are candidates for PPR. The ATE executes the JEDEC PPR entry sequence: PPR_GUARD_KEY → PPR_CMD with fail row address → PPR_PROGRAM. Each antifuse blow requires a 10–100 ms soak at elevated current; the tester verifies the repair by re-running the march test on the repaired address.</li><li><strong>In-system repair (ISR):</strong> The memory controller or BIOS issues sPPR commands during POST or a management-initiated scrub cycle. Failed rows detected by ECC multi-bit errors are logged by the OS or BMC; sPPR redirect addresses are stored in BIOS NVRAM or SPD EEPROM and reloaded on every boot. HBM3 JESD238A specifies the <code>sPPR_ENTRY</code> / <code>sPPR_CMD</code> / <code>sPPR_EXIT</code> MRS sequence for in-system activation.</li></ul><p>ATE handling: Testers must assert VDDQ and VPP within the ramp rate specified in JESD235C before issuing PPR commands. During antifuse programming the HBM draws a large transient current (≥500 mA per fuse blow on VPP); DPS current compliance must be set above this threshold or the fuse blow will be incomplete, creating a <strong>partial-blow defect</strong> that passes initial verify but fails at temperature.</p></div>
+<div class="section"><h2>PPR Budget, Yield Impact, and Repair Efficiency</h2><p>JEDEC sets a maximum PPR budget per die. For HBM2E (JESD235C): up to <strong>8 PPR rows per die</strong>. For HBM3 (JESD238A): up to <strong>16 PPR rows per die</strong> (generation-dependent; vendor-specific sparing beyond the spec floor is common). Each PPR consumes one spare row; once the budget is exhausted, further fails require a device downbin or reject.</p><p>Yield impact analysis: PPR recovery rate is measured as the fraction of devices that pass final test only after applying at least one PPR operation. A well-tuned HBM process achieves 2–5% PPR utilization at final test (meaning 2–5% of shipped devices have ≥1 post-package repair applied). Above ~10% PPR utilization, process engineers investigate whether a systematic fail mechanism is driving the demand — often a marginal bitline sense amp, a weak wordline driver, or a TSV-induced stress pattern that manifests only post-assembly.</p><p>The <strong>repair efficiency</strong> metric tracks: (rows recoverable by PPR) / (total post-package fail rows). A high repair efficiency (>90%) means the sparing architecture successfully absorbs post-assembly defects. A low repair efficiency indicates clustered failures (multiple adjacent fails that share a spare row) or column/bank-level fails that row-address redirect cannot fix.</p></div>
+<div class="section"><h2>sPPR vs. PPR: Trade-offs and System-Level Considerations</h2><p>The choice between sPPR and PPR in a system involves several trade-offs:</p><ul><li><strong>Reversibility:</strong> sPPR allows re-assignment if a different row later fails within the same bank. PPR commits a spare permanently; if the spare row itself develops a defect post-field-deployment, the device loses that repair resource with no recovery path.</li><li><strong>Boot latency:</strong> sPPR reload adds ~1–5 ms to system initialization per HBM stack (time to issue all MRS sequences × number of repairs). In latency-sensitive HPC and AI accelerator platforms, this is a known initialization overhead that system architects must budget.</li><li><strong>Security:</strong> OTP antifuse PPR is tamper-resistant; sPPR register content can in principle be manipulated by a sufficiently privileged software stack, which is a consideration in multi-tenant cloud environments.</li><li><strong>Field RMA guidance:</strong> JEDEC sPPR allows the system operator to clear a repair and run diagnostics on the raw device state, which aids failure analysis. PPR-repaired devices present the patched view; reading the original fail row requires a specialized PPR bypass mode not available in all ATE configurations.</li></ul><p>HBM3 adds a <strong>PPR status register</strong> (MR29 in JESD238A) that reports the number of PPR repairs consumed per die, allowing the host to monitor the remaining repair budget at runtime and trigger predictive maintenance actions before the budget is fully exhausted.</p></div>
+
+<div class="takeaways">
+  <h2>&#x26A1; Key Takeaways</h2>
+  <ul><li>PPR permanently programs antifuse elements via a guard-keyed MRS sequence, consuming one spare row per repair; sPPR stores the redirect in a volatile register reloaded every boot — same test interface, fundamentally different persistence.</li><li>At final test, ATE must supply VPP within JEDEC ramp specs and set current compliance above the antifuse blow transient (≥500 mA); a partial-blow creates a latent defect that escapes initial verify and fails at temperature.</li><li>PPR utilization above ~10% signals a systematic post-assembly fail mechanism (TSV stress, marginal bitline amp); HBM3 MR29 exposes the per-die consumed-repair count for real-time field monitoring and predictive maintenance.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">High Bandwidth Memory (HBM2E) DRAM Standard</div><div class="ref-detail">JESD235C, Section 4.9 — Post-Package Repair (PPR) and sPPR command sequences, guard key, budget</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">High Bandwidth Memory (HBM3) DRAM Standard</div><div class="ref-detail">JESD238A, Section 4.11 — HBM3 PPR/sPPR extensions, MR29 repair status, 16-row budget</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">LPDDR5/5X Post-Package Repair Addendum</div><div class="ref-detail">JESD209-5B Annex A — sPPR re-initialization timing (tINIT5), SPD EEPROM repair-data storage</div></div></div><div class="ref-item"><span class="ref-type">IEEE</span><div><div class="ref-title">Electrical Characterization of Antifuse OTP Memory in Advanced CMOS</div><div class="ref-detail">Kalnitsky A. et al., IEEE Trans. Electron Devices, vol. 68, no. 4, 2021 — antifuse dielectric breakdown and program reliability</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">3D TSV-Based HBM2 Memory Yield and Repair Analysis</div><div class="ref-detail">Lee D. et al., ISSCC 2016 — post-package repair rate, TSV-induced stress fail distribution</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">JEDEC Standard for SPD EEPROM Encoding — HBM3</div><div class="ref-detail">JEP106 / SPD annex for HBM3 — byte map for sPPR address storage in non-volatile SPD</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-17">Partial-Blow Antifuse: The Hidden PPR Reliability Risk</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
