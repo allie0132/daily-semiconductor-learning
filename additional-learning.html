@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 83 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 84 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -697,6 +697,14 @@
   </div>
   <h3>Roofline Model for HBM Bandwidth Bottleneck Diagnosis</h3>
   <p>The Roofline model — plotting compute throughput (FLOP/s) vs. arithmetic intensity (FLOP/byte) — provides a direct diagnostic for whether an AI kernel is memory-bandwidth-bound or compute-bound on a given HBM configuration. For HBM3 at 3.35 TB/s peak, the roofline ridge point (where compute and memory limits intersect) falls around 100 TFLOP/s for FP16, meaning any kernel with arithmetic intensity below ~30 FLOP/byte will expose the memory subsystem at full utilization. Test engineers can use this to prioritize which traffic patterns to stress: kernels below the ridge point are the ones most likely to expose HBM BW or latency margin issues during silicon validation.</p>
+</div></div><div class="module-group" id="module-18"><h2>Module 18 — HBM in Production AI Systems & Silicon Lifecycle Management</h2>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Friday, Oct 02 2026</span>
+    <span class="lesson-title">HBM Bandwidth Profiling in AI Accelerators</span>
+  </div>
+  <h3>Effective Bandwidth vs. Peak Bandwidth: The 70% Rule</h3>
+  <p>In production AI training clusters, sustained HBM effective bandwidth rarely exceeds 70% of peak due to non-unit-stride access patterns, ECC overhead, and refresh interference. This '70% rule of thumb' is empirically validated across H100 and MI300X deployments at hyperscalers. Test engineers should calibrate ATE bandwidth limits to 75% of theoretical peak as a practical production floor — silicon achieving only 68–70% of peak in streaming tests warrants marginal-bin classification even if it technically passes the JEDEC minimum.</p>
 </div></div>
 </body>
 </html>

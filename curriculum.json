@@ -821,6 +821,52 @@
           "done": true
         }
       ]
+    },
+    {
+      "id": 18,
+      "name": "HBM in Production AI Systems & Silicon Lifecycle Management",
+      "topics": [
+        {
+          "id": "18.1",
+          "title": "HBM Bandwidth Profiling in AI Accelerators — roofline model, memory-bound vs compute-bound workload analysis",
+          "done": true
+        },
+        {
+          "id": "18.2",
+          "title": "HBM RAS Features in Production — address poisoning, row hammer mitigation (TRR, PARA), patrol scrub scheduling",
+          "done": false
+        },
+        {
+          "id": "18.3",
+          "title": "Silicon Lifecycle Management for HBM — in-field monitoring, predictive RMA, telemetry collection strategies",
+          "done": false
+        },
+        {
+          "id": "18.4",
+          "title": "HBM Operational Temperature Management — dynamic frequency-voltage scaling, throttling policies, thermal runaway prevention",
+          "done": false
+        },
+        {
+          "id": "18.5",
+          "title": "HBM ECC in AI Training — SECDED vs Chipkill, silent data corruption (SDC) risk in LLM training, NVIDIA/AMD implementations",
+          "done": false
+        },
+        {
+          "id": "18.6",
+          "title": "Multi-Stack HBM Validation on Interposer — cross-stack signal integrity, crosstalk characterization, post-assembly diagnostics",
+          "done": false
+        },
+        {
+          "id": "18.7",
+          "title": "HBM Yield Learning in High-Volume Production — bin split strategies, DRAM Sparing effectiveness, fab-to-fab correlation",
+          "done": false
+        },
+        {
+          "id": "18.8",
+          "title": "HBM4 PHY Architecture and Serdes-Less Interface — base-die PHY, clocking topology, impact on ATE interface design",
+          "done": false
+        }
+      ]
     }
   ]
 }
