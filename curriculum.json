@@ -834,7 +834,7 @@
         {
           "id": "18.2",
           "title": "HBM RAS Features in Production — address poisoning, row hammer mitigation (TRR, PARA), patrol scrub scheduling",
-          "done": false
+          "done": true
         },
         {
           "id": "18.3",
