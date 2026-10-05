@@ -844,7 +844,7 @@
         {
           "id": "18.4",
           "title": "HBM Operational Temperature Management — dynamic frequency-voltage scaling, throttling policies, thermal runaway prevention",
-          "done": false
+          "done": true
         },
         {
           "id": "18.5",

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM Operational Temperature Management</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M18.4 HBM in Production AI Systems & Silicon Lifecycle Management</span></div>
+  <h1>HBM Operational Temperature Management</h1>
+  <div class="meta">Monday, Oct 05 2026 &middot; Lesson 148 of 152</div>
+</header>
+<div class="section"><h2>Thermal Constraints in HBM Die Stacks</h2><p>HBM packages stack up to 12 DRAM dies over a logic base die, all connected by TSVs, creating a vertical heat path with limited convective surface area. JEDEC JESD235C specifies a maximum junction temperature (T<sub>J,max</sub>) of <strong>85 °C</strong> for standard-grade HBM3 and <strong>95 °C</strong> for extended-grade parts. Exceeding T<sub>J,max</sub> accelerates DRAM bit-flip rates, degrades retention, and can cause permanent dielectric breakdown in TSV liners.</p><p>Heat is generated primarily in the logic base die (PHY, DRAM I/O, DFI logic) and in each DRAM core array during activate/precharge cycles. With thermal resistance R<sub>θJC</sub> typically 0.15–0.25 °C/W for a 4-Hi HBM2E stack, and peak power densities up to 15 W, the temperature gradient from base to top die can reach 10–15 °C, making the top die the limiting component.</p><ul><li>JEDEC JESD235C Table 32 lists operating temperature ranges by speed grade</li><li>HBM3 extended-temperature SKUs (e.g. Samsung K4FAF3252L-HC14) are rated to 95 °C for automotive and edge inference</li><li>TSV thermal conductivity (≈150 W/m·K for Cu) limits but does not eliminate vertical thermal gradients</li></ul></div>
+<div class="section"><h2>Dynamic Frequency-Voltage Scaling in HBM Controllers</h2><p>The host memory controller (GPU, NPU, or HBM controller ASIC) implements DVFS by adjusting the HBM interface clock and, where supported, the VDDQ supply. JEDEC HBM3 defines a set of <strong>speed grades</strong> (1.0 GT/s, 1.6 GT/s, 2.4 GT/s, 3.2 GT/s) that map directly to programmable gear-down ratios in the PHY. The controller firmware monitors on-die temperature sensor (ODTS) readback via the HBM CATTRIP/AERR sideband and steps down the frequency tier when thermal thresholds are crossed.</p><p>DVFS policy tables stored in controller microcode typically implement hysteresis: the controller downgrades when T_J exceeds T<sub>high</sub> and upgrades only when T_J falls below T<sub>low</sub> = T<sub>high</sub> − ΔT (typically ΔT = 5–10 °C). This prevents rapid oscillation ("thermal thrashing") that would cause repeated PLL lock/unlock cycles on the DRAM side.</p><ul><li>AMD CDNA2/3 (MI250X, MI300X) implements per-HBM-stack DVFS with 200 ms polling intervals via PMFW</li><li>NVIDIA H100 uses a unified thermal controller that co-throttles GPC clock and HBM link clock proportionally</li><li>Voltage reduction at lower speed grades: VDDQ drops from 1.1 V (full speed) to as low as 0.9 V, yielding quadratic dynamic power reduction</li></ul></div>
+<div class="section"><h2>Throttling Policies and JEDEC Thermal Control Registers</h2><p>JESD235C defines a <strong>Mode Register 4 (MR4)</strong> in HBM that contains a 3-bit temperature readout field (bits [6:4]) with 8 temperature bands from &lt;45 °C to ≥115 °C. Controllers poll MR4 via the HBM maintenance command interface on a software-configurable interval (typically every 32–128 ms in production systems).</p><p>Above T<sub>high</sub> (commonly set at 80–85 °C in firmware), the controller enters <strong>Throttle Mode 1</strong>: it reduces the command bus utilization to 75% of peak and extends refresh intervals beyond the nominal tREF=3.9 µs. At T<sub>critical</sub> (typically 90 °C), <strong>Throttle Mode 2</strong> engages, dropping to 50% utilization and asserting CATTRIP_N to signal the PCB power management IC to reduce VDDQ.</p><ul><li>MR4[6:4] = 0b101 indicates T_J ≥ 85 °C on HBM2E; controller should act within 10 ms per JESD235C §6.14</li><li>CATTRIP_N is an active-low open-drain signal; if not de-asserted within 10 µs of assertion, the VRM must cut power per system board specification</li><li>Refresh rate temperature compensation: JEDEC defines temperature-compensated auto refresh (TCSR) — at T_J ≥ 85 °C, tREF must be halved to maintain data retention per JESD235C Table 35</li></ul></div>
+<div class="section"><h2>Thermal Runaway Prevention and Safety Mechanisms</h2><p>Thermal runaway in stacked DRAM occurs when leakage current increases with temperature, increasing power, increasing temperature further — a positive feedback loop. HBM mitigates this through a hierarchy of safety mechanisms:</p><ul><li><strong>Level 1 — On-die ODTS:</strong> Each die contains a bandgap thermal sensor accurate to ±3 °C. The logic base die aggregates per-die readings and exposes the maximum via MR4 and the analog CATTRIP pin.</li><li><strong>Level 2 — Package thermal diodes:</strong> Discrete BJT-based thermal diodes on the HBM package allow the PCB temperature monitoring IC (e.g. TMP464) to read T<sub>case</sub> independently of the DRAM interface. These provide fail-safe coverage when the HBM memory bus is non-functional.</li><li><strong>Level 3 — PCB/system BMC:</strong> The baseboard management controller (BMC) reads all package thermal diodes, compares against manufacturer-specified T<sub>case,max</sub> (typically 70 °C for HBM2E), and can force a system shutdown via IPMI emergency shutdown command independent of GPU firmware.</li></ul><p>Thermal runaway prevention also includes <strong>write-activity limiting</strong>: write operations dissipate 20–40% more energy than reads per HBM cell (due to sense-amp full-swing writes), so write bandwidth is capped in firmware during thermal emergencies.</p></div>
+<div class="section"><h2>Refresh Rate Management Under Thermal Stress</h2><p>DRAM retention time degrades exponentially with temperature — retention halves for every ~10 °C increase above 85 °C. JEDEC JESD235C mandates <strong>temperature-compensated self refresh (TCSR)</strong>, which the controller activates by writing MR2[2:1] to select the high-temperature refresh rate (tREF_HT = 1.95 µs, half of the nominal 3.9 µs tREF).</p><p>For ATE validation of thermal throttling, test engineers use the following procedure: (1) Force the HBM die temperature using a TEC or forced hot-air fixture to ≥85 °C, (2) Read MR4 to confirm the thermal band register reflects the set temperature, (3) Verify controller transitions to TCSR by monitoring DRAM command bus — activate/precharge pairs for refresh should appear at 2× nominal rate on a logic analyzer, (4) Inject single-bit errors via address scramblers and confirm ECC correction counters increment correctly under the degraded refresh interval.</p><ul><li>Symptom of missed TCSR: elevated DRAM uncorrectable error (UCE) rates at high temperature in DIMM stress tests</li><li>JEDEC JESD235C §7.12 covers TCSR enabling sequence and timing requirements</li><li>SK Hynix AN-0022 "HBM2E Thermal Management" covers per-stack thermal characterization methodology for system integrators</li></ul></div>
+
+<div class="takeaways">
+  <h2>&#x26A1; Key Takeaways</h2>
+  <ul><li>HBM3 T_J,max is 85 °C (standard) / 95 °C (extended grade); exceeding this accelerates retention failure and TSV degradation</li><li>Controllers implement hysteresis-gated DVFS using MR4 temperature polling every 32–128 ms; CATTRIP_N provides emergency VRM cutoff at T_critical</li><li>Thermal runaway is prevented by three independent layers: on-die ODTS, package thermal diodes, and system BMC; all must be validated in ATE qualification</li><li>Temperature-compensated auto refresh (TCSR) halves tREF at ≥85 °C — ATE suites must exercise this path explicitly or ECC corner cases will escape</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">High Bandwidth Memory (HBM) DRAM</div><div class="ref-detail">JESD235C, §6.14 (thermal throttling), §7.12 (TCSR), Table 32 (temperature ratings), Table 35 (refresh vs. temperature)</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">HBM2E Thermal Management Application Note</div><div class="ref-detail">SK Hynix AN-0022, rev. 1.2 — die-level thermal characterization and CATTRIP_N integration guide</div></div></div><div class="ref-item"><span class="ref-type">Web</span><div><div class="ref-title">AMD Instinct MI300X Accelerator Thermal Design Guide</div><div class="ref-detail">AMD Publication #57500 — PMFW DVFS policy, per-stack thermal polling architecture, CATTRIP_N board routing rules</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">DRAM Data Retention and Temperature: A Study of Mechanisms</div><div class="ref-detail">Liu et al., ISCA 2013 — empirical retention half-life vs. temperature curves, supports TCSR threshold selection</div></div></div><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">Low Power Double Data Rate 5 (LPDDR5) Standard</div><div class="ref-detail">JESD209-5B §8.8 — TCSR enabling sequence, comparable to HBM3 TCSR for cross-technology reference</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">TMP464 Remote and Local Temperature Sensor</div><div class="ref-detail">Texas Instruments SBOS599F — BJT thermal diode interface for HBM package T_case monitoring, ±1 °C accuracy</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-18">HBM Thermal Impedance Stack and Hotspot Modeling</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>
