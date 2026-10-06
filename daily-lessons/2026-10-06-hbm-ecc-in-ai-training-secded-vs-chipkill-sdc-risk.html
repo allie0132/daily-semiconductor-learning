@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBM ECC in AI Training: SECDED vs Chipkill & SDC Risk</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         background: #0f1117; color: #e2e8f0; padding: 20px; max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; line-height: 1.4; margin-bottom: 6px; }
+  .meta { font-size: 0.9rem; color: #64748b; margin-top: 6px; }
+  .badge { display: inline-block; background: #1e3a5f; color: #60a5fa;
+            font-size: 0.78rem; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+            letter-spacing: .05em; text-transform: uppercase; margin-right: 8px; }
+  .module-badge { background: #1a2e1a; color: #86efac; }
+  .section { background: #1e2330; border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+  h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 14px; }
+  p { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 12px; }
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 1.05rem; line-height: 1.8; color: #cbd5e1; margin-bottom: 6px; }
+  code { background: #0f172a; color: #a5f3fc; padding: 2px 6px; border-radius: 4px;
+          font-size: 0.95em; font-family: 'SF Mono', Consolas, monospace; }
+  strong { color: #f1f5f9; }
+  .takeaways { background: #162032; border-left: 3px solid #3b82f6;
+                border-radius: 0 10px 10px 0; padding: 18px 22px; margin-bottom: 14px; }
+  .takeaways h2 { color: #60a5fa; margin-bottom: 12px; }
+  .takeaways li { color: #94a3b8; }
+  .references { background: #1e2330; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; }
+  .references h2 { font-size: 1.15rem; font-weight: 700; color: #93c5fd; margin-bottom: 12px; }
+  .ref-item { display: flex; gap: 10px; align-items: baseline; padding: 8px 0;
+               border-bottom: 1px solid #0f172a; font-size: 1rem; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-type { flex-shrink: 0; background: #0f172a; color: #7dd3fc; font-size: 0.75rem;
+               font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; }
+  .ref-title { color: #e2e8f0; font-weight: 600; }
+  .ref-detail { color: #64748b; font-size: 0.9rem; }
+  .additional { background: #1a1f2e; border-left: 3px solid #a78bfa; border-radius: 0 8px 8px 0;
+                  padding: 14px 18px; margin-bottom: 14px; }
+  .additional h2 { color: #a78bfa; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: .08em; margin-bottom: 6px; }
+  .additional a { color: #c4b5fd; font-size: 0.9rem; text-decoration: none; display: block; }
+  .additional a:hover { text-decoration: underline; }
+  .nav { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1e2330; }
+  .nav a { display: inline-block; background: #1e2330; color: #60a5fa; text-decoration: none;
+            font-size: 0.85rem; font-weight: 600; padding: 10px 18px; border-radius: 8px;
+            border: 1px solid #334155; transition: background 0.15s; }
+  .nav a:hover { background: #263347; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="badge">HBM Testing</span><span class="badge module-badge">M18.5 HBM in Production AI Systems & Silicon Lifecycle Management</span></div>
+  <h1>HBM ECC in AI Training: SECDED vs Chipkill & SDC Risk</h1>
+  <div class="meta">Tuesday, Oct 06 2026 · Lesson 149 of 152</div>
+</header>
+<div class="section"><h2>Why ECC Matters More in AI Training Than in HPC</h2><p>In traditional HPC workloads, a memory error causes a detectable crash or checksum mismatch — bad, but visible. In large language model (LLM) training, silent data corruption (SDC) is far more dangerous: a single flipped bit in a gradient accumulation buffer or weight tensor can propagate undetected for thousands of iterations, silently degrading model quality or causing subtle numerical instabilities that are nearly impossible to diagnose after the fact.</p><p>HBM2e and HBM3 both mandate on-die ECC per JEDEC JESD235C. The test engineer's job is to verify that this protection actually works under the thermal and electrical stress of sustained AI training workloads — where die temperatures frequently exceed 85°C and memory bandwidth utilization approaches 100%.</p></div>
+<div class="section"><h2>SECDED: Single-Error Correct, Double-Error Detect</h2><p>SECDED (Single Error Correct, Double Error Detect) is the baseline ECC scheme used within each HBM pseudo-channel. Each 128-bit data burst is protected by an 8-bit Hamming code, producing a 136-bit codeword. The syndrome decoder can:</p><ul><li>Correct any single-bit error transparently to the memory controller</li><li>Detect (but not correct) any 2-bit error, signaling an uncorrectable error (UCE)</li><li>Miss any even-weight multi-bit error pattern that maps to a valid codeword — a true SDC scenario</li></ul><p>The critical JEDEC parameter is <code>tRRD_S</code> timing: if a row activation error is masked by a concurrent ECC correction on the same pseudo-channel, the correction latency adds ~2–4 ns to the effective read latency. Under JEDEC JESD235C Table 3, the ECC correction path must complete within the <code>tCL</code> window to avoid pipeline bubbles visible to the memory controller.</p><p>SECDED provides <strong>no protection against multi-bit soft errors</strong> caused by high-energy neutron strikes or alpha particles — events that become statistically significant at the fleet scale of AI training clusters (thousands of GPUs running continuously for weeks).</p></div>
+<div class="section"><h2>Chipkill ECC: Extended Protection for Adjacent-Bit Failures</h2><p>Chipkill (also called Symbol-ECC or Chip-Kill Correct) is a stronger scheme that protects against the complete failure of an entire x4 or x8 DRAM die within the stack. Where SECDED works on individual bits within a burst, Chipkill treats each die's contribution to a burst as a <strong>symbol</strong> (4 or 8 bits), and uses a Reed-Solomon or similar code to correct a complete symbol erasure.</p><p>In HBM3 stacks operating at 6.4 Gbps/pin, each 128-bit data burst is distributed across 8 channels × 16 I/O per channel. A Chipkill-capable controller treats the 8-bit contribution of each die as a symbol. If one die fails entirely (all 8 bits wrong), the Reed-Solomon code over GF(2<sup>8</sup>) can reconstruct the missing symbol from the remaining seven plus the parity symbol.</p><ul><li><strong>Chipkill-correct (x4 die):</strong> corrects any single x4 symbol error (1 die failure) and detects any 2-symbol error</li><li><strong>Chipkill-correct (x8 die):</strong> corrects any single x8 symbol error; requires wider parity — typically 2 extra die-widths of ECC storage</li><li><strong>HBM3 on-die implementation:</strong> NVIDIA H100 (HBM3, 80 GB) implements a modified Chipkill scheme with the ECC logic distributed across the memory controller on the base die, not in the DRAM dies themselves</li></ul><p>The performance cost of Chipkill is higher than SECDED: the parity calculation spans the full burst across all contributing dies, adding ~3–5% latency overhead versus ~1% for SECDED under JEDEC JESD235C recommended operating conditions.</p></div>
+<div class="section"><h2>Silent Data Corruption (SDC) Risk in LLM Training</h2><p>SDC occurs when a memory error is neither corrected nor detected — it silently writes incorrect data into a tensor. In LLM training, the most dangerous SDC scenarios are:</p><ul><li><strong>Gradient accumulation buffers:</strong> BF16 or FP32 accumulators for distributed training (AllReduce across NVLink/InfiniBand). A flipped sign bit in a gradient value can flip the update direction for an entire parameter block.</li><li><strong>Attention weight matrices:</strong> A corrupt attention score corrupts the entire output of a transformer layer for that batch, poisoning the residual stream for all subsequent layers.</li><li><strong>Optimizer state (Adam/AdaFactor):</strong> The second-moment estimate <code>v_t</code> can be corrupted to a near-zero value, causing a gradient explosion equivalent to division by zero in the Adam update rule <code>θ ← θ - lr × m_t / (√v_t + ε)</code>.</li></ul><p>NVIDIA's 2023 publication on large-scale training infrastructure (see References) documented SDC events at a rate of approximately 1 per 10,000 GPU-hours in early A100 deployments without enhanced ECC, detectable only through loss curve divergence or cross-run reproducibility checks. With HBM2e Chipkill enabled, this rate dropped below detection threshold.</p><p>The test implication: ECC validation must include <strong>fault injection</strong> at the memory controller level, verifying that corrupted patterns in gradient/weight tensors are detected (UCE → training halt) rather than silently passed to compute (SDC → model corruption).</p></div>
+<div class="section"><h2>NVIDIA and AMD HBM ECC Implementations</h2><p><strong>NVIDIA H100 / H800 (HBM3):</strong> Implements a 2D ECC scheme. The first dimension is the standard SECDED per burst (on-die, HBM3 DRAM side). The second dimension is a Chipkill-equivalent scheme implemented in the NVLink-C2C connected GPC (Graphics Processing Cluster) memory controller. The controller maintains a scrubbing thread that reads and rewrites all HBM pages on a configurable cycle (default ~24 hours) to promote single-bit corrections before they accumulate into uncorrectable multi-bit errors. Accessible via <code>nvidia-smi --query-gpu=ecc.mode.current --format=csv</code>; the <code>nvidia-smi dmon</code> counters <code>cecc</code> (corrected) and <code>uecc</code> (uncorrectable) expose per-pass error rates.</p><p><strong>AMD MI300X (HBM3):</strong> Uses a proprietary Unified Memory Architecture (UMA) where HBM3 and CDNA3 compute dies share a single unified address space. AMD's ECC implementation uses SECDED as the baseline with a row-remapping feature (JESD235C §7.6 Post-Package Repair extension) — rows with persistent correctable errors are transparently remapped to spare rows. Accessed via <code>rocm-smi --showmeminfo ECC</code>. AMD's MI300X documentation specifies a maximum UCE rate threshold of <strong>1 UCE per 10<sup>15</sup> bit-operations</strong> before triggering a hardware RAS (Reliability, Availability, Serviceability) event and halting the training job.</p><p>Both vendors expose ECC counters to the ATE via JTAG/DFT boundary scan and via the PCIe/AXI management interface. On the ATE (e.g., Advantest T2000 with HBM3 personality boards), ECC validation uses <strong>March C-</strong> pattern variants with injected single-bit and adjacent-bit errors to verify SECDED correction, followed by x4/x8 symbol-error injection for Chipkill validation.</p></div>
+
+<div class="takeaways">
+  <h2>⚡ Key Takeaways</h2>
+  <ul><li>SECDED corrects single-bit errors and detects double-bit errors but is blind to multi-bit error patterns that form valid codewords — a true SDC risk at AI training fleet scale.</li><li>Chipkill ECC extends protection to complete die-width symbol failures; NVIDIA H100 and AMD MI300X both implement Chipkill-class schemes on top of the JEDEC JESD235C on-die SECDED baseline.</li><li>Silent data corruption in LLM training can corrupt gradient accumulators, attention weights, or optimizer states over thousands of iterations with no detectable signal — making ECC scrubbing and fault-injection ATE validation critical quality gates.</li></ul>
+</div>
+<div class="references"><h2>📚 References</h2><div class="ref-item"><span class="ref-type">JEDEC</span><div><div class="ref-title">High Bandwidth Memory (HBM) DRAM Standard</div><div class="ref-detail">JESD235C, Sections 4.3 (ECC Mode), 7.6 (Post-Package Repair), Table 3 (AC Timing Parameters) — jedec.org</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">NVIDIA H100 Tensor Core GPU Architecture Whitepaper</div><div class="ref-detail">NVIDIA Corporation, 2022 — covers 2D ECC architecture, HBM3 ECC scrubbing, and UECC thresholds — nvidia.com</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Silent Data Corruption at Scale in Large-Scale AI Training</div><div class="ref-detail">Meta AI Infrastructure Team, 2023 — documents SDC detection via loss-curve fingerprinting and cross-run checksum methods; arXiv:2302.00843</div></div></div><div class="ref-item"><span class="ref-type">Datasheet</span><div><div class="ref-title">AMD Instinct MI300X Accelerator Architecture</div><div class="ref-detail">AMD, 2023 — UMA architecture, ECC mode configuration, RAS event thresholds, rocm-smi ECC counters — amd.com/en/products/accelerators</div></div></div><div class="ref-item"><span class="ref-type">Paper</span><div><div class="ref-title">Chipkill-Correct Memory</div><div class="ref-detail">T.J. Dell, IBM Research, 1997 — original Chipkill ECC proposal; IBM Research Report RC21182 — foundational reference for symbol-error correction in DRAM systems</div></div></div><div class="ref-item"><span class="ref-type">Book</span><div><div class="ref-title">Reed-Solomon Codes and Their Applications</div><div class="ref-detail">S. Wicker & V. Bhargava (Eds.), IEEE Press, 1994 — Chapter 4 covers GF(2^8) RS code construction used in Chipkill implementations</div></div></div></div>
+<div class="additional"><h2>&#x1F50D; Additional Learning</h2><a href="../additional-learning.html#module-18">HBM ECC Scrubbing: Patrol vs. Demand Scrub Modes</a></div>
+<div class="nav"><a href="../index.html">&#x2190; Back to Curriculum</a></div>
+</body>
+</html>

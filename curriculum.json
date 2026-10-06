@@ -849,7 +849,7 @@
         {
           "id": "18.5",
           "title": "HBM ECC in AI Training — SECDED vs Chipkill, silent data corruption (SDC) risk in LLM training, NVIDIA/AMD implementations",
-          "done": false
+          "done": true
         },
         {
           "id": "18.6",
