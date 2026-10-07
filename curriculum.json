@@ -859,7 +859,7 @@
         {
           "id": "18.7",
           "title": "HBM Yield Learning in High-Volume Production — bin split strategies, DRAM Sparing effectiveness, fab-to-fab correlation",
-          "done": false
+          "done": true
         },
         {
           "id": "18.8",

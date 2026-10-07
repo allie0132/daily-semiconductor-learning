@@ -30,7 +30,7 @@
 <body>
 <header>
   <h1>&#x1F50D; Additional Learning</h1>
-  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 85 entries</div>
+  <div class="sub">Emerging topics &amp; beyond-curriculum insights · 86 entries</div>
 </header>
 <div class="nav"><a href="index.html">&#x2190; Back to Curriculum</a></div>
 <div class="module-group" id="module-1"><h2>Module 1 — Foundations</h2>
@@ -713,6 +713,14 @@
   </div>
   <h3>HBM ECC Scrubbing: Patrol vs. Demand Scrub Modes</h3>
   <p>Modern HBM controllers implement two scrubbing strategies: demand scrub (ECC correction triggered on every read, with corrected data written back inline) and patrol scrub (a background thread periodically re-reads and rewrites all memory to catch and correct accumulated single-bit errors before they become multi-bit failures). NVIDIA H100 uses a configurable patrol scrub interval (accessible via nvidia-smi); AMD MI300X defaults to a 48-hour full-HBM scrub cycle. For AI training, setting the patrol scrub interval shorter than the mean-time-to-accumulation for a second bit error in a row (empirically ~12–24 hours at 85°C junction temperature) is a key reliability configuration parameter that test engineers should validate during system bring-up.</p>
+</div>
+<div class="entry">
+  <div class="entry-meta">
+    <span class="date">Tuesday, Oct 06 2026</span>
+    <span class="lesson-title">Multi-Stack HBM Validation on Interposer</span>
+  </div>
+  <h3>Machine‑Learning‑Assisted Crosstalk Prediction for HBM Interposers</h3>
+  <p>Recent work (IEEE CPMT 2024) demonstrates training a graph‑neural network on extracted S‑parameter datasets to predict NEXT/FEXT across new interposer layouts before fabrication. The model achieves <1 dB prediction error, enabling rapid what‑of‑stack‑size exploration and reducing prototype cycles by up to 40 %. Integrating this estimator into the ATE test plan allows dynamic adjustment of guard‑ring placement based on real‑time SI drift observed during production burn‑in.</p>
 </div></div>
 </body>
 </html>
