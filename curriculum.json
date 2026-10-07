@@ -864,7 +864,7 @@
         {
           "id": "18.8",
           "title": "HBM4 PHY Architecture and Serdes-Less Interface — base-die PHY, clocking topology, impact on ATE interface design",
-          "done": false
+          "done": true
         }
       ]
     }
