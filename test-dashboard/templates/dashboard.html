@@ -83,9 +83,11 @@
   </div>
   <span class="date-sep">|</span>
   <span class="date-label">From</span>
-  <input type="date" id="f-date-from" onchange="onDateChange()">
+  <input type="text" class="date-field" id="f-date-from" placeholder="YYYY-MM-DD"
+         pattern="\d{4}-\d{2}-\d{2}" onchange="onDateChange()">
   <span class="date-label">To</span>
-  <input type="date" id="f-date-to" onchange="onDateChange()">
+  <input type="text" class="date-field" id="f-date-to" placeholder="YYYY-MM-DD"
+         pattern="\d{4}-\d{2}-\d{2}" onchange="onDateChange()">
 </div>
 
 <!-- ── KPI Cards ── -->
@@ -159,14 +161,14 @@
   <!-- Yield by Lot summary table -->
   <div class="chart-card section-gap">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div class="chart-title">Recent Lots</div>
+      <div class="chart-title">Recent Runs</div>
       <span id="lot-count" style="font-size:11px;color:var(--dim);"></span>
     </div>
     <div style="overflow-x:auto;max-height:280px;overflow-y:auto;">
       <table class="data-table" id="lot-table">
         <thead>
           <tr>
-            <th>Lot ID</th><th>Product</th><th>TP Rev</th>
+            <th>Run ID</th><th>Product</th><th>TP Rev</th>
             <th>Step</th><th>Node</th><th class="num">Yield %</th><th>Date</th>
           </tr>
         </thead>
@@ -236,8 +238,8 @@
 <div class="content pane" id="pane-wafer">
   <div class="wmap-controls">
     <div class="filter-group">
-      <div class="filter-label">Lot</div>
-      <select id="wmap-lot" onchange="loadWaferList()" style="min-width:160px;"></select>
+      <div class="filter-label">Run</div>
+      <select id="wmap-run" onchange="loadWaferList()" style="min-width:320px;"></select>
     </div>
     <div class="filter-group">
       <div class="filter-label">Wafer</div>

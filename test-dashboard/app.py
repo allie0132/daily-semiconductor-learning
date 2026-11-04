@@ -9,6 +9,13 @@ app = Flask(__name__)
 md.init_db()   # no-op if DB already exists
 
 
+# Columns available on both wafers and test_results (denormalized)
+_FILTER_COLS = ("product_family", "product", "tp_rev", "test_step",
+                "proc_node", "lot", "run")
+# map filter arg -> actual column name
+_COL_NAME = {"lot": "lot_id", "run": "run_id"}
+
+
 def _where(args, table="w"):
     """Build SQL WHERE clause + params for wafers table queries."""
     clauses, params = [], []
@@ -21,22 +28,18 @@ def _where(args, table="w"):
     if date_to:
         clauses.append(f"{t}test_date <= ?"); params.append(date_to)
 
-    for col in ("product_family", "product", "tp_rev", "test_step",
-                "proc_node", "tester", "socket"):
+    # wafers also carries tester/socket
+    for col in _FILTER_COLS + ("tester", "socket"):
         val = args.get(col, "ALL")
         if val and val != "ALL":
-            clauses.append(f"{t}{col} = ?"); params.append(val)
-
-    lot = args.get("lot", "ALL")
-    if lot and lot != "ALL":
-        clauses.append(f"{t}lot_id = ?"); params.append(lot)
+            clauses.append(f"{t}{_COL_NAME.get(col, col)} = ?"); params.append(val)
 
     sql = "WHERE " + " AND ".join(clauses) if clauses else ""
     return sql, params
 
 
 def _where_tr(args):
-    """Build JOIN+WHERE for test_results queries (joins with lots for metadata)."""
+    """Build WHERE clause for test_results (fully denormalized — no join)."""
     clauses, params = [], []
 
     date_from = args.get("date_from", "")
@@ -46,20 +49,12 @@ def _where_tr(args):
     if date_to:
         clauses.append("tr.test_date <= ?"); params.append(date_to)
 
-    # lots table has product_family, product, tp_rev, test_step, proc_node
-    for col in ("product_family", "product", "tp_rev", "test_step", "proc_node"):
+    for col in _FILTER_COLS:
         val = args.get(col, "ALL")
         if val and val != "ALL":
-            clauses.append(f"l.{col} = ?"); params.append(val)
+            clauses.append(f"tr.{_COL_NAME.get(col, col)} = ?"); params.append(val)
 
-    lot = args.get("lot", "ALL")
-    if lot and lot != "ALL":
-        clauses.append("tr.lot_id = ?"); params.append(lot)
-
-    join_sql = "JOIN lots l ON tr.lot_id = l.lot_id"
-    if clauses:
-        join_sql += " WHERE " + " AND ".join(clauses)
-    return join_sql, params
+    return ("WHERE " + " AND ".join(clauses)) if clauses else "", params
 
 
 @app.route("/")
@@ -94,9 +89,17 @@ def api_meta():
     dr = dict(c.execute(
         "SELECT MIN(test_date) AS min_d, MAX(test_date) AS max_d FROM wafers"
     ).fetchone())
+    # Lot-level identities
     lots = [dict(r) for r in c.execute(
-        "SELECT lot_id, product, product_family, tp_rev, test_step, proc_node, "
-        "yield_pct, start_date FROM lots ORDER BY start_date DESC LIMIT 200"
+        "SELECT lot_id, product, product_family, proc_node, first_date, run_count "
+        "FROM lots ORDER BY first_date DESC LIMIT 300"
+    )]
+    # Run-level rows (what you test/compare against)
+    runs = [dict(r) for r in c.execute(
+        "SELECT r.run_id, r.lot_id, r.run_num, r.run_label, r.tp_rev, r.test_step, "
+        "r.test_date, r.yield_pct, l.product, l.product_family, l.proc_node "
+        "FROM runs r JOIN lots l ON r.lot_id = l.lot_id "
+        "ORDER BY r.test_date DESC LIMIT 400"
     )]
     conn.close()
     return jsonify({
@@ -111,6 +114,7 @@ def api_meta():
         "date_min":   dr["min_d"],
         "date_max":   dr["max_d"],
         "lots":       lots,
+        "runs":       runs,
     })
 
 
@@ -146,7 +150,20 @@ def api_yield_trend():
     group_by = request.args.get("group_by", "date")
     conn     = md.get_conn()
 
-    if group_by == "lot":
+    if group_by == "wafer":
+        # per-wafer yield (used for lot/run comparison); x-axis = wafer_id
+        rows = conn.execute(
+            f"SELECT w.wafer_id, AVG(w.yield_pct) FROM wafers w {where} "
+            f"GROUP BY w.wafer_id ORDER BY w.wafer_id", params
+        ).fetchall()
+        result = [{"label": r[0], "yield_pct": round(r[1], 2)} for r in rows]
+    elif group_by == "run":
+        rows = conn.execute(
+            f"SELECT w.run_id, AVG(w.yield_pct) FROM wafers w {where} "
+            f"GROUP BY w.run_id ORDER BY MIN(w.test_date) LIMIT 80", params
+        ).fetchall()
+        result = [{"label": r[0], "yield_pct": round(r[1], 2)} for r in rows]
+    elif group_by == "lot":
         rows = conn.execute(
             f"SELECT w.lot_id, AVG(w.yield_pct) FROM wafers w {where} "
             f"GROUP BY w.lot_id ORDER BY MIN(w.test_date) LIMIT 60", params
@@ -235,46 +252,44 @@ def api_bin_summary():
 
 @app.route("/api/wafer_map")
 def api_wafer_map():
-    where, params = _where(request.args)
     conn     = md.get_conn()
-    # default: last lot's first wafer
-    lot_id   = request.args.get("lot", "")
+    run_id   = request.args.get("run", "")
     wafer_id = request.args.get("wafer", "W01")
-    if not lot_id:
-        row = conn.execute("SELECT lot_id FROM lots ORDER BY start_date DESC LIMIT 1").fetchone()
-        lot_id = row[0] if row else "LOT2026001"
+    if not run_id:
+        row = conn.execute("SELECT run_id FROM runs ORDER BY test_date DESC LIMIT 1").fetchone()
+        run_id = row[0] if row else "LOT2026001-R1"
     row = conn.execute(
-        "SELECT yield_pct FROM wafers WHERE lot_id=? AND wafer_id=?",
-        (lot_id, wafer_id)
+        "SELECT yield_pct FROM wafers WHERE run_id=? AND wafer_id=?",
+        (run_id, wafer_id)
     ).fetchone()
     conn.close()
     if not row:
         return jsonify({"error": "not found"}), 404
-    return jsonify(md.generate_wafer_map(lot_id, wafer_id, row[0]))
+    return jsonify(md.generate_wafer_map(run_id, wafer_id, row[0]))
 
 
-@app.route("/api/wafers_in_lot")
-def api_wafers_in_lot():
-    lot_id = request.args.get("lot", "")
+@app.route("/api/wafers_in_run")
+def api_wafers_in_run():
+    run_id = request.args.get("run", "")
     conn   = md.get_conn()
     rows   = conn.execute(
-        "SELECT DISTINCT wafer_id FROM wafers WHERE lot_id=? ORDER BY wafer_id",
-        (lot_id,)
+        "SELECT DISTINCT wafer_id FROM wafers WHERE run_id=? ORDER BY wafer_id",
+        (run_id,)
     ).fetchall()
     conn.close()
     return jsonify([r[0] for r in rows])
 
 
-@app.route("/api/lots")
-def api_lots():
-    """Filtered lot list (respects date/product/etc. filters)."""
+@app.route("/api/runs")
+def api_runs():
+    """Filtered run list (respects date/product/etc. filters)."""
     where, params = _where(request.args)
     conn  = md.get_conn()
     rows  = conn.execute(
-        f"SELECT DISTINCT w.lot_id, l.product, l.product_family, l.tp_rev, "
-        f"l.test_step, l.proc_node, l.yield_pct, l.start_date "
-        f"FROM wafers w JOIN lots l ON w.lot_id = l.lot_id {where} "
-        f"ORDER BY l.start_date DESC LIMIT 200", params
+        f"SELECT DISTINCT w.run_id, w.lot_id, w.run_num, r.run_label, w.product, "
+        f"w.product_family, w.tp_rev, w.test_step, w.proc_node, r.yield_pct, w.test_date "
+        f"FROM wafers w JOIN runs r ON w.run_id = r.run_id {where} "
+        f"ORDER BY w.test_date DESC LIMIT 200", params
     ).fetchall()
     conn.close()
     return jsonify([dict(r) for r in rows])

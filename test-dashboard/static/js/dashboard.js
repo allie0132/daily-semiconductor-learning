@@ -91,13 +91,13 @@ function populateSelects() {
   fill("f-tester",    META.testers);
   fill("f-socket",    META.sockets);
 
-  // Wafer map lot selector
-  const lotSel = qs("wmap-lot");
-  META.lots.forEach(l => {
+  // Wafer map run selector (each run = one test pass of a lot)
+  const runSel = qs("wmap-run");
+  META.runs.forEach(r => {
     const opt = document.createElement("option");
-    opt.value = l.lot_id;
-    opt.textContent = `${l.lot_id} · ${l.product} · ${l.start_date}`;
-    lotSel.appendChild(opt);
+    opt.value = r.run_id;
+    opt.textContent = `${r.run_id} · ${r.run_label} · ${r.product} · ${r.test_date}`;
+    runSel.appendChild(opt);
   });
 }
 
@@ -274,21 +274,23 @@ async function loadBinDist() {
     </div>`).join("");
 }
 
-// ── Lot Table ────────────────────────────────────────────────────────
+// ── Runs Table ───────────────────────────────────────────────────────
 async function loadLotTable() {
-  const lots = await api("/api/lots");
-  qs("lot-count").textContent = `${lots.length} lots`;
+  const runs = await api("/api/runs");
+  qs("lot-count").textContent = `${runs.length} runs`;
   const tbody = qs("lot-tbody");
-  tbody.innerHTML = lots.map(l => {
-    const yc = l.yield_pct >= 95 ? "kpi-green" : l.yield_pct >= 90 ? "kpi-amber" : "kpi-red";
+  tbody.innerHTML = runs.map(r => {
+    const yc = r.yield_pct >= 95 ? "kpi-green" : r.yield_pct >= 90 ? "kpi-amber" : "kpi-red";
+    const runTag = r.run_num > 1
+      ? `<span class="badge-downgrade" style="margin-left:5px">${r.run_label}</span>` : "";
     return `<tr>
-      <td style="font-family:monospace;font-size:12px">${l.lot_id}</td>
-      <td>${l.product}</td>
-      <td>${l.tp_rev}</td>
-      <td>${l.test_step}</td>
-      <td>${l.proc_node}</td>
-      <td class="num ${yc}" style="font-weight:700">${fmt(l.yield_pct)}%</td>
-      <td style="color:var(--dim)">${l.start_date}</td>
+      <td style="font-family:monospace;font-size:12px">${r.run_id}${runTag}</td>
+      <td>${r.product}</td>
+      <td>${r.tp_rev}</td>
+      <td>${r.test_step}</td>
+      <td>${r.proc_node}</td>
+      <td class="num ${yc}" style="font-weight:700">${fmt(r.yield_pct)}%</td>
+      <td style="color:var(--dim)">${r.test_date}</td>
     </tr>`;
   }).join("");
 }
@@ -382,12 +384,12 @@ function renderBarChart(canvasId, data, valFn, colorFn, label) {
 
 // ── Wafer Map ─────────────────────────────────────────────────────────
 function initWaferTab() {
-  if (qs("wmap-lot").options.length > 0) loadWaferList();
+  if (qs("wmap-run").options.length > 0) loadWaferList();
 }
 
 async function loadWaferList() {
-  const lot  = qs("wmap-lot").value;
-  const data = await fetch(`/api/wafers_in_lot?lot=${lot}`).then(r=>r.json());
+  const run  = qs("wmap-run").value;
+  const data = await fetch(`/api/wafers_in_run?run=${encodeURIComponent(run)}`).then(r=>r.json());
   const sel  = qs("wmap-wafer");
   sel.innerHTML = "";
   data.forEach(w => {
@@ -397,11 +399,11 @@ async function loadWaferList() {
 }
 
 async function loadWaferMap() {
-  const lot   = qs("wmap-lot").value;
+  const run   = qs("wmap-run").value;
   const wafer = qs("wmap-wafer").value;
-  if (!lot || !wafer) return;
+  if (!run || !wafer) return;
 
-  const d = await fetch(`/api/wafer_map?lot=${lot}&wafer=${wafer}`).then(r=>r.json());
+  const d = await fetch(`/api/wafer_map?run=${encodeURIComponent(run)}&wafer=${wafer}`).then(r=>r.json());
   if (d.error) return;
 
   drawWafer(d);

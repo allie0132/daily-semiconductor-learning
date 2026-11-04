@@ -38,9 +38,11 @@
   </div>
   <span class="date-sep">|</span>
   <span class="date-label">From</span>
-  <input type="date" id="f-date-from" onchange="onDateChange()">
+  <input type="text" class="date-field" id="f-date-from" placeholder="YYYY-MM-DD"
+         pattern="\d{4}-\d{2}-\d{2}" onchange="onDateChange()">
   <span class="date-label">To</span>
-  <input type="date" id="f-date-to" onchange="onDateChange()">
+  <input type="text" class="date-field" id="f-date-to" placeholder="YYYY-MM-DD"
+         pattern="\d{4}-\d{2}-\d{2}" onchange="onDateChange()">
 </div>
 
 <!-- ── Compare controls ── -->
@@ -49,6 +51,8 @@
     <div class="filter-group">
       <div class="filter-label">Compare By</div>
       <select id="cmp-dim" onchange="onCmpDimChange()" style="min-width:160px;">
+        <option value="run">Run ID</option>
+        <option value="lot">Lot ID</option>
         <option value="tp_rev">Test Program Rev</option>
         <option value="tester">Tester</option>
         <option value="socket">PSCB Socket</option>

@@ -1,6 +1,8 @@
 """
 Generates a SQLite database of realistic semiconductor ATE test data.
-Covers Sep 1 – Nov 4, 2026 (~65 days, 2-4 lots/day, 25 wafers/lot).
+
+Hierarchy:  Lot (batch) → Run (test pass; a lot may be retested) → Wafer → Die.
+Covers lots started Sep 1 – Nov 4, 2026; retest runs extend a few weeks beyond.
 """
 import sqlite3, random, math, os
 from datetime import datetime, timedelta, date as Date
@@ -216,104 +218,131 @@ def init_db(force=False):
     conn = sqlite3.connect(DB_PATH)
     c    = conn.cursor()
     c.executescript("""
+        -- Lot = batch identity (fixed physical attributes).
         CREATE TABLE lots (
-            lot_id TEXT PRIMARY KEY, product TEXT, product_family TEXT, tp_rev TEXT,
-            test_step TEXT, proc_node TEXT,
-            wafer_count INT, total_dies INT, pass_dies INT, fail_dies INT,
-            yield_pct REAL, start_date TEXT, end_date TEXT, avg_test_time_s REAL
+            lot_id TEXT PRIMARY KEY, product TEXT, product_family TEXT,
+            proc_node TEXT, first_date TEXT, run_count INT
         );
+        -- Run = one test pass of a lot. A lot can have several runs (retests).
+        CREATE TABLE runs (
+            run_id TEXT PRIMARY KEY, lot_id TEXT, run_num INT, run_label TEXT,
+            tp_rev TEXT, test_step TEXT, test_date TEXT, wafer_count INT,
+            total_dies INT, pass_dies INT, fail_dies INT,
+            yield_pct REAL, avg_test_time_s REAL
+        );
+        -- Wafer = one disc within a run (W01-W25).
         CREATE TABLE wafers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            lot_id TEXT, wafer_id TEXT, product TEXT, product_family TEXT, tp_rev TEXT,
-            test_step TEXT, proc_node TEXT, tester TEXT, socket TEXT,
+            run_id TEXT, lot_id TEXT, run_num INT, wafer_id TEXT,
+            product TEXT, product_family TEXT, tp_rev TEXT, test_step TEXT,
+            proc_node TEXT, tester TEXT, socket TEXT,
             total_dies INT, pass_dies INT, fail_dies INT,
             yield_pct REAL, test_time_s REAL, test_date TEXT, start_time TEXT
         );
+        -- Per-run aggregated result for each test item (denormalized for fast filtering).
         CREATE TABLE test_results (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            lot_id TEXT, test_name TEXT, category TEXT, unit TEXT, bin TEXT,
-            fail_count INT, total_count INT, avg_time_ms REAL, test_date TEXT
+            run_id TEXT, lot_id TEXT, test_name TEXT, category TEXT, unit TEXT, bin TEXT,
+            fail_count INT, total_count INT, avg_time_ms REAL, test_date TEXT,
+            product TEXT, product_family TEXT, tp_rev TEXT, test_step TEXT, proc_node TEXT
         );
-        CREATE INDEX idx_w_date     ON wafers(test_date);
-        CREATE INDEX idx_w_product  ON wafers(product);
-        CREATE INDEX idx_w_family    ON wafers(product_family);
-        CREATE INDEX idx_w_lot      ON wafers(lot_id);
-        CREATE INDEX idx_w_tprev    ON wafers(tp_rev);
-        CREATE INDEX idx_w_step     ON wafers(test_step);
-        CREATE INDEX idx_w_node     ON wafers(proc_node);
-        CREATE INDEX idx_w_tester   ON wafers(tester);
-        CREATE INDEX idx_w_socket   ON wafers(socket);
-        CREATE INDEX idx_tr_date    ON test_results(test_date);
-        CREATE INDEX idx_tr_name    ON test_results(test_name);
-        CREATE INDEX idx_tr_lot     ON test_results(lot_id);
+        CREATE INDEX idx_w_date   ON wafers(test_date);
+        CREATE INDEX idx_w_product ON wafers(product);
+        CREATE INDEX idx_w_family  ON wafers(product_family);
+        CREATE INDEX idx_w_lot     ON wafers(lot_id);
+        CREATE INDEX idx_w_run     ON wafers(run_id);
+        CREATE INDEX idx_w_tprev   ON wafers(tp_rev);
+        CREATE INDEX idx_w_step    ON wafers(test_step);
+        CREATE INDEX idx_w_node    ON wafers(proc_node);
+        CREATE INDEX idx_w_tester  ON wafers(tester);
+        CREATE INDEX idx_w_socket  ON wafers(socket);
+        CREATE INDEX idx_tr_date   ON test_results(test_date);
+        CREATE INDEX idx_tr_name   ON test_results(test_name);
+        CREATE INDEX idx_tr_lot    ON test_results(lot_id);
+        CREATE INDEX idx_tr_run    ON test_results(run_id);
+        CREATE INDEX idx_r_lot     ON runs(lot_id);
     """)
 
-    rng     = random.Random(42)
-    cur_dt  = Date(2026, 9, 1)
-    end_dt  = Date(2026, 11, 4)
-    lot_num = 1
-    wafer_rows, test_rows, lot_rows = [], [], []
+    rng      = random.Random(42)
+    start_dt = Date(2026, 9, 1)
+    end_dt   = Date(2026, 11, 4)
+    lot_num  = 1
+    wafer_rows, test_rows, lot_rows, run_rows = [], [], [], []
 
+    cur_dt = start_dt
     while cur_dt <= end_dt:
-        for _ in range(rng.randint(2, 4)):
+        for _ in range(rng.randint(1, 2)):           # 1-2 new lots start per day
             lot_id    = f"LOT2026{lot_num:03d}"
             product   = rng.choice(PRODUCTS)
             family    = PRODUCT_TO_FAMILY[product]
-            tp_rev    = rng.choice(TP_REVS)
-            test_step = rng.choice(TEST_STEPS)
             proc_node = rng.choice(PROC_NODES)
-            lot_yoff  = rng.uniform(-4.0, 2.5)
-            lot_start = datetime(cur_dt.year, cur_dt.month, cur_dt.day,
-                                 rng.randint(0, 20), 0)
-            lot_pass = lot_total = 0
+            base_yoff = rng.uniform(-4.0, 2.0)
+            # Most lots pass in one run; some need 1-2 retests.
+            n_runs    = rng.choices([1, 2, 3], weights=[55, 30, 15])[0]
 
-            for w in range(1, 26):
-                tester  = rng.choice(TESTERS)
-                socket  = rng.choice(SOCKETS)
-                base_y  = max(85.0, min(99.5, 93.0 + lot_yoff + rng.uniform(-2.0, 2.0)))
-                fail_c  = int(DIE_COUNT * (100 - base_y) / 100)
-                pass_c  = DIE_COUNT - fail_c
-                lot_pass  += pass_c
-                lot_total += DIE_COUNT
-                wafer_rows.append((
-                    lot_id, f"W{w:02d}", product, family, tp_rev, test_step, proc_node,
-                    tester, socket, DIE_COUNT, pass_c, fail_c,
-                    round(pass_c / DIE_COUNT * 100, 2),
-                    round(TOTAL_TIME_PER_DIE_MS * DIE_COUNT / 1000, 1),
-                    cur_dt.isoformat(),
-                    (lot_start + timedelta(minutes=w * 30)).strftime("%Y-%m-%d %H:%M"),
-                ))
+            for run_num in range(1, n_runs + 1):
+                run_id    = f"{lot_id}-R{run_num}"
+                run_label = "Initial" if run_num == 1 else f"Retest {run_num - 1}"
+                # retests happen a week+ later; yield improves each retest
+                run_date  = cur_dt + timedelta(days=(run_num - 1) * rng.randint(6, 12))
+                run_yoff  = base_yoff + (run_num - 1) * rng.uniform(1.0, 2.5)
+                # retests often move to a newer test-program revision
+                tp_rev    = rng.choice(TP_REVS) if run_num == 1 else rng.choice(TP_REVS[1:])
+                test_step = rng.choice(TEST_STEPS)
+                run_start = datetime(run_date.year, run_date.month, run_date.day,
+                                     rng.randint(0, 20), 0)
+                run_pass = run_total = 0
 
-            for name, cat, unit, time_ms, fail_rate, bin_num in TEST_DEFS:
-                adj   = max(0.0, fail_rate * (1 + lot_yoff * -0.05) * rng.uniform(0.8, 1.2))
-                fails = int(lot_total * adj / 100)
-                test_rows.append((lot_id, name, cat, unit, bin_num,
-                                  fails, lot_total, round(time_ms, 1), cur_dt.isoformat()))
+                for w in range(1, 26):
+                    tester = rng.choice(TESTERS)
+                    socket = rng.choice(SOCKETS)
+                    base_y = max(85.0, min(99.5, 93.0 + run_yoff + rng.uniform(-2.0, 2.0)))
+                    fail_c = int(DIE_COUNT * (100 - base_y) / 100)
+                    pass_c = DIE_COUNT - fail_c
+                    run_pass  += pass_c
+                    run_total += DIE_COUNT
+                    wafer_rows.append((
+                        run_id, lot_id, run_num, f"W{w:02d}", product, family, tp_rev,
+                        test_step, proc_node, tester, socket, DIE_COUNT, pass_c, fail_c,
+                        round(pass_c / DIE_COUNT * 100, 2),
+                        round(TOTAL_TIME_PER_DIE_MS * DIE_COUNT / 1000, 1),
+                        run_date.isoformat(),
+                        (run_start + timedelta(minutes=w * 30)).strftime("%Y-%m-%d %H:%M"),
+                    ))
 
-            lot_rows.append((
-                lot_id, product, family, tp_rev, test_step, proc_node, 25,
-                lot_total, lot_pass, lot_total - lot_pass,
-                round(lot_pass / lot_total * 100, 2),
-                cur_dt.isoformat(),
-                (lot_start + timedelta(hours=12)).strftime("%Y-%m-%d"),
-                round(TOTAL_TIME_PER_DIE_MS / 1000, 2),
-            ))
+                for name, cat, unit, time_ms, fail_rate, bin_num in TEST_DEFS:
+                    adj   = max(0.0, fail_rate * (1 + run_yoff * -0.05) * rng.uniform(0.8, 1.2))
+                    fails = int(run_total * adj / 100)
+                    test_rows.append((
+                        run_id, lot_id, name, cat, unit, bin_num, fails, run_total,
+                        round(time_ms, 1), run_date.isoformat(),
+                        product, family, tp_rev, test_step, proc_node))
+
+                run_rows.append((
+                    run_id, lot_id, run_num, run_label, tp_rev, test_step,
+                    run_date.isoformat(), 25, run_total, run_pass, run_total - run_pass,
+                    round(run_pass / run_total * 100, 2),
+                    round(TOTAL_TIME_PER_DIE_MS / 1000, 2)))
+
+            lot_rows.append((lot_id, product, family, proc_node,
+                             cur_dt.isoformat(), n_runs))
             lot_num += 1
         cur_dt += timedelta(days=1)
 
+    c.executemany("INSERT INTO lots VALUES (?,?,?,?,?,?)", lot_rows)
+    c.executemany("INSERT INTO runs VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", run_rows)
     c.executemany(
-        "INSERT INTO lots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", lot_rows)
+        "INSERT INTO wafers (run_id,lot_id,run_num,wafer_id,product,product_family,"
+        "tp_rev,test_step,proc_node,tester,socket,total_dies,pass_dies,fail_dies,"
+        "yield_pct,test_time_s,test_date,start_time) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", wafer_rows)
     c.executemany(
-        "INSERT INTO wafers (lot_id,wafer_id,product,product_family,tp_rev,test_step,proc_node,"
-        "tester,socket,total_dies,pass_dies,fail_dies,yield_pct,test_time_s,"
-        "test_date,start_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", wafer_rows)
-    c.executemany(
-        "INSERT INTO test_results (lot_id,test_name,category,unit,bin,"
-        "fail_count,total_count,avg_time_ms,test_date) VALUES (?,?,?,?,?,?,?,?,?)",
-        test_rows)
+        "INSERT INTO test_results (run_id,lot_id,test_name,category,unit,bin,"
+        "fail_count,total_count,avg_time_ms,test_date,product,product_family,"
+        "tp_rev,test_step,proc_node) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", test_rows)
     conn.commit()
     conn.close()
-    print(f"DB ready: {len(lot_rows)} lots, {len(wafer_rows)} wafers")
+    print(f"DB ready: {len(lot_rows)} lots, {len(run_rows)} runs, {len(wafer_rows)} wafers")
 
 
 def get_conn():
@@ -323,8 +352,8 @@ def get_conn():
 
 
 # ── Wafer map (generated on demand, no DB) ───────────────────────────
-def generate_wafer_map(lot_id, wafer_id, yield_pct):
-    rng       = random.Random(hash(lot_id + wafer_id))
+def generate_wafer_map(run_id, wafer_id, yield_pct):
+    rng       = random.Random(hash(run_id + wafer_id))
     fail_rate = (100 - yield_pct) / 100
     clusters  = [(rng.uniform(3, 17), rng.uniform(3, 17), rng.uniform(1.0, 2.5))
                  for _ in range(rng.randint(0, 2))]
@@ -382,7 +411,7 @@ def generate_wafer_map(lot_id, wafer_id, yield_pct):
 
     total_tested = pass_c + fail_c + bin_counts.get("BIN1B", 0) + bin_counts.get("BIN1C", 0)
     return {
-        "lot_id": lot_id, "wafer_id": wafer_id, "grid_size": GRID,
+        "run_id": run_id, "wafer_id": wafer_id, "grid_size": GRID,
         "yield_pct":        round(pass_c / total_tested * 100, 2) if total_tested else 0,
         "grade_a_pct":      round(bin_counts["BIN1"] / total_tested * 100, 2) if total_tested else 0,
         "grade_b_pct":      round(bin_counts.get("BIN1B", 0) / total_tested * 100, 2) if total_tested else 0,

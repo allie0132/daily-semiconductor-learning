@@ -23,14 +23,21 @@ function catBadge(cat) {
   return `<span class="cat ${CAT_CLASS[cat] || "cat-DC"}">${cat}</span>`;
 }
 
+// Each returns an array of {value, label}
 const DIM_VALUES = {
-  tp_rev:         () => META.tp_revs,
-  tester:         () => META.testers,
-  socket:         () => META.sockets,
-  product:        () => META.products,
-  product_family: () => META.families,
-  proc_node:      () => META.proc_nodes,
-  test_step:      () => META.test_steps,
+  run:            () => META.runs.map(r => ({
+                          value: r.run_id,
+                          label: `${r.run_id} · ${r.run_label} · ${r.product} · ${r.test_date}` })),
+  lot:            () => META.lots.map(l => ({
+                          value: l.lot_id,
+                          label: `${l.lot_id} · ${l.product} · ${l.first_date} · ${l.run_count} run(s)` })),
+  tp_rev:         () => META.tp_revs.map(v => ({value:v, label:v})),
+  tester:         () => META.testers.map(v => ({value:v, label:v})),
+  socket:         () => META.sockets.map(v => ({value:v, label:v})),
+  product:        () => META.products.map(v => ({value:v, label:v})),
+  product_family: () => META.families.map(v => ({value:v, label:v})),
+  proc_node:      () => META.proc_nodes.map(v => ({value:v, label:v})),
+  test_step:      () => META.test_steps.map(v => ({value:v, label:v})),
 };
 
 // ── Init ─────────────────────────────────────────────────────────────
@@ -74,8 +81,8 @@ function onCmpDimChange() {
   const aSel = qs("cmp-a"), bSel = qs("cmp-b");
   aSel.innerHTML = ""; bSel.innerHTML = "";
   vals.forEach(v => {
-    aSel.appendChild(Object.assign(document.createElement("option"), {value:v, textContent:v}));
-    bSel.appendChild(Object.assign(document.createElement("option"), {value:v, textContent:v}));
+    aSel.appendChild(Object.assign(document.createElement("option"), {value:v.value, textContent:v.label}));
+    bSel.appendChild(Object.assign(document.createElement("option"), {value:v.value, textContent:v.label}));
   });
   if (vals.length > 1) bSel.selectedIndex = 1;
   loadCompare();
@@ -106,17 +113,25 @@ async function loadCompare() {
   qs("cmp-th-a").textContent = a;
   qs("cmp-th-b").textContent = b;
 
+  // For lot/run comparison, trend by wafer (each tests on one day); else by date
+  const perWafer   = (dim === "lot" || dim === "run");
+  const trendGroup = perWafer ? "wafer" : "date";
+  const trendTitle = perWafer ? "Per-Wafer Yield — A vs B" : "Yield Trend — A vs B";
+  const titleEl = document.querySelector("#chartCmpYield")
+    ?.closest(".chart-card")?.querySelector(".chart-title");
+  if (titleEl) titleEl.textContent = trendTitle;
+
   const [sumA, sumB, trendA, trendB, failA, failB] = await Promise.all([
     cmpFetch("/api/summary", dim, a),
     cmpFetch("/api/summary", dim, b),
-    cmpFetch("/api/yield_trend", dim, a, {group_by:"date"}),
-    cmpFetch("/api/yield_trend", dim, b, {group_by:"date"}),
+    cmpFetch("/api/yield_trend", dim, a, {group_by: trendGroup}),
+    cmpFetch("/api/yield_trend", dim, b, {group_by: trendGroup}),
     cmpFetch("/api/top_fail_tests", dim, a, {n:90}),
     cmpFetch("/api/top_fail_tests", dim, b, {n:90}),
   ]);
 
   renderCmpKPIs(sumA, sumB);
-  renderCmpYield(trendA, trendB, a, b);
+  renderCmpYield(trendA, trendB, a, b, dim);
   renderCmpFails(failA, failB, a, b);
 }
 
@@ -148,7 +163,7 @@ function renderCmpKPIs(a, b) {
   }).join("");
 }
 
-function renderCmpYield(trendA, trendB, labelA, labelB) {
+function renderCmpYield(trendA, trendB, labelA, labelB, dim) {
   const allDates = [...new Set([...trendA.map(d=>d.label), ...trendB.map(d=>d.label)])].sort();
   const mapA = Object.fromEntries(trendA.map(d=>[d.label, d.yield_pct]));
   const mapB = Object.fromEntries(trendB.map(d=>[d.label, d.yield_pct]));
