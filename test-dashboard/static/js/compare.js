@@ -311,19 +311,18 @@ function renderCmpFails(failA, failB, labelA, labelB) {
 // ── Manual N-way comparison (paste multiple Run IDs) ──────────────────
 // ══════════════════════════════════════════════════════════════════════
 async function runManualCompare() {
-  const raw  = qs("cmp-runlist").value || "";
-  const ids  = raw.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
-  const msg  = qs("cmp-runlist-msg");
+  const parse = el => (qs(el).value || "").split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+  const ids   = [...parse("cmp-runlist-a"), ...parse("cmp-runlist-b")];
+  const msg   = qs("cmp-runlist-msg");
 
-  if (!ids.length) { msg.textContent = "Enter at least two Run IDs to compare."; return; }
+  if (!ids.length) { msg.textContent = "Enter Run IDs in both boxes to compare."; return; }
 
   const known   = new Set(META.runs.map(r => r.run_id));
-  const valid   = ids.filter(id => known.has(id));
-  const unknown = ids.filter(id => !known.has(id));
-  const uniq    = [...new Set(valid)];
+  const unknown = [...new Set(ids.filter(id => !known.has(id)))];
+  const uniq    = [...new Set(ids.filter(id => known.has(id)))];   // preserves A-then-B order
 
   if (uniq.length < 2) {
-    msg.innerHTML = `<span style="color:var(--red)">Need at least 2 valid Run IDs.</span>` +
+    msg.innerHTML = `<span style="color:var(--red)">Need at least 2 valid Run IDs across the two boxes.</span>` +
       (unknown.length ? ` Unknown: ${unknown.join(", ")}` : "");
     return;
   }
