@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATE Production Test Dashboard</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ── Header / Filters ── -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <div>
+      <div class="logo-text">ATE Monitor</div>
+      <div class="logo-sub">Production Test Dashboard</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <div class="filter-label">Product</div>
+      <select id="f-product" onchange="applyFilters()">
+        <option value="ALL">All Products</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">TP Rev</div>
+      <select id="f-tp_rev" onchange="applyFilters()">
+        <option value="ALL">All Revs</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Test Step</div>
+      <select id="f-test_step" onchange="applyFilters()">
+        <option value="ALL">All Steps</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Proc Node</div>
+      <select id="f-proc_node" onchange="applyFilters()">
+        <option value="ALL">All Nodes</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Tester</div>
+      <select id="f-tester" onchange="applyFilters()">
+        <option value="ALL">All Testers</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Socket</div>
+      <select id="f-socket" onchange="applyFilters()">
+        <option value="ALL">All Sockets</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<!-- ── Date Range Bar ── -->
+<div class="date-bar">
+  <span class="date-label">Date Range</span>
+  <div class="date-quick">
+    <button class="date-btn" onclick="setQuick('today')">Today</button>
+    <button class="date-btn" onclick="setQuick('7d')">7D</button>
+    <button class="date-btn active" onclick="setQuick('30d')">30D</button>
+    <button class="date-btn" onclick="setQuick('90d')">90D</button>
+    <button class="date-btn" onclick="setQuick('all')">All</button>
+  </div>
+  <span class="date-sep">|</span>
+  <span class="date-label">From</span>
+  <input type="date" id="f-date-from" onchange="onDateChange()">
+  <span class="date-label">To</span>
+  <input type="date" id="f-date-to" onchange="onDateChange()">
+</div>
+
+<!-- ── KPI Cards ── -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-label">Wafer Yield</div>
+    <div class="kpi-value kpi-green" id="kpi-yield">—</div>
+    <div class="kpi-sub" id="kpi-yield-sub">loading…</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Total Lots</div>
+    <div class="kpi-value kpi-blue" id="kpi-lots">—</div>
+    <div class="kpi-sub" id="kpi-lots-sub">wafers</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Total Dies</div>
+    <div class="kpi-value kpi-cyan" id="kpi-dies">—</div>
+    <div class="kpi-sub" id="kpi-dies-sub">tested</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Fail Dies</div>
+    <div class="kpi-value kpi-red" id="kpi-fails">—</div>
+    <div class="kpi-sub" id="kpi-fails-sub">rejected</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Avg Test Time</div>
+    <div class="kpi-value kpi-amber" id="kpi-time">—</div>
+    <div class="kpi-sub">s / wafer</div>
+  </div>
+</div>
+
+<!-- ── Tabs ── -->
+<div class="tabs" style="padding-top:16px; padding-left:24px; padding-right:24px;">
+  <div class="tab active" id="tab-overview"  onclick="switchTab('overview')">Overview</div>
+  <div class="tab"        id="tab-fails"     onclick="switchTab('fails')">Top Fail Tests</div>
+  <div class="tab"        id="tab-time"      onclick="switchTab('time')">Test Time</div>
+  <div class="tab"        id="tab-wafer"     onclick="switchTab('wafer')">Wafer Map</div>
+</div>
+
+<!-- ══════════ OVERVIEW PANE ══════════ -->
+<div class="content pane active" id="pane-overview">
+  <div class="chart-grid chart-grid-2">
+
+    <!-- Yield Trend -->
+    <div class="chart-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div class="chart-title">Yield Trend</div>
+        <select id="trend-group" onchange="loadYieldTrend()" style="font-size:11px;height:24px;padding:2px 20px 2px 6px;">
+          <option value="date">By Date</option>
+          <option value="lot">By Lot</option>
+        </select>
+      </div>
+      <div class="chart-wrap" style="height:260px">
+        <canvas id="chartYield"></canvas>
+      </div>
+    </div>
+
+    <!-- Bin Distribution -->
+    <div class="chart-card">
+      <div class="chart-title">Bin Distribution</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center;">
+        <div class="chart-wrap" style="height:220px">
+          <canvas id="chartBins"></canvas>
+        </div>
+        <div id="bin-legend" style="font-size:12px;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Yield by Lot summary table -->
+  <div class="chart-card section-gap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="chart-title">Recent Lots</div>
+      <span id="lot-count" style="font-size:11px;color:var(--dim);"></span>
+    </div>
+    <div style="overflow-x:auto;max-height:280px;overflow-y:auto;">
+      <table class="data-table" id="lot-table">
+        <thead>
+          <tr>
+            <th>Lot ID</th><th>Product</th><th>TP Rev</th>
+            <th>Step</th><th>Node</th><th class="num">Yield %</th><th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="lot-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FAIL TESTS PANE ══════════ -->
+<div class="content pane" id="pane-fails">
+  <div class="chart-grid chart-grid-1">
+    <div class="chart-card">
+      <div class="chart-title">Top 30 Fail Tests — Fail Count</div>
+      <div class="chart-wrap" style="height:520px">
+        <canvas id="chartFails"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card section-gap">
+    <div class="chart-title">Fail Test Details</div>
+    <div style="overflow-x:auto;">
+      <table class="data-table" id="fail-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Test Name</th><th>Category</th><th>Bin</th>
+            <th class="num">Fail Count</th><th class="num">Fail Rate %</th>
+            <th class="num">Avg Time ms</th><th style="min-width:120px">Fail Rate Bar</th>
+          </tr>
+        </thead>
+        <tbody id="fail-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TEST TIME PANE ══════════ -->
+<div class="content pane" id="pane-time">
+  <div class="chart-grid chart-grid-1">
+    <div class="chart-card">
+      <div class="chart-title">Top 30 Slowest Tests — Avg Time (ms)</div>
+      <div class="chart-wrap" style="height:520px">
+        <canvas id="chartTime"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card section-gap">
+    <div class="chart-title">Test Time Details</div>
+    <div style="overflow-x:auto;">
+      <table class="data-table" id="time-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Test Name</th><th>Category</th><th>Bin</th>
+            <th class="num">Avg Time ms</th><th class="num">Fail Rate %</th>
+            <th style="min-width:120px">Time Bar</th>
+          </tr>
+        </thead>
+        <tbody id="time-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ WAFER MAP PANE ══════════ -->
+<div class="content pane" id="pane-wafer">
+  <div class="wmap-controls">
+    <div class="filter-group">
+      <div class="filter-label">Lot</div>
+      <select id="wmap-lot" onchange="loadWaferList()" style="min-width:160px;"></select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Wafer</div>
+      <select id="wmap-wafer" onchange="loadWaferMap()" style="min-width:80px;"></select>
+    </div>
+  </div>
+
+  <div class="wmap-layout">
+    <div>
+      <div class="wmap-canvas-wrap">
+        <canvas id="waferCanvas" width="440" height="440"></canvas>
+        <div class="wmap-legend" id="wmap-legend"></div>
+      </div>
+    </div>
+
+    <div class="wmap-stats">
+      <!-- Grade summary -->
+      <div class="wmap-stat-card">
+        <h4>Die Grade Summary</h4>
+        <div class="wmap-kpi-row">
+          <div class="wmap-kpi">
+            <div class="wmap-kpi-val kpi-green" id="wm-yield">—</div>
+            <div class="wmap-kpi-lbl">Grade A %</div>
+          </div>
+          <div class="wmap-kpi">
+            <div class="wmap-kpi-val kpi-cyan" id="wm-grb">—</div>
+            <div class="wmap-kpi-lbl">Grade B %</div>
+          </div>
+          <div class="wmap-kpi">
+            <div class="wmap-kpi-val kpi-amber" id="wm-grc">—</div>
+            <div class="wmap-kpi-lbl">Grade C %</div>
+          </div>
+          <div class="wmap-kpi">
+            <div class="wmap-kpi-val kpi-red" id="wm-fail">—</div>
+            <div class="wmap-kpi-lbl">Fail (Reject)</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--dim);">
+          Grade B/C = speed downgrade; still sellable at lower spec
+        </div>
+      </div>
+
+      <!-- Top fail tests -->
+      <div class="wmap-stat-card">
+        <h4>Top Fail Tests (Reject)</h4>
+        <div id="wm-top-fails"><span class="empty-msg">—</span></div>
+      </div>
+
+      <!-- Top downgrade tests -->
+      <div class="wmap-stat-card">
+        <h4>Top Downgrade Triggers</h4>
+        <div id="wm-top-down"><span class="empty-msg">—</span></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--dim);">
+          AC/Timing tests that caused speed downgrade (re-tested at lower speed)
+        </div>
+      </div>
+
+      <!-- Bin counts -->
+      <div class="wmap-stat-card">
+        <h4>Bin Counts</h4>
+        <div id="wm-bins"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tooltip -->
+<div id="tooltip"></div>
+
+<script src="/static/js/dashboard.js"></script>
+</body>
+</html>
