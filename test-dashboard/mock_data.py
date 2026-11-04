@@ -187,7 +187,17 @@ TEST_DEFS = [
 
 TOTAL_TIME_PER_DIE_MS = sum(t[3] for t in TEST_DEFS)
 
-PRODUCTS   = ["XC7K325T", "XC7A200T", "XC7VX485T", "HBM3_16GB"]
+# Each product family contains several product part numbers.
+PRODUCT_FAMILIES = {
+    "Kintex-7": ["XC7K325T", "XC7K410T", "XC7K480T"],
+    "Artix-7":  ["XC7A100T", "XC7A200T"],
+    "Virtex-7": ["XC7VX485T", "XC7VX690T"],
+    "HBM3":     ["HBM3_16GB", "HBM3_24GB"],
+}
+# Reverse lookup: product -> family
+PRODUCT_TO_FAMILY = {p: fam for fam, prods in PRODUCT_FAMILIES.items() for p in prods}
+PRODUCTS   = list(PRODUCT_TO_FAMILY.keys())
+FAMILIES   = list(PRODUCT_FAMILIES.keys())
 TP_REVS    = ["TPR_1.0", "TPR_1.1", "TPR_1.2", "TPR_2.0"]
 TEST_STEPS = ["CP1", "CP2", "FT1", "FT2"]
 PROC_NODES = ["N7_A1", "N7_A2", "N7_B1", "N5_A1"]
@@ -207,14 +217,14 @@ def init_db(force=False):
     c    = conn.cursor()
     c.executescript("""
         CREATE TABLE lots (
-            lot_id TEXT PRIMARY KEY, product TEXT, tp_rev TEXT,
+            lot_id TEXT PRIMARY KEY, product TEXT, product_family TEXT, tp_rev TEXT,
             test_step TEXT, proc_node TEXT,
             wafer_count INT, total_dies INT, pass_dies INT, fail_dies INT,
             yield_pct REAL, start_date TEXT, end_date TEXT, avg_test_time_s REAL
         );
         CREATE TABLE wafers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            lot_id TEXT, wafer_id TEXT, product TEXT, tp_rev TEXT,
+            lot_id TEXT, wafer_id TEXT, product TEXT, product_family TEXT, tp_rev TEXT,
             test_step TEXT, proc_node TEXT, tester TEXT, socket TEXT,
             total_dies INT, pass_dies INT, fail_dies INT,
             yield_pct REAL, test_time_s REAL, test_date TEXT, start_time TEXT
@@ -226,6 +236,7 @@ def init_db(force=False):
         );
         CREATE INDEX idx_w_date     ON wafers(test_date);
         CREATE INDEX idx_w_product  ON wafers(product);
+        CREATE INDEX idx_w_family    ON wafers(product_family);
         CREATE INDEX idx_w_lot      ON wafers(lot_id);
         CREATE INDEX idx_w_tprev    ON wafers(tp_rev);
         CREATE INDEX idx_w_step     ON wafers(test_step);
@@ -247,6 +258,7 @@ def init_db(force=False):
         for _ in range(rng.randint(2, 4)):
             lot_id    = f"LOT2026{lot_num:03d}"
             product   = rng.choice(PRODUCTS)
+            family    = PRODUCT_TO_FAMILY[product]
             tp_rev    = rng.choice(TP_REVS)
             test_step = rng.choice(TEST_STEPS)
             proc_node = rng.choice(PROC_NODES)
@@ -264,7 +276,7 @@ def init_db(force=False):
                 lot_pass  += pass_c
                 lot_total += DIE_COUNT
                 wafer_rows.append((
-                    lot_id, f"W{w:02d}", product, tp_rev, test_step, proc_node,
+                    lot_id, f"W{w:02d}", product, family, tp_rev, test_step, proc_node,
                     tester, socket, DIE_COUNT, pass_c, fail_c,
                     round(pass_c / DIE_COUNT * 100, 2),
                     round(TOTAL_TIME_PER_DIE_MS * DIE_COUNT / 1000, 1),
@@ -279,7 +291,7 @@ def init_db(force=False):
                                   fails, lot_total, round(time_ms, 1), cur_dt.isoformat()))
 
             lot_rows.append((
-                lot_id, product, tp_rev, test_step, proc_node, 25,
+                lot_id, product, family, tp_rev, test_step, proc_node, 25,
                 lot_total, lot_pass, lot_total - lot_pass,
                 round(lot_pass / lot_total * 100, 2),
                 cur_dt.isoformat(),
@@ -290,11 +302,11 @@ def init_db(force=False):
         cur_dt += timedelta(days=1)
 
     c.executemany(
-        "INSERT INTO lots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", lot_rows)
+        "INSERT INTO lots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", lot_rows)
     c.executemany(
-        "INSERT INTO wafers (lot_id,wafer_id,product,tp_rev,test_step,proc_node,"
+        "INSERT INTO wafers (lot_id,wafer_id,product,product_family,tp_rev,test_step,proc_node,"
         "tester,socket,total_dies,pass_dies,fail_dies,yield_pct,test_time_s,"
-        "test_date,start_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", wafer_rows)
+        "test_date,start_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", wafer_rows)
     c.executemany(
         "INSERT INTO test_results (lot_id,test_name,category,unit,bin,"
         "fail_count,total_count,avg_time_ms,test_date) VALUES (?,?,?,?,?,?,?,?,?)",

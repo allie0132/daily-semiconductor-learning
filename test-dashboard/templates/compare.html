@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compare — ATE Production Test Dashboard</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <div>
+      <div class="logo-text">ATE Monitor</div>
+      <div class="logo-sub">Comparison View</div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <a href="/" class="nav-link">Home</a>
+    <a href="/dashboard" class="nav-link">Dashboard</a>
+    <a href="/compare" class="nav-link active">Compare</a>
+  </nav>
+</header>
+
+<!-- ── Date Range Bar ── -->
+<div class="date-bar">
+  <span class="date-label">Date Range</span>
+  <div class="date-quick">
+    <button class="date-btn" onclick="setQuick('today')">Today</button>
+    <button class="date-btn" onclick="setQuick('7d')">7D</button>
+    <button class="date-btn active" onclick="setQuick('30d')">30D</button>
+    <button class="date-btn" onclick="setQuick('90d')">90D</button>
+    <button class="date-btn" onclick="setQuick('all')">All</button>
+  </div>
+  <span class="date-sep">|</span>
+  <span class="date-label">From</span>
+  <input type="date" id="f-date-from" onchange="onDateChange()">
+  <span class="date-label">To</span>
+  <input type="date" id="f-date-to" onchange="onDateChange()">
+</div>
+
+<!-- ── Compare controls ── -->
+<div class="content">
+  <div class="cmp-controls">
+    <div class="filter-group">
+      <div class="filter-label">Compare By</div>
+      <select id="cmp-dim" onchange="onCmpDimChange()" style="min-width:160px;">
+        <option value="tp_rev">Test Program Rev</option>
+        <option value="tester">Tester</option>
+        <option value="socket">PSCB Socket</option>
+        <option value="product">Product</option>
+        <option value="product_family">Product Family</option>
+        <option value="proc_node">Process Node</option>
+        <option value="test_step">Test Step</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label" style="color:#3b82f6">◆ Group A</div>
+      <select id="cmp-a" onchange="loadCompare()" style="min-width:160px;"></select>
+    </div>
+    <div class="cmp-vs">vs</div>
+    <div class="filter-group">
+      <div class="filter-label" style="color:#f59e0b">◆ Group B</div>
+      <select id="cmp-b" onchange="loadCompare()" style="min-width:160px;"></select>
+    </div>
+  </div>
+
+  <!-- KPI comparison -->
+  <div class="cmp-kpi-grid" id="cmp-kpis"></div>
+
+  <!-- Yield trend overlay -->
+  <div class="chart-card section-gap">
+    <div class="chart-title">Yield Trend — A vs B</div>
+    <div class="chart-wrap" style="height:280px">
+      <canvas id="chartCmpYield"></canvas>
+    </div>
+  </div>
+
+  <!-- Fail rate comparison -->
+  <div class="chart-card section-gap">
+    <div class="chart-title">Top Fail Tests — Fail Rate % (A vs B)</div>
+    <div class="chart-wrap" style="height:460px">
+      <canvas id="chartCmpFails"></canvas>
+    </div>
+  </div>
+
+  <!-- Side-by-side diff table -->
+  <div class="chart-card section-gap">
+    <div class="chart-title">Fail Rate Delta (biggest differences first)</div>
+    <div style="overflow-x:auto;">
+      <table class="data-table" id="cmp-table">
+        <thead>
+          <tr>
+            <th>Test Name</th><th>Category</th>
+            <th class="num" id="cmp-th-a" style="color:#3b82f6">A</th>
+            <th class="num" id="cmp-th-b" style="color:#f59e0b">B</th>
+            <th class="num">Δ (A−B)</th><th style="min-width:140px">Delta</th>
+          </tr>
+        </thead>
+        <tbody id="cmp-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/compare.js"></script>
+</body>
+</html>

@@ -83,6 +83,7 @@ function populateSelects() {
     const sel = qs(id);
     arr.forEach(v => sel.appendChild(Object.assign(document.createElement("option"), {value:v, textContent:v})));
   };
+  fill("f-product_family", META.families);
   fill("f-product",   META.products);
   fill("f-tp_rev",    META.tp_revs);
   fill("f-test_step", META.test_steps);
@@ -98,6 +99,19 @@ function populateSelects() {
     opt.textContent = `${l.lot_id} · ${l.product} · ${l.start_date}`;
     lotSel.appendChild(opt);
   });
+}
+
+// When family changes, narrow the Product dropdown to that family's parts
+function onFamilyChange() {
+  const fam = qs("f-product_family").value;
+  const sel = qs("f-product");
+  const products = (fam === "ALL")
+    ? META.products
+    : (META.product_families[fam] || []);
+  sel.innerHTML = '<option value="ALL">All Products</option>';
+  products.forEach(p =>
+    sel.appendChild(Object.assign(document.createElement("option"), {value:p, textContent:p})));
+  applyFilters();
 }
 
 // ── Date quick-select ─────────────────────────────────────────────────

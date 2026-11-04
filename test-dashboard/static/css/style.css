@@ -37,6 +37,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 .logo-text { font-size: 15px; font-weight: 700; color: #f1f5f9; }
 .logo-sub  { font-size: 11px; color: var(--dim); font-weight: 400; }
 
+/* ── Nav ── */
+.nav { display: flex; gap: 4px; flex-shrink: 0; }
+.nav-link { padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+            color: var(--sub); text-decoration: none; transition: all .15s; }
+.nav-link:hover { color: var(--text); background: var(--card); }
+.nav-link.active { color: #fff; background: var(--blue); }
+
 .filters { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
 .filter-group { display: flex; flex-direction: column; gap: 2px; }
 .filter-label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
@@ -206,6 +213,50 @@ input[type="date"]:focus { outline: none; border-color: var(--blue); }
 #tooltip .tt-tick  { font-weight: 700; color: #f1f5f9; }
 #tooltip .tt-fail  { color: var(--red); }
 #tooltip .tt-pass  { color: var(--green); }
+
+/* ── Compare pane ── */
+.cmp-controls { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 20px;
+                flex-wrap: wrap; }
+.cmp-vs { font-size: 13px; font-weight: 700; color: var(--dim); align-self: center;
+          padding: 0 4px; }
+.cmp-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.cmp-kpi-card { background: var(--card); border: 1px solid var(--border);
+                border-radius: 10px; padding: 14px 16px; }
+.cmp-kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
+                 color: var(--sub); font-weight: 600; margin-bottom: 10px; }
+.cmp-kpi-pair { display: flex; align-items: baseline; justify-content: space-between; }
+.cmp-kpi-a { font-size: 1.4rem; font-weight: 800; color: #3b82f6; }
+.cmp-kpi-b { font-size: 1.4rem; font-weight: 800; color: #f59e0b; }
+.cmp-kpi-delta { font-size: 12px; font-weight: 700; margin-top: 8px; text-align: center;
+                 padding: 3px; border-radius: 5px; }
+.cmp-delta-good { background: #052e16; color: #10b981; }
+.cmp-delta-bad  { background: #450a0a; color: #ef4444; }
+.cmp-delta-neutral { background: var(--border); color: var(--sub); }
+.cmp-ab-tag { display: inline-block; width: 8px; height: 8px; border-radius: 2px;
+              margin-right: 5px; vertical-align: middle; }
+
+/* ── Home / landing ── */
+.home-wrap { max-width: 1000px; margin: 0 auto; padding: 48px 24px; }
+.home-hero { text-align: center; margin-bottom: 40px; }
+.home-hero h1 { font-size: 2rem; font-weight: 800; color: #f1f5f9; margin-bottom: 8px; }
+.home-hero p  { font-size: 14px; color: var(--sub); }
+.home-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 40px; }
+.home-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+             padding: 16px; text-align: center; }
+.home-stat-val { font-size: 1.6rem; font-weight: 800; }
+.home-stat-lbl { font-size: 11px; color: var(--dim); text-transform: uppercase;
+                 letter-spacing: .06em; margin-top: 4px; }
+.home-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.home-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+             padding: 28px; text-decoration: none; display: block; transition: all .18s;
+             position: relative; overflow: hidden; }
+.home-card:hover { border-color: var(--blue); transform: translateY(-3px);
+                   box-shadow: 0 8px 28px rgba(0,0,0,.35); }
+.home-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex;
+                  align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
+.home-card-title { font-size: 1.15rem; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+.home-card-desc  { font-size: 13px; color: var(--sub); line-height: 1.6; }
+.home-card-cta   { margin-top: 16px; font-size: 13px; font-weight: 700; color: var(--blue); }
 
 /* ── Misc ── */
 .section-gap { margin-top: 20px; }

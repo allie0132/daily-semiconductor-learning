@@ -21,7 +21,8 @@ def _where(args, table="w"):
     if date_to:
         clauses.append(f"{t}test_date <= ?"); params.append(date_to)
 
-    for col in ("product", "tp_rev", "test_step", "proc_node", "tester", "socket"):
+    for col in ("product_family", "product", "tp_rev", "test_step",
+                "proc_node", "tester", "socket"):
         val = args.get(col, "ALL")
         if val and val != "ALL":
             clauses.append(f"{t}{col} = ?"); params.append(val)
@@ -45,8 +46,8 @@ def _where_tr(args):
     if date_to:
         clauses.append("tr.test_date <= ?"); params.append(date_to)
 
-    # lots table has product, tp_rev, test_step, proc_node
-    for col in ("product", "tp_rev", "test_step", "proc_node"):
+    # lots table has product_family, product, tp_rev, test_step, proc_node
+    for col in ("product_family", "product", "tp_rev", "test_step", "proc_node"):
         val = args.get(col, "ALL")
         if val and val != "ALL":
             clauses.append(f"l.{col} = ?"); params.append(val)
@@ -66,6 +67,16 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
+
+
+@app.route("/compare")
+def compare():
+    return render_template("compare.html")
+
+
 @app.route("/api/meta")
 def api_meta():
     conn = md.get_conn()
@@ -73,6 +84,7 @@ def api_meta():
     def vals(col):
         return [r[0] for r in c.execute(
             f"SELECT DISTINCT {col} FROM wafers ORDER BY {col}")]
+    families   = vals("product_family")
     products   = vals("product")
     tp_revs    = vals("tp_rev")
     test_steps = vals("test_step")
@@ -83,12 +95,14 @@ def api_meta():
         "SELECT MIN(test_date) AS min_d, MAX(test_date) AS max_d FROM wafers"
     ).fetchone())
     lots = [dict(r) for r in c.execute(
-        "SELECT lot_id, product, tp_rev, test_step, proc_node, yield_pct, start_date "
-        "FROM lots ORDER BY start_date DESC LIMIT 200"
+        "SELECT lot_id, product, product_family, tp_rev, test_step, proc_node, "
+        "yield_pct, start_date FROM lots ORDER BY start_date DESC LIMIT 200"
     )]
     conn.close()
     return jsonify({
-        "products":   products,
+        "families":          families,
+        "product_families":  md.PRODUCT_FAMILIES,
+        "products":          products,
         "tp_revs":    tp_revs,
         "test_steps": test_steps,
         "proc_nodes": proc_nodes,
@@ -257,8 +271,8 @@ def api_lots():
     where, params = _where(request.args)
     conn  = md.get_conn()
     rows  = conn.execute(
-        f"SELECT DISTINCT w.lot_id, l.product, l.tp_rev, l.test_step, "
-        f"l.proc_node, l.yield_pct, l.start_date "
+        f"SELECT DISTINCT w.lot_id, l.product, l.product_family, l.tp_rev, "
+        f"l.test_step, l.proc_node, l.yield_pct, l.start_date "
         f"FROM wafers w JOIN lots l ON w.lot_id = l.lot_id {where} "
         f"ORDER BY l.start_date DESC LIMIT 200", params
     ).fetchall()
