@@ -317,7 +317,7 @@ async function runManualCompare() {
   const ids   = [...parse("cmp-runlist-a"), ...parse("cmp-runlist-b")];
   const msg   = qs("cmp-runlist-msg");
 
-  if (!ids.length) { msg.textContent = "Enter Run IDs in both boxes to compare."; return; }
+  if (!ids.length) { msg.textContent = ""; return; }
 
   const known   = new Set(META.runs.map(r => r.run_id));
   const unknown = [...new Set(ids.filter(id => !known.has(id)))];
