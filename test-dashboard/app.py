@@ -34,6 +34,13 @@ def _where(args, table="w"):
         if val and val != "ALL":
             clauses.append(f"{t}{_COL_NAME.get(col, col)} = ?"); params.append(val)
 
+    # `runs` = comma-separated run_ids aggregated together (combined group)
+    runs = args.get("runs", "")
+    ids  = [x for x in runs.split(",") if x]
+    if ids:
+        ph = ",".join("?" * len(ids))
+        clauses.append(f"{t}run_id IN ({ph})"); params.extend(ids)
+
     sql = "WHERE " + " AND ".join(clauses) if clauses else ""
     return sql, params
 
@@ -53,6 +60,13 @@ def _where_tr(args):
         val = args.get(col, "ALL")
         if val and val != "ALL":
             clauses.append(f"tr.{_COL_NAME.get(col, col)} = ?"); params.append(val)
+
+    # `runs` = comma-separated run_ids aggregated together (combined group)
+    runs = args.get("runs", "")
+    ids  = [x for x in runs.split(",") if x]
+    if ids:
+        ph = ",".join("?" * len(ids))
+        clauses.append(f"tr.run_id IN ({ph})"); params.extend(ids)
 
     return ("WHERE " + " AND ".join(clauses)) if clauses else "", params
 

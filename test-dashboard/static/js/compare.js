@@ -81,10 +81,11 @@ function onDateChange() {
 function onCmpDimChange() {
   const dim        = qs("cmp-dim").value;
   const isLot      = (dim === "lot");
-  const isRunList  = (dim === "runlist");
+  const isRunList  = (dim === "runlist");    // two boxes, each combined -> A vs B
+  const isRunMulti = (dim === "runmulti");   // one box, each run separate -> N-way
+  const isManual   = isRunList || isRunMulti;
 
   // Populate A/B dropdowns only for dimensions that have a value list
-  // (the manual run-list mode has none).
   if (DIM_VALUES[dim]) {
     const vals = DIM_VALUES[dim]();
     const aSel = qs("cmp-a"), bSel = qs("cmp-b");
@@ -96,10 +97,10 @@ function onCmpDimChange() {
     if (vals.length > 1) bSel.selectedIndex = 1;
   }
 
-  // A/B dropdown groups show for every dimension except the manual list mode
-  qs("grp-a").style.display       = isRunList ? "none" : "";
-  qs("grp-b").style.display       = isRunList ? "none" : "";
-  qs("cmp-main-vs").style.display = isRunList ? "none" : "";
+  // A/B dropdown groups show for the dropdown dimensions only
+  qs("grp-a").style.display       = isManual ? "none" : "";
+  qs("grp-b").style.display       = isManual ? "none" : "";
+  qs("cmp-main-vs").style.display = isManual ? "none" : "";
 
   // For the Lot dimension, reveal a per-side Run picker so the user chooses
   // exactly which run of each lot to compare (runs are never combined).
@@ -107,11 +108,13 @@ function onCmpDimChange() {
   qs("grp-b-run").style.display = isLot ? "" : "none";
   if (isLot) { fillRunPicker("a"); fillRunPicker("b"); }
 
-  // Manual multi-run mode: show the two-box text input
-  qs("grp-runlist").style.display = isRunList ? "" : "none";
+  // Manual text-input modes
+  qs("grp-runlist").style.display  = isRunList  ? "" : "none";
+  qs("grp-runmulti").style.display = isRunMulti ? "" : "none";
 
-  if (isRunList) runManualCompare();   // render with whatever is already typed
-  else           loadCompare();
+  if (isRunList)       runManualCompare();   // A vs B combined
+  else if (isRunMulti) runMultiCompare();    // multiple runs separate
+  else                 loadCompare();
 }
 
 // Populate the Run (A|B) dropdown with the runs belonging to the chosen lot.
@@ -310,35 +313,116 @@ function renderCmpFails(failA, failB, labelA, labelB) {
 }
 
 // ══════════════════════════════════════════════════════════════════════
-// ── Manual N-way comparison (paste multiple Run IDs) ──────────────────
+// ── Manual compare: Box A vs Box B (each box = one combined group) ────
 // ══════════════════════════════════════════════════════════════════════
+
+// Expand a box's tokens into a set of run_ids.
+// A token can be a run_id (used directly) or a lot_id (all its runs added).
+// Every run in a box is combined into that box's single group.
+function resolveBox(elId) {
+  const tokens = (qs(elId).value || "").split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+  const runSet = new Set(META.runs.map(r => r.run_id));
+  const byLot  = {};
+  META.runs.forEach(r => { (byLot[r.lot_id] = byLot[r.lot_id] || []).push(r.run_id); });
+
+  const runIds = [], unknown = [];
+  tokens.forEach(tok => {
+    if (runSet.has(tok))      runIds.push(tok);                 // a run id
+    else if (byLot[tok])      byLot[tok].forEach(r => runIds.push(r)); // a lot id -> its runs
+    else                      unknown.push(tok);
+  });
+  return { runIds: [...new Set(runIds)], unknown, tokens };
+}
+
+// Fetch helper that sends a combined set of run_ids (runs=a,b,c) + date range
+async function cmpFetchRuns(path, runIds, extra={}) {
+  const p = new URLSearchParams();
+  const df = qs("f-date-from")?.value, dt = qs("f-date-to")?.value;
+  if (df) p.set("date_from", df);
+  if (dt) p.set("date_to", dt);
+  p.set("runs", runIds.join(","));
+  Object.entries(extra).forEach(([k,v]) => p.set(k, String(v)));
+  return fetch(`${path}?${p}`).then(r => r.json());
+}
+
 async function runManualCompare() {
-  const parse = el => (qs(el).value || "").split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
-  const ids   = [...parse("cmp-runlist-a"), ...parse("cmp-runlist-b")];
-  const msg   = qs("cmp-runlist-msg");
+  const msg = qs("cmp-runlist-msg");
+  const A   = resolveBox("cmp-runlist-a");
+  const B   = resolveBox("cmp-runlist-b");
 
-  if (!ids.length) { msg.textContent = ""; return; }
+  if (!A.tokens.length && !B.tokens.length) { msg.textContent = ""; return; }
 
-  const known   = new Set(META.runs.map(r => r.run_id));
-  const unknown = [...new Set(ids.filter(id => !known.has(id)))];
-  const uniq    = [...new Set(ids.filter(id => known.has(id)))];   // preserves A-then-B order
+  if (!A.runIds.length || !B.runIds.length) {
+    msg.innerHTML = `<span style="color:var(--red)">Enter at least one valid Run ID (or Lot ID) in each box.</span>`;
+    return;
+  }
 
-  if (uniq.length < 2) {
-    msg.innerHTML = `<span style="color:var(--red)">Need at least 2 valid Run IDs across the two boxes.</span>` +
+  const unknown = [...new Set([...A.unknown, ...B.unknown])];
+  const labelA  = A.runIds.length === 1 ? A.runIds[0] : `Box A (${A.runIds.length} runs combined)`;
+  const labelB  = B.runIds.length === 1 ? B.runIds[0] : `Box B (${B.runIds.length} runs combined)`;
+  msg.innerHTML = `A = ${A.runIds.length} run(s) combined · B = ${B.runIds.length} run(s) combined.` +
+    (unknown.length ? ` <span style="color:var(--amber)">Skipped unknown: ${unknown.join(", ")}</span>` : "");
+
+  // Each box is ONE combined group -> standard A vs B view
+  restoreTwoWayLayout();
+  qs("cmp-th-a").textContent = labelA;
+  qs("cmp-th-b").textContent = labelB;
+
+  const titleEl = document.querySelector("#chartCmpYield")
+    ?.closest(".chart-card")?.querySelector(".chart-title");
+  if (titleEl) titleEl.textContent = "Per-Wafer Yield — A vs B (combined)";
+
+  const [sumA, sumB, trendA, trendB, failA, failB] = await Promise.all([
+    cmpFetchRuns("/api/summary",        A.runIds),
+    cmpFetchRuns("/api/summary",        B.runIds),
+    cmpFetchRuns("/api/yield_trend",    A.runIds, {group_by:"wafer"}),
+    cmpFetchRuns("/api/yield_trend",    B.runIds, {group_by:"wafer"}),
+    cmpFetchRuns("/api/top_fail_tests", A.runIds, {n:90}),
+    cmpFetchRuns("/api/top_fail_tests", B.runIds, {n:90}),
+  ]);
+
+  renderCmpKPIs(sumA, sumB);
+  renderCmpYield(trendA, trendB, labelA, labelB, "run");
+  renderCmpFails(failA, failB, labelA, labelB);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ── Multiple runs: one box, each run its own series (N-way) ───────────
+// ══════════════════════════════════════════════════════════════════════
+function tokenToRunIds(tok) {
+  const runSet = new Set(META.runs.map(r => r.run_id));
+  if (runSet.has(tok)) return [tok];                                   // a run id
+  return META.runs.filter(r => r.lot_id === tok).map(r => r.run_id);  // a lot id -> its runs (else [])
+}
+
+async function runMultiCompare() {
+  const msg    = qs("cmp-runmulti-msg");
+  const tokens = (qs("cmp-runmulti").value || "").split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+  if (!tokens.length) { msg.textContent = ""; return; }
+
+  const series = [], unknown = [], seen = new Set();
+  tokens.forEach(tok => {
+    if (seen.has(tok)) return;
+    seen.add(tok);
+    const runIds = tokenToRunIds(tok);
+    if (runIds.length) series.push({ id: tok, runIds });
+    else unknown.push(tok);
+  });
+
+  if (series.length < 2) {
+    msg.innerHTML = `<span style="color:var(--red)">Enter at least 2 valid Run IDs.</span>` +
       (unknown.length ? ` Unknown: ${unknown.join(", ")}` : "");
     return;
   }
-  msg.innerHTML = `Comparing ${uniq.length} runs.` +
+  series.forEach((s, i) => s.color = CMP_PALETTE[i % CMP_PALETTE.length]);
+  msg.innerHTML = `Comparing ${series.length} runs.` +
     (unknown.length ? ` <span style="color:var(--amber)">Skipped unknown: ${unknown.join(", ")}</span>` : "");
 
-  const series = uniq.map((id, i) => ({ id, color: CMP_PALETTE[i % CMP_PALETTE.length] }));
-
-  // fetch summary, per-wafer trend, and fail tests for each run in parallel
   await Promise.all(series.map(async s => {
     const [summary, trend, fails] = await Promise.all([
-      cmpFetch("/api/summary",         "run", s.id),
-      cmpFetch("/api/yield_trend",     "run", s.id, {group_by:"wafer"}),
-      cmpFetch("/api/top_fail_tests",  "run", s.id, {n:90}),
+      cmpFetchRuns("/api/summary",        s.runIds),
+      cmpFetchRuns("/api/yield_trend",    s.runIds, {group_by:"wafer"}),
+      cmpFetchRuns("/api/top_fail_tests", s.runIds, {n:90}),
     ]);
     s.summary = summary; s.trend = trend; s.fails = fails;
   }));
@@ -353,9 +437,7 @@ async function runManualCompare() {
 }
 
 function renderMultiKPIs(series) {
-  // one card per run: yield / fail% / avg time / wafers
-  qs("cmp-kpis").style.gridTemplateColumns =
-    `repeat(${Math.min(series.length, 4)}, 1fr)`;
+  qs("cmp-kpis").style.gridTemplateColumns = `repeat(${Math.min(series.length, 4)}, 1fr)`;
   qs("cmp-kpis").innerHTML = series.map(s => {
     const d  = s.summary;
     const yc = d.yield_pct >= 95 ? "kpi-green" : d.yield_pct >= 90 ? "kpi-amber" : "kpi-red";
@@ -404,7 +486,6 @@ function renderMultiYield(series) {
 }
 
 function renderMultiFails(series) {
-  // union of test names, ranked by spread (max-min fail rate across runs)
   const names = [...new Set(series.flatMap(s => s.fails.map(f => f.name)))];
   const maps  = series.map(s => Object.fromEntries(s.fails.map(f => [f.name, f])));
   const rows  = names.map(n => {
@@ -413,7 +494,6 @@ function renderMultiFails(series) {
     return { name:n, category:cat, rates, spread:+(Math.max(...rates) - Math.min(...rates)).toFixed(3) };
   }).sort((a,b) => b.spread - a.spread);
 
-  // Chart: top 15 by spread, grouped bars
   const top = rows.slice(0, 15);
   destroyChart("chartCmpFails");
   charts.chartCmpFails = new Chart(qs("chartCmpFails").getContext("2d"), {
@@ -436,14 +516,14 @@ function renderMultiFails(series) {
   });
 
   // Matrix table: test | run1 | run2 | ... | spread; highlight worst per row
-  const thead = `<tr><th>Test Name</th><th>Category</th>` +
+  qs("cmp-table").querySelector("thead").innerHTML =
+    `<tr><th>Test Name</th><th>Category</th>` +
     series.map(s => `<th class="num" style="color:${s.color}">${s.id.split("-").pop()}</th>`).join("") +
     `<th class="num">Spread</th></tr>`;
-  qs("cmp-table").querySelector("thead").innerHTML = thead;
 
   qs("cmp-tbody").innerHTML = rows.map(r => {
     const worst = Math.max(...r.rates);
-    const cells = r.rates.map((v,i) => {
+    const cells = r.rates.map(v => {
       const hot = (v === worst && r.spread > 0) ? "font-weight:800;color:var(--red)" : "";
       return `<td class="num" style="${hot}">${fmt(v,3)}%</td>`;
     }).join("");

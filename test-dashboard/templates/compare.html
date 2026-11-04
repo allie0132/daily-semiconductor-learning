@@ -51,8 +51,9 @@
     <!-- Fixed: the Compare By selector stays in this position in every mode -->
     <div class="filter-group">
       <div class="filter-label">Compare By</div>
-      <select id="cmp-dim" onchange="onCmpDimChange()" style="min-width:180px;">
-        <option value="runlist">Run IDs (manual list)</option>
+      <select id="cmp-dim" onchange="onCmpDimChange()" style="min-width:210px;">
+        <option value="runlist">Run IDs — A vs B (combined)</option>
+        <option value="runmulti">Run IDs — multiple (separate)</option>
         <option value="run">Run ID</option>
         <option value="lot">Lot ID</option>
         <option value="tp_rev">Test Program Rev</option>
@@ -69,21 +70,35 @@
 
     <!-- Manual multi-run input: two boxes, each takes one or more Run IDs -->
     <div class="filter-group" id="grp-runlist" style="flex:1;">
-      <div class="filter-label">Run IDs — type into both boxes (comma or space separated)</div>
+      <div class="filter-label">Run / Lot IDs — everything in one box is combined into that group</div>
       <div style="display:flex; gap:8px; align-items:center;">
         <input type="text" class="date-field" id="cmp-runlist-a"
                style="flex:1; width:auto; min-width:220px; border-color:#3b82f6;"
-               placeholder="Box A — e.g. LOT2026093-R1"
+               placeholder="Box A (combined) — e.g. LOT2026093-R1"
                onkeydown="if(event.key==='Enter') runManualCompare()">
         <span style="font-size:13px;font-weight:700;color:var(--dim)">vs</span>
         <input type="text" class="date-field" id="cmp-runlist-b"
                style="flex:1; width:auto; min-width:220px; border-color:#f59e0b;"
-               placeholder="Box B — e.g. LOT2026093-R2, LOT2026093-R3"
+               placeholder="Box B (combined) — e.g. LOT2026093-R2 LOT2026093-R3"
                onkeydown="if(event.key==='Enter') runManualCompare()">
         <button class="date-btn" style="background:var(--blue);color:#fff;border-color:var(--blue);"
                 onclick="runManualCompare()">Compare</button>
       </div>
       <div id="cmp-runlist-msg" style="font-size:11px;color:var(--dim);margin-top:3px;"></div>
+    </div>
+
+    <!-- Multiple-run input: one box, each Run ID compared as its own series -->
+    <div class="filter-group" id="grp-runmulti" style="display:none; flex:1;">
+      <div class="filter-label">Run IDs — each run is compared separately (comma or space separated)</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="text" class="date-field" id="cmp-runmulti"
+               style="flex:1; width:auto; min-width:420px;"
+               placeholder="e.g. LOT2026093-R1 LOT2026093-R2 LOT2026093-R3 LOT2026094-R1"
+               onkeydown="if(event.key==='Enter') runMultiCompare()">
+        <button class="date-btn" style="background:var(--blue);color:#fff;border-color:var(--blue);"
+                onclick="runMultiCompare()">Compare</button>
+      </div>
+      <div id="cmp-runmulti-msg" style="font-size:11px;color:var(--dim);margin-top:3px;"></div>
     </div>
 
     <!-- A vs B dropdown mode (Run / Lot / TP Rev / etc.) -->
