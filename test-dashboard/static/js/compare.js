@@ -79,20 +79,25 @@ function onDateChange() {
 
 // ── Dimension + A/B selectors ─────────────────────────────────────────
 function onCmpDimChange() {
-  const dim  = qs("cmp-dim").value;
-  const vals = DIM_VALUES[dim]();
-  const aSel = qs("cmp-a"), bSel = qs("cmp-b");
-  aSel.innerHTML = ""; bSel.innerHTML = "";
-  vals.forEach(v => {
-    aSel.appendChild(Object.assign(document.createElement("option"), {value:v.value, textContent:v.label}));
-    bSel.appendChild(Object.assign(document.createElement("option"), {value:v.value, textContent:v.label}));
-  });
-  if (vals.length > 1) bSel.selectedIndex = 1;
+  const dim        = qs("cmp-dim").value;
+  const isLot      = (dim === "lot");
+  const isRunList  = (dim === "runlist");
+
+  // Populate A/B dropdowns only for dimensions that have a value list
+  // (the manual run-list mode has none).
+  if (DIM_VALUES[dim]) {
+    const vals = DIM_VALUES[dim]();
+    const aSel = qs("cmp-a"), bSel = qs("cmp-b");
+    aSel.innerHTML = ""; bSel.innerHTML = "";
+    vals.forEach(v => {
+      aSel.appendChild(Object.assign(document.createElement("option"), {value:v.value, textContent:v.label}));
+      bSel.appendChild(Object.assign(document.createElement("option"), {value:v.value, textContent:v.label}));
+    });
+    if (vals.length > 1) bSel.selectedIndex = 1;
+  }
 
   // For the Lot dimension, reveal a per-side Run picker so the user chooses
   // exactly which run of each lot to compare (runs are never combined).
-  const isLot      = (dim === "lot");
-  const isRunList  = (dim === "runlist");
   qs("grp-a-run").style.display = isLot ? "" : "none";
   qs("grp-b-run").style.display = isLot ? "" : "none";
   if (isLot) { fillRunPicker("a"); fillRunPicker("b"); }
