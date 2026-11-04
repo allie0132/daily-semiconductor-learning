@@ -48,11 +48,12 @@
 <!-- ── Compare controls ── -->
 <div class="content">
   <div class="cmp-controls">
+    <!-- Fixed: the Compare By selector stays in this position in every mode -->
     <div class="filter-group">
       <div class="filter-label">Compare By</div>
-      <select id="cmp-dim" onchange="onCmpDimChange()" style="min-width:160px;">
-        <option value="run">Run ID</option>
+      <select id="cmp-dim" onchange="onCmpDimChange()" style="min-width:180px;">
         <option value="runlist">Run IDs (manual list)</option>
+        <option value="run">Run ID</option>
         <option value="lot">Lot ID</option>
         <option value="tp_rev">Test Program Rev</option>
         <option value="tester">Tester</option>
@@ -63,7 +64,30 @@
         <option value="test_step">Test Step</option>
       </select>
     </div>
-    <div class="filter-group">
+
+    <!-- Mode-specific controls swap in here, right of the selector -->
+
+    <!-- Manual multi-run input: two boxes, each takes one or more Run IDs -->
+    <div class="filter-group" id="grp-runlist" style="flex:1;">
+      <div class="filter-label">Run IDs — type into both boxes (comma or space separated)</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="text" class="date-field" id="cmp-runlist-a"
+               style="flex:1; width:auto; min-width:220px; border-color:#3b82f6;"
+               placeholder="Box A — e.g. LOT2026093-R1"
+               onkeydown="if(event.key==='Enter') runManualCompare()">
+        <span style="font-size:13px;font-weight:700;color:var(--dim)">vs</span>
+        <input type="text" class="date-field" id="cmp-runlist-b"
+               style="flex:1; width:auto; min-width:220px; border-color:#f59e0b;"
+               placeholder="Box B — e.g. LOT2026093-R2, LOT2026093-R3"
+               onkeydown="if(event.key==='Enter') runManualCompare()">
+        <button class="date-btn" style="background:var(--blue);color:#fff;border-color:var(--blue);"
+                onclick="runManualCompare()">Compare</button>
+      </div>
+      <div id="cmp-runlist-msg" style="font-size:11px;color:var(--dim);margin-top:3px;"></div>
+    </div>
+
+    <!-- A vs B dropdown mode (Run / Lot / TP Rev / etc.) -->
+    <div class="filter-group" id="grp-a" style="display:none;">
       <div class="filter-label" style="color:#3b82f6">◆ Group A</div>
       <select id="cmp-a" onchange="onSideChange('a')" style="min-width:160px;"></select>
     </div>
@@ -71,33 +95,14 @@
       <div class="filter-label" style="color:#3b82f6">Run (A)</div>
       <select id="cmp-a-run" onchange="loadCompare()" style="min-width:150px;"></select>
     </div>
-    <div class="cmp-vs">vs</div>
-    <div class="filter-group">
+    <div class="cmp-vs" id="cmp-main-vs" style="display:none;">vs</div>
+    <div class="filter-group" id="grp-b" style="display:none;">
       <div class="filter-label" style="color:#f59e0b">◆ Group B</div>
       <select id="cmp-b" onchange="onSideChange('b')" style="min-width:160px;"></select>
     </div>
     <div class="filter-group" id="grp-b-run" style="display:none;">
       <div class="filter-label" style="color:#f59e0b">Run (B)</div>
       <select id="cmp-b-run" onchange="loadCompare()" style="min-width:150px;"></select>
-    </div>
-
-    <!-- Manual multi-run input: two boxes, each takes one or more Run IDs -->
-    <div class="filter-group" id="grp-runlist" style="display:none; flex:1;">
-      <div class="filter-label">Run IDs — type into both boxes (comma or space separated)</div>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <input type="text" class="date-field" id="cmp-runlist-a"
-               style="flex:1; width:auto; min-width:240px; border-color:#3b82f6;"
-               placeholder="Box A — e.g. LOT2026093-R1"
-               onkeydown="if(event.key==='Enter') runManualCompare()">
-        <span class="cmp-vs">vs</span>
-        <input type="text" class="date-field" id="cmp-runlist-b"
-               style="flex:1; width:auto; min-width:240px; border-color:#f59e0b;"
-               placeholder="Box B — e.g. LOT2026093-R2, LOT2026093-R3"
-               onkeydown="if(event.key==='Enter') runManualCompare()">
-        <button class="date-btn" style="background:var(--blue);color:#fff;border-color:var(--blue);"
-                onclick="runManualCompare()">Compare</button>
-      </div>
-      <div id="cmp-runlist-msg" style="font-size:11px;color:var(--dim);margin-top:3px;"></div>
     </div>
   </div>
 

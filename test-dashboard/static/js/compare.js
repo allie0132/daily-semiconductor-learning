@@ -96,17 +96,19 @@ function onCmpDimChange() {
     if (vals.length > 1) bSel.selectedIndex = 1;
   }
 
+  // A/B dropdown groups show for every dimension except the manual list mode
+  qs("grp-a").style.display       = isRunList ? "none" : "";
+  qs("grp-b").style.display       = isRunList ? "none" : "";
+  qs("cmp-main-vs").style.display = isRunList ? "none" : "";
+
   // For the Lot dimension, reveal a per-side Run picker so the user chooses
   // exactly which run of each lot to compare (runs are never combined).
   qs("grp-a-run").style.display = isLot ? "" : "none";
   qs("grp-b-run").style.display = isLot ? "" : "none";
   if (isLot) { fillRunPicker("a"); fillRunPicker("b"); }
 
-  // Manual multi-run mode: hide the A/B selectors, show the text input
+  // Manual multi-run mode: show the two-box text input
   qs("grp-runlist").style.display = isRunList ? "" : "none";
-  qs("cmp-a").closest(".filter-group").style.display = isRunList ? "none" : "";
-  qs("cmp-b").closest(".filter-group").style.display = isRunList ? "none" : "";
-  document.querySelector(".cmp-vs").style.display    = isRunList ? "none" : "";
 
   if (isRunList) runManualCompare();   // render with whatever is already typed
   else           loadCompare();
