@@ -43,6 +43,11 @@
   <span class="date-label">To</span>
   <input type="text" class="date-field" id="f-date-to" placeholder="YYYY-MM-DD"
          pattern="\d{4}-\d{2}-\d{2}" onchange="onDateChange()">
+  <span class="date-sep">|</span>
+  <span class="date-label">Test Step</span>
+  <select id="cmp-step" onchange="refreshCompare()" style="height:28px;">
+    <option value="ALL">All Steps</option>
+  </select>
 </div>
 
 <!-- ── Compare controls ── -->

@@ -46,8 +46,28 @@ const DIM_VALUES = {
 // ── Init ─────────────────────────────────────────────────────────────
 async function init() {
   META = await fetch("/api/meta").then(r => r.json());
+  // Test Step scope filter
+  const stepSel = qs("cmp-step");
+  META.test_steps.forEach(v =>
+    stepSel.appendChild(Object.assign(document.createElement("option"), {value:v, textContent:v})));
   setQuick("30d", false);
   onCmpDimChange();
+}
+
+// Re-run whichever comparison mode is active (after a scope change)
+function refreshCompare() {
+  const dim = qs("cmp-dim").value;
+  if (dim === "runlist")       runManualCompare();
+  else if (dim === "runmulti") runMultiCompare();
+  else                         loadCompare();
+}
+
+// Apply the global scope filters (currently Test Step) to a params object.
+// Skipped when the comparison dimension IS test_step (would contradict).
+function applyScope(p) {
+  const step = qs("cmp-step") ? qs("cmp-step").value : "ALL";
+  if (step && step !== "ALL" && qs("cmp-dim").value !== "test_step")
+    p.set("test_step", step);
 }
 
 // ── Date quick-select ─────────────────────────────────────────────────
@@ -66,7 +86,7 @@ function setQuick(mode, doRefresh=true) {
   else if (mode === "90d") from.value = META ? META.date_min : offsetDate(today, -90);
   else { from.value = META ? META.date_min : ""; to.value = META ? META.date_max : ""; }
 
-  if (doRefresh) loadCompare();
+  if (doRefresh) refreshCompare();
 }
 function offsetDate(dateStr, days) {
   const d = new Date(dateStr); d.setDate(d.getDate() + days);
@@ -74,7 +94,7 @@ function offsetDate(dateStr, days) {
 }
 function onDateChange() {
   document.querySelectorAll(".date-btn").forEach(b => b.classList.remove("active"));
-  loadCompare();
+  refreshCompare();
 }
 
 // ── Dimension + A/B selectors ─────────────────────────────────────────
@@ -136,7 +156,7 @@ function onSideChange(side) {
   loadCompare();
 }
 
-// Params = date range + chosen dimension override
+// Params = date range + chosen dimension override + global scope (step)
 function cmpParams(dim, value, extra={}) {
   const p = new URLSearchParams();
   const df = qs("f-date-from")?.value;
@@ -145,6 +165,7 @@ function cmpParams(dim, value, extra={}) {
   if (dt) p.set("date_to", dt);
   p.set(dim, value);
   Object.entries(extra).forEach(([k,v]) => p.set(k, String(v)));
+  applyScope(p);
   return p;
 }
 async function cmpFetch(path, dim, value, extra={}) {
@@ -342,6 +363,7 @@ async function cmpFetchRuns(path, runIds, extra={}) {
   if (dt) p.set("date_to", dt);
   p.set("runs", runIds.join(","));
   Object.entries(extra).forEach(([k,v]) => p.set(k, String(v)));
+  applyScope(p);
   return fetch(`${path}?${p}`).then(r => r.json());
 }
 
