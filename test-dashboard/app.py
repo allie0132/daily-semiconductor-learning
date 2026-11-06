@@ -311,4 +311,5 @@ def api_runs():
 
 if __name__ == "__main__":
     print("Starting dashboard on http://localhost:5001")
-    app.run(debug=True, port=5001)
+    # use_reloader=False -> a single process (no auto-reloader child)
+    app.run(debug=True, port=5001, use_reloader=False)
